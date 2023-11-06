@@ -1,0 +1,25 @@
+name: example
+description: A new Flutter package project.
+version: 0.0.1
+homepage:
+publish_to: none
+
+environment:
+  sdk: '>=3.1.4 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  build_runner: ^2.4.6
+  flutter:
+    sdk: flutter
+  sqflite_query:
+    path: ../packages/sqflite_query
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  sqflite_generator:
+    path: ../
+flutter:
+  generate: true

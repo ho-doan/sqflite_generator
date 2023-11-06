@@ -1,0 +1,3 @@
+class AJoinForeign {
+  const AJoinForeign();
+}
