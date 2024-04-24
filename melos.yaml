@@ -1,0 +1,47 @@
+name: app
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+packages:
+  - packages/**
+  - packages/sqflite_annotation/**
+  - packages/sqflite_generator/**
+  - packages/sqflite_query/**
+  - '*'
+
+scripts:
+  analyze:
+    exec: dart analyze .
+    failFast: true
+    description: analyze all modules.
+  pub:
+    exec: flutter pub get
+    failFast: true
+    description: pub get all modules.
+  clean:
+    exec: flutter clean
+    failFast: true
+    description: pub get all modules.
+  d_pub:
+    exec: dart pub get
+    failFast: true
+    description: pub get all modules.
+  test:
+    exec: flutter test
+    failFast: true
+    packageFilters:
+      dirExists: test
+    description: test all modules.
+  test_run:
+    run: melos exec --dir-exists="test" --fail-fast -- flutter test --no-pub --coverage
+    failFast: true
+    concurrency: 1
+    description: test all modules.
+  build:
+    exec: dart pub run build_runner build --delete-conflicting-outputs
+    failFast: true
+    packageFilters:
+      dependsOn: build_runner
+    description: build_runner build all modules.

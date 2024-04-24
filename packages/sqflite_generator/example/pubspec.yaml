@@ -1,7 +1,6 @@
 name: example
 description: A new Flutter package project.
 version: 0.0.1
-homepage:
 publish_to: none
 
 environment:
@@ -13,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   sqflite_query:
-    path: ../packages/sqflite_query
+    path: ../../sqflite_query
 
 dev_dependencies:
   flutter_test:
