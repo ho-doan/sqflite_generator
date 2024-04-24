@@ -20,13 +20,11 @@ extension ForeignActionX on ForeignAction {
 }
 
 class ForeignKey extends Property {
-  final Type parent;
   final ForeignAction onUpdate;
   final ForeignAction onDelete;
 
   const ForeignKey({
-    required this.parent,
-    super.name,
+    required super.name,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,
   });

@@ -11,6 +11,7 @@ dependencies:
   build_runner: ^2.4.6
   flutter:
     sdk: flutter
+  sqflite: ^2.3.3
   sqflite_query:
     path: ../../sqflite_query
 

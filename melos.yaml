@@ -8,6 +8,7 @@ packages:
   - packages/**
   - packages/sqflite_annotation/**
   - packages/sqflite_generator/**
+  - packages/sqflite_generator/example/**
   - packages/sqflite_query/**
   - '*'
 
@@ -44,4 +45,10 @@ scripts:
     failFast: true
     packageFilters:
       dependsOn: build_runner
+    description: build_runner build all modules.
+  build_test:
+    exec: flutter packages pub get && dart pub run build_runner build --delete-conflicting-outputs
+    failFast: true
+    packageFilters:
+      scope: "*example*"
     description: build_runner build all modules.

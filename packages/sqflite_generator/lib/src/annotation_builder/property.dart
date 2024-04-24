@@ -8,12 +8,14 @@ class AProperty {
   final String nameDefault;
   final DartType dartType;
   final FieldElement element;
+  final bool rawFromJson;
 
   const AProperty({
     this.name,
     required this.nameDefault,
     required this.dartType,
     required this.element,
+    this.rawFromJson = false,
   });
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
   String get _isNull => _isQues ? '' : 'NOT NULL';
@@ -40,5 +42,17 @@ extension APropertyX on List<AProperty> {
     if (length < 2) return '';
     final keys = map((e) => e.name ?? e.nameDefault).join(',');
     return 'PRIMARY KEY($keys)';
+  }
+
+  List<AProperty> get lst {
+    final List<AProperty> l = [];
+    for (final item in this) {
+      if (l.any((e) => e.nameDefault == item.nameDefault)) {
+        continue;
+      } else {
+        l.add(item);
+      }
+    }
+    return l;
   }
 }

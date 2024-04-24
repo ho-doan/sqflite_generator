@@ -1,6 +1,8 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 
+import '../annotation_builder/entity.dart';
+
 enum TypeSql {
   integer,
   dateTime,
@@ -55,6 +57,10 @@ extension DartTypeX on DartType {
     if (toString().contains('DateTime')) return TypeSql.dateTime;
     if (isEnum) {
       return TypeSql.enumerated;
+    }
+    if (element != null && element is ClassElement) {
+      final parent = AEntity.fromElement(element as ClassElement);
+      return parent.primaryKeys.first.dartType.typeSql;
     }
     return null;
   }

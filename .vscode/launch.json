@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Debug Widgetbook Generator",
-      "cwd": "example",
+      "cwd": "packages/sqflite_generator/example",
       "request": "launch",
       "program": ".dart_tool/build/entrypoint/build.dart",
       "type": "dart",

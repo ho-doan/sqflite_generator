@@ -13,8 +13,8 @@ class AEntity {
   final List<AIndex> indices;
   final String className;
   String get extensionName => '${className}Query';
+
   String get rawCreateTable {
-    print('object $className ${primaryKeys.length}');
     final all = [
       ...primaryKeys.map(
         (e) => e.rawCreate(
@@ -28,7 +28,30 @@ class AEntity {
       primaryKeys.rawCreate,
       ...foreignKeys.map((e) => e.rawCreateForeign),
     ].where((e) => e.isNotEmpty);
-    return 'CREATE TABLE IF NOT EXISTS $className(${all.join(',\n')})';
+    return 'CREATE TABLE IF NOT EXISTS $className(\n\t\t${all.join(',\n\t\t\t')}\n\t)';
+  }
+
+  String get rawFromJson {
+    return [
+      [
+        ...primaryKeys,
+        ...columns,
+        ...indices,
+        ...foreignKeys,
+      ].lst.map(
+        (e) {
+          if (e.rawFromJson) {
+            return '${e.nameDefault}: ${e.dartType}.fromJson(json[\'${e.name ?? e.nameDefault}\'])';
+          }
+          return '${e.nameDefault}: json[\'${e.name ?? e.nameDefault}\'] as ${e.dartType}';
+        },
+      ).join(','),
+      ','
+    ].join();
+  }
+
+  String get rawFindAll {
+    return 'SELECT * FROM $className';
   }
 
   const AEntity({

@@ -2,21 +2,24 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
+import 'package:sqflite_generator/src/annotation_builder/entity.dart';
 
 import 'property.dart';
 
 final _checker = const TypeChecker.fromRuntime(ForeignKey);
 
 class AForeignKey extends AProperty {
-  final String parent;
   final ForeignAction onUpdate;
   final ForeignAction onDelete;
 
+  final AEntity entityParent;
+
   const AForeignKey({
-    required this.parent,
     super.name,
+    super.rawFromJson,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,
+    required this.entityParent,
     required super.nameDefault,
     required super.dartType,
     required super.element,
@@ -26,17 +29,23 @@ class AForeignKey extends AProperty {
       nameDefault: element.displayName,
       dartType: element.type,
       element: element,
-      parent: AForeignKeyX._parent(element)!,
+      entityParent: AEntity.fromElement(element.type.element as ClassElement),
       name: AForeignKeyX._name(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
+      rawFromJson: element.type.element is ClassElement &&
+          AEntity.fromElement(element.type.element as ClassElement)
+              .primaryKeys
+              .isNotEmpty,
     );
   }
 }
 
 extension AForeignKeyX on AForeignKey {
   String get rawCreateForeign =>
-      'FOREIGN KEY $parent on ${name ?? nameDefault} ${onUpdate.str} ${onDelete.str}';
+      'FOREIGN KEY (${name ?? nameDefault}) REFERENCES ${element.type.toString()} '
+      '(${entityParent.primaryKeys.first.name ?? entityParent.primaryKeys.first.nameDefault})'
+      ' ON ${onUpdate.str} ${onDelete.str}';
   static List<AForeignKey> fields(List<FieldElement> fields) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
@@ -50,14 +59,6 @@ extension AForeignKeyX on AForeignKey {
         ?.getField('(super)')
         ?.getField('name')
         ?.toStringValue();
-  }
-
-  static String? _parent(FieldElement field) {
-    return _checker
-        .firstAnnotationOfExact(field)!
-        .getField('parent')!
-        .toTypeValue()!
-        .toString();
   }
 
   static ForeignAction _updValue(FieldElement element) {

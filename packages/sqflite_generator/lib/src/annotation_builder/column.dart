@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
+import 'package:sqflite_generator/src/annotation_builder/entity.dart';
 
 import 'property.dart';
 
@@ -9,6 +10,7 @@ final _checker = const TypeChecker.fromRuntime(Column);
 class AColumn extends AProperty {
   const AColumn({
     super.name,
+    super.rawFromJson,
     required super.dartType,
     required super.nameDefault,
     required super.element,
@@ -20,6 +22,10 @@ class AColumn extends AProperty {
       dartType: type,
       nameDefault: element.displayName,
       element: element,
+      rawFromJson: element.type.element is ClassElement &&
+          AEntity.fromElement(element.type.element as ClassElement)
+              .primaryKeys
+              .isNotEmpty,
     );
   }
 }
