@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:change_case/change_case.dart';
 import 'package:sqflite_generator/src/annotation_builder/column.dart';
 import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
 import 'package:sqflite_generator/src/annotation_builder/index.dart';
@@ -41,9 +42,28 @@ class AEntity {
       ].lst.map(
         (e) {
           if (e.rawFromJson) {
-            return '${e.nameDefault}: ${e.dartType}.fromJson(json[\'${e.name ?? e.nameDefault}\'])';
+            return '${e.nameDefault}: ${e.dartType}.fromJson(json)';
           }
-          return '${e.nameDefault}: json[\'${e.name ?? e.nameDefault}\'] as ${e.dartType}';
+          return '${e.nameDefault}: json[\'${e.nameFromJson}\'] as ${e.dartType}';
+        },
+      ).join(','),
+      ','
+    ].join();
+  }
+
+  String get rawToJson {
+    return [
+      [
+        ...primaryKeys,
+        ...columns,
+        ...indices,
+        ...foreignKeys,
+      ].lst.map(
+        (e) {
+          if (e.rawFromJson) {
+            return '\'${e.nameToJson}\': ${e.nameDefault}.id';
+          }
+          return '\'${e.nameToJson}\':${e.nameDefault}';
         },
       ).join(','),
       ','
@@ -51,7 +71,67 @@ class AEntity {
   }
 
   String get rawFindAll {
-    return 'SELECT * FROM $className';
+    final fields = [
+      ...[
+        ...primaryKeys,
+        ...columns,
+        ...indices,
+        ...foreignKeys,
+      ].lst,
+      ...[
+        for (final item in foreignKeys)
+          ...[
+            ...item.entityParent.primaryKeys,
+            ...item.entityParent.columns,
+            ...item.entityParent.indices,
+            ...item.entityParent.foreignKeys,
+          ].lst,
+      ],
+    ]
+        .map((e) =>
+            '${e.className.toSnakeCase()}.${e.nameToJson} as ${e.nameFromJson}')
+        .join(',\n');
+
+    final fores = foreignKeys.map((e) {
+      return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
+          ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToJson}'
+          ' = ${className.toSnakeCase()}.${e.name}';
+    }).toList();
+
+    return [
+      'SELECT $fields FROM $className ${className.toSnakeCase()}',
+      ...fores
+    ].join('\n');
+  }
+
+  String rawInsert([String? parent]) {
+    final fields = [
+      ...primaryKeys,
+      ...columns,
+      ...indices,
+      ...foreignKeys,
+    ].lst;
+    final fieldsRaw = fields.map((e) => e.nameToJson).join(',\n');
+
+    final fieldsValue = fields.map((e) {
+      if (e.rawFromJson) {
+        // TODO(hodoan): hard id
+        return '${parent ?? 'model'}.${e.nameDefault}.id';
+      }
+      return '${parent ?? 'model'}.${e.nameDefault}';
+    }).join(',');
+
+    return [
+      ...foreignKeys.map(
+        (e) => e.entityParent.rawInsert('model.${e.nameDefault}'),
+      ),
+      '''await database.rawInsert(\'\'\'INSERT INTO $className ($fieldsRaw) 
+       VALUES(${List.generate(fields.length, (index) => '?').join(', ')})\'\'\',
+       [
+        $fieldsValue,
+       ]
+      );''',
+    ].join('\n');
   }
 
   const AEntity({
@@ -67,10 +147,10 @@ class AEntity {
     final fields = element.fields.cast<FieldElement>();
     return AEntity(
       className: element.displayName,
-      columns: AColumnX.fields(fields),
-      foreignKeys: AForeignKeyX.fields(fields),
-      primaryKeys: APrimaryKeyX.fields(fields),
-      indices: AIndexX.fields(fields),
+      columns: AColumnX.fields(fields, element.displayName),
+      foreignKeys: AForeignKeyX.fields(fields, element.displayName),
+      primaryKeys: APrimaryKeyX.fields(fields, element.displayName),
+      indices: AIndexX.fields(fields, element.displayName),
     );
   }
 }

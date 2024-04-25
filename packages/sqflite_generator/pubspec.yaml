@@ -18,6 +18,7 @@ dependencies:
   glob: ^2.1.2
   sqflite_annotation:
     path: ../sqflite_annotation
+  change_case: ^2.0.1
 
 dev_dependencies:
   lints: ^2.0.1

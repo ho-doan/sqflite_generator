@@ -17,9 +17,10 @@ class APrimaryKey extends AProperty {
     required super.nameDefault,
     required super.dartType,
     required super.element,
+    required super.className,
   });
 
-  factory APrimaryKey.fromElement(FieldElement element) {
+  factory APrimaryKey.fromElement(FieldElement element, String className) {
     return APrimaryKey(
       name: APrimaryKeyX._name(element),
       nameDefault: element.displayName,
@@ -29,15 +30,16 @@ class APrimaryKey extends AProperty {
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
               .isNotEmpty,
+      className: className,
     );
   }
 }
 
 extension APrimaryKeyX on APrimaryKey {
-  static List<APrimaryKey> fields(List<FieldElement> fields) {
+  static List<APrimaryKey> fields(List<FieldElement> fields, String className) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => APrimaryKey.fromElement(e))
+        .map((e) => APrimaryKey.fromElement(e, className))
         .toList();
   }
 

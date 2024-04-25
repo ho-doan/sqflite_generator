@@ -23,8 +23,9 @@ class AForeignKey extends AProperty {
     required super.nameDefault,
     required super.dartType,
     required super.element,
+    required super.className,
   });
-  factory AForeignKey.fromElement(FieldElement element) {
+  factory AForeignKey.fromElement(FieldElement element, String className) {
     return AForeignKey(
       nameDefault: element.displayName,
       dartType: element.type,
@@ -37,6 +38,7 @@ class AForeignKey extends AProperty {
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
               .isNotEmpty,
+      className: className,
     );
   }
 }
@@ -46,10 +48,10 @@ extension AForeignKeyX on AForeignKey {
       'FOREIGN KEY (${name ?? nameDefault}) REFERENCES ${element.type.toString()} '
       '(${entityParent.primaryKeys.first.name ?? entityParent.primaryKeys.first.nameDefault})'
       ' ON ${onUpdate.str} ${onDelete.str}';
-  static List<AForeignKey> fields(List<FieldElement> fields) {
+  static List<AForeignKey> fields(List<FieldElement> fields, String className) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => AForeignKey.fromElement(e))
+        .map((e) => AForeignKey.fromElement(e, className))
         .toList();
   }
 

@@ -14,8 +14,9 @@ class AColumn extends AProperty {
     required super.dartType,
     required super.nameDefault,
     required super.element,
+    required super.className,
   });
-  factory AColumn.fromElement(FieldElement element) {
+  factory AColumn.fromElement(FieldElement element, String className) {
     final type = element.type;
     return AColumn(
       name: AColumnX.name(element),
@@ -26,15 +27,16 @@ class AColumn extends AProperty {
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
               .isNotEmpty,
+      className: className,
     );
   }
 }
 
 extension AColumnX on AColumn {
-  static List<AColumn> fields(List<FieldElement> fields) {
+  static List<AColumn> fields(List<FieldElement> fields, String className) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => AColumn.fromElement(e))
+        .map((e) => AColumn.fromElement(e, className))
         .toList();
   }
 

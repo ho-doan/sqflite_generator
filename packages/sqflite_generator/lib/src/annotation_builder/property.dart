@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:change_case/change_case.dart';
 import 'package:sqflite_generator/src/extensions/sql_type.dart';
 
 class AProperty {
@@ -9,12 +10,14 @@ class AProperty {
   final DartType dartType;
   final FieldElement element;
   final bool rawFromJson;
+  final String className;
 
   const AProperty({
     this.name,
     required this.nameDefault,
     required this.dartType,
     required this.element,
+    required this.className,
     this.rawFromJson = false,
   });
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
@@ -22,6 +25,9 @@ class AProperty {
   String get _sqlType => dartType.typeSql?.str ?? 'NONE';
 
   bool get isEnum => dartType.isEnum;
+
+  String get nameToJson => (name ?? nameDefault).toSnakeCase();
+  String get nameFromJson => '${className}_$nameToJson'.toSnakeCase();
 
   String rawCreate({
     bool isId = false,

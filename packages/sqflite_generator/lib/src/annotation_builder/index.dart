@@ -16,9 +16,10 @@ class AIndex extends AProperty {
     required super.nameDefault,
     required super.dartType,
     required super.element,
+    required super.className,
     super.rawFromJson,
   });
-  factory AIndex.fromElement(FieldElement element) {
+  factory AIndex.fromElement(FieldElement element, String className) {
     return AIndex(
       nameDefault: element.displayName,
       dartType: element.type,
@@ -27,15 +28,16 @@ class AIndex extends AProperty {
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
               .isNotEmpty,
+      className: className,
     );
   }
 }
 
 extension AIndexX on AIndex {
-  static List<AIndex> fields(List<FieldElement> fields) {
+  static List<AIndex> fields(List<FieldElement> fields, String className) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => AIndex.fromElement(e))
+        .map((e) => AIndex.fromElement(e, className))
         .toList();
   }
 

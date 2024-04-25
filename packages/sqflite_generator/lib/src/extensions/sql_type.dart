@@ -20,8 +20,9 @@ extension TypeSqlX on TypeSql {
     switch (this) {
       case TypeSql.integer:
       case TypeSql.dateTime:
-      case TypeSql.bool:
         return 'INTEGER';
+      case TypeSql.bool:
+        return 'BIT';
       case TypeSql.double:
         return 'REAL';
       case TypeSql.list:
