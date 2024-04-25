@@ -8,7 +8,7 @@ packages:
   - packages/**
   - packages/sqflite_annotation/**
   - packages/sqflite_generator/**
-  - packages/sqflite_generator/example/**
+  - packages/example/**
   - packages/sqflite_query/**
   - '*'
 
