@@ -104,6 +104,53 @@ class AEntity {
     ].join('\n');
   }
 
+  String get rawFindOne {
+    final fields = [
+      ...[
+        ...[
+          ...primaryKeys,
+          ...columns,
+          ...indices,
+          ...foreignKeys,
+        ].lst,
+        ...[
+          for (final item in foreignKeys)
+            ...[
+              ...item.entityParent.primaryKeys,
+              ...item.entityParent.columns,
+              ...item.entityParent.indices,
+              ...item.entityParent.foreignKeys,
+            ].lst,
+        ],
+      ].map((e) =>
+          '${e.className.toSnakeCase()}.${e.nameToJson} as ${e.nameFromJson}'),
+      'WHERE ${className.toSnakeCase()}.${primaryKeys.first.nameToJson} = ?'
+    ].join(',\n');
+
+    final fores = foreignKeys.map((e) {
+      return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
+          ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToJson}'
+          ' = ${className.toSnakeCase()}.${e.name}';
+    }).toList();
+
+    return [
+      'SELECT $fields FROM $className ${className.toSnakeCase()}',
+      ...fores
+    ].join('\n');
+  }
+
+  String get delete {
+    return [
+      'DELETE FROM $className ${className.toSnakeCase()} WHERE ${primaryKeys.map((e) => '${e.nameToJson} = ?').join(' AND ')}',
+    ].join('\n');
+  }
+
+  String get deleteAll {
+    return [
+      'DELETE * FROM $className',
+    ].join('\n');
+  }
+
   String rawInsert([String? parent]) {
     final fields = [
       ...primaryKeys,
@@ -132,6 +179,14 @@ class AEntity {
        ]
       );''',
     ].join('\n');
+  }
+
+  List<String> rawUpdate([String? parent]) {
+    return {
+      for (final fore in foreignKeys)
+        ...fore.entityParent.rawUpdate('model.${fore.nameDefault}'),
+      'await database.update(\'$className\',${parent ?? 'model'}.toJson());',
+    }.toList();
   }
 
   const AEntity({

@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
+import 'package:collection/collection.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
@@ -74,6 +75,90 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                 (p) => p
                   ..name = 'model'
                   ..type = refer(entity.className),
+              ),
+            ])
+            ..returns = refer('Future<void>');
+        }),
+        Method((m) {
+          m
+            ..name = 'update'
+            ..modifier = MethodModifier.async
+            ..body = Code(entity.rawUpdate().join('\n'))
+            ..requiredParameters.addAll([
+              Parameter(
+                (p) => p
+                  ..name = 'database'
+                  ..type = refer('Database'),
+              ),
+              Parameter(
+                (p) => p
+                  ..name = 'model'
+                  ..type = refer(entity.className),
+              ),
+            ])
+            ..returns = refer('Future<void>');
+        }),
+        Method((m) {
+          final t = entity.primaryKeys.first;
+          final c = entity.foreignKeys.firstWhereOrNull(
+            (e) => e.nameDefault == t.nameDefault,
+          );
+          final type = c?.entityParent.primaryKeys.first.dartType.toString() ??
+              t.dartType.toString();
+          m
+            ..name = 'getById'
+            ..modifier = MethodModifier.async
+            ..body = Code(
+                'final res = (await database.rawQuery(\'\'\'${entity.rawFindOne}\'\'\',[id]) as List<Map>);'
+                'return res.isNotEmpty? ${entity.className}.fromJson(res.first):null;')
+            ..requiredParameters.addAll([
+              Parameter(
+                (p) => p
+                  ..name = 'database'
+                  ..type = refer('Database'),
+              ),
+              Parameter(
+                (p) => p
+                  ..name = 'id'
+                  ..type = refer(type),
+              ),
+            ])
+            ..returns = refer('Future<${entity.className}?>');
+        }),
+        Method((m) {
+          m
+            ..name = 'delete'
+            ..modifier = MethodModifier.async
+            ..body = Code(
+              'await database.rawQuery(\'\'\'${entity.delete}\'\'\','
+              '[${entity.primaryKeys.map((e) => 'model.${e.nameDefault}').join(',')}]);',
+            )
+            ..requiredParameters.addAll([
+              Parameter(
+                (p) => p
+                  ..name = 'database'
+                  ..type = refer('Database'),
+              ),
+              Parameter(
+                (p) => p
+                  ..name = 'model'
+                  ..type = refer(entity.className),
+              ),
+            ])
+            ..returns = refer('Future<void>');
+        }),
+        Method((m) {
+          m
+            ..name = 'deleteAll'
+            ..modifier = MethodModifier.async
+            ..body = Code(
+              'await database.rawDelete(\'\'\'${entity.deleteAll}\'\'\');',
+            )
+            ..requiredParameters.addAll([
+              Parameter(
+                (p) => p
+                  ..name = 'database'
+                  ..type = refer('Database'),
               ),
             ])
             ..returns = refer('Future<void>');
