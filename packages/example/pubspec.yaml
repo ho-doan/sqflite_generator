@@ -19,6 +19,7 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   sqflite_generator:
     path: ../sqflite_generator
+  build_runner: ^2.4.6
 flutter:
   generate: true
   uses-material-design: true
