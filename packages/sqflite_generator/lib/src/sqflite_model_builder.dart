@@ -47,6 +47,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           m
             ..name = 'getAll'
             ..lambda = true
+            ..static = true
             ..modifier = MethodModifier.async
             ..body = Code(
                 '(await database.rawQuery(${entity.extensionName}._selectAll) as List<Map>)'
@@ -71,13 +72,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..name = 'database'
                   ..type = refer('Database'),
               ),
-              Parameter(
-                (p) => p
-                  ..name = 'model'
-                  ..type = refer(entity.className),
-              ),
             ])
-            ..returns = refer('Future<void>');
+            ..returns = refer('Future<int>');
         }),
         Method((m) {
           m
@@ -168,7 +164,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..name = '\$fromJson'
             ..lambda = true
             ..static = true
-            ..docs.add('// TODO(hodoan): convert value')
             ..body = Code('${entity.className}(${entity.rawFromJson})')
             ..requiredParameters.add(
               Parameter(
@@ -182,7 +177,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) {
           m
             ..name = '\$toJson'
-            ..docs.add('// TODO(hodoan): convert value')
             ..lambda = true
             ..body = Code('{${entity.rawToJson}}')
             ..returns = refer('Map<String,dynamic>');

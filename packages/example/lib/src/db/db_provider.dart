@@ -15,7 +15,7 @@ class DBProvider {
 
   initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "TestDB.db");
+    String path = join(documentsDirectory.path, "mm.db");
     final db = await openDatabase(
       path,
       version: 1,
@@ -24,19 +24,8 @@ class DBProvider {
       },
       onCreate: (Database db, int version) async {
         log('db create');
-        await db.execute("CREATE TABLE Product ("
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "first_name TEXT,"
-            "last_name TEXT,"
-            "blocked BIT"
-            ")");
-        await db.execute("CREATE TABLE Client ("
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "first_name TEXT,"
-            "last_name TEXT,"
-            "blocked BIT,"
-            "productId INTEGER,"
-            "FOREIGN KEY (productId) REFERENCES Product (id) ON DELETE NO ACTION ON UPDATE NO ACTION)");
+        await db.execute(ProductQuery.createTable);
+        await db.execute(ClientQuery.createTable);
         log('db end create');
       },
       onConfigure: (db) async {
@@ -44,32 +33,13 @@ class DBProvider {
         await db.execute('PRAGMA foreign_keys = ON');
       },
     );
+    log('done init config');
     _database = db;
   }
 
   newClient(Client newClient) async {
     final db = _database;
-    //insert to the table using the new id
-    var raw = await db.rawInsert(
-        "INSERT Into Client (first_name,last_name,blocked,productId)"
-        " VALUES (?,?,?,?)",
-        [
-          newClient.firstName,
-          newClient.lastName,
-          newClient.blocked,
-          newClient.product.id,
-        ]);
-    return raw;
-  }
-
-  newProduct(Product model) async {
-    final db = _database;
-    //insert to the table using the new id
-    var raw = await db.rawInsert(
-        "INSERT Into Product (first_name,last_name,blocked)"
-        " VALUES (?,?,?)",
-        [model.firstName, model.lastName, model.blocked]);
-    return raw;
+    await newClient.insert(db);
   }
 
   blockOrUnblock(Client client) async {
@@ -81,14 +51,14 @@ class DBProvider {
       blocked: !client.blocked,
       product: client.product,
     );
-    var res = await db.update("Client", blocked.toMap(),
+    var res = await db.update("Client", blocked.toJson(),
         where: "id = ?", whereArgs: [client.id]);
     return res;
   }
 
   updateClient(Client newClient) async {
     final db = _database;
-    var res = await db.update("Client", newClient.toMap(),
+    var res = await db.update("Client", newClient.toJson(),
         where: "id = ?", whereArgs: [newClient.id]);
     return res;
   }
@@ -96,7 +66,7 @@ class DBProvider {
   getClient(int id) async {
     final db = _database;
     var res = await db.query("Client", where: "id = ?", whereArgs: [id]);
-    return res.isNotEmpty ? Client.fromMap(res.first) : null;
+    return res.isNotEmpty ? Client.fromJson(res.first) : null;
   }
 
   Future<List<Client>> getBlockedClients() async {
@@ -106,22 +76,14 @@ class DBProvider {
     var res = await db.query("Client", where: "blocked = ? ", whereArgs: [1]);
 
     List<Client> list =
-        res.isNotEmpty ? res.map((c) => Client.fromMap(c)).toList() : [];
+        res.isNotEmpty ? res.map((c) => Client.fromJson(c)).toList() : [];
     return list;
   }
 
   Future<List<Client>> getAllClients() async {
     final db = _database;
-    var res =
-        await db.rawQuery("SELECT c.id as c_id, c.first_name as c_first_name,"
-            " c.last_name as c_last_name, c.blocked as c_blocked,"
-            " p.first_name as p_first_name, p.id as p_id,"
-            " p.last_name as p_last_name, p.blocked as p_blocked,"
-            " c.productId as c_productId FROM Client c"
-            " INNER JOIN Product p ON p.id = c.productId");
-    List<Client> list =
-        res.isNotEmpty ? res.map((c) => Client.fromMap(c)).toList() : [];
-    return list;
+    log('get all----');
+    return await ClientQuery.getAll(db);
   }
 
   deleteClient(int id) async {

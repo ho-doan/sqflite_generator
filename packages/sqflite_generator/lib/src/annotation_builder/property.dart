@@ -35,7 +35,7 @@ class AProperty {
     bool isIds = false,
   }) =>
       [
-        name ?? nameDefault,
+        nameToJson,
         _sqlType,
         if (isId && !isIds) 'PRIMARY KEY',
         if (autoId && !isIds) 'AUTOINCREMENT',

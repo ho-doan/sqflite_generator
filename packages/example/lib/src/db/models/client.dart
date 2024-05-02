@@ -1,25 +1,27 @@
-import 'dart:convert';
-
 import 'package:example/src/db/models/product.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_query/sqflite_query.dart';
 
-Client clientFromJson(String str) {
-  final jsonData = json.decode(str);
-  return Client.fromMap(jsonData);
-}
+part 'client.g.dart';
 
-String clientToJson(Client data) {
-  final dyn = data.toMap();
-  return json.encode(dyn);
-}
-
+@entity
 class Client {
+  @primaryKey
   final int? id;
+
+  @column
   final String firstName;
+
+  @column
   final String lastName;
+
+  @column
   final bool blocked;
+
+  @ForeignKey(name: 'productId')
   final Product product;
 
-  Client({
+  const Client({
     this.id,
     required this.firstName,
     required this.lastName,
@@ -27,19 +29,8 @@ class Client {
     required this.product,
   });
 
-  factory Client.fromMap(Map<String, dynamic> json) => Client(
-        id: json["c_id"],
-        firstName: json["c_first_name"],
-        lastName: json["c_last_name"],
-        blocked: json["c_blocked"] == 1,
-        product: Product.fromMap(json),
-      );
+  factory Client.fromJson(Map<dynamic, dynamic> json) =>
+      ClientQuery.$fromJson(json);
 
-  Map<String, dynamic> toMap() => {
-        "id": id,
-        "first_name": firstName,
-        "last_name": lastName,
-        "blocked": blocked,
-        'productId': product.id,
-      };
+  Map<String, dynamic> toJson() => $toJson();
 }

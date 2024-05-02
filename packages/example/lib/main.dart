@@ -22,32 +22,32 @@ class _MyAppState extends State<MyApp> {
   // data for testing
   List<Client> testClients = [
     Client(
-      firstName: "Raouf",
-      lastName: "Rahiche",
+      firstName: "a",
+      lastName: "b",
       blocked: false,
       product: Product(
-        firstName: "Raouf",
-        lastName: "Rahiche",
+        firstName: "c",
+        lastName: "d",
         blocked: false,
       ),
     ),
     Client(
-      firstName: "Zaki",
-      lastName: "oun",
+      firstName: "e",
+      lastName: "f",
       blocked: true,
       product: Product(
-        firstName: "Zaki",
-        lastName: "oun",
+        firstName: "g",
+        lastName: "h",
         blocked: true,
       ),
     ),
     Client(
-      firstName: "oussama",
-      lastName: "ali",
+      firstName: "i",
+      lastName: "k",
       blocked: false,
       product: Product(
-        firstName: "oussama",
-        lastName: "ali",
+        firstName: "l",
+        lastName: "m",
         blocked: false,
       ),
     ),
@@ -95,7 +95,6 @@ class _MyAppState extends State<MyApp> {
         child: const Icon(Icons.add),
         onPressed: () async {
           Client rnd = testClients[math.Random().nextInt(testClients.length)];
-          await DBProvider.instance.newProduct(rnd.product);
           await DBProvider.instance.newClient(rnd);
           setState(() {});
         },

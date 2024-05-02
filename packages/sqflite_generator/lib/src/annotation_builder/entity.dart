@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:change_case/change_case.dart';
 import 'package:sqflite_generator/src/annotation_builder/column.dart';
 import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
@@ -26,6 +27,7 @@ class AEntity {
       ),
       ...columns.map((e) => e.rawCreate()),
       ...indices.map((e) => e.rawCreate()),
+      ...foreignKeys.map((e) => e.rawCreate()),
       primaryKeys.rawCreate,
       ...foreignKeys.map((e) => e.rawCreateForeign),
     ].where((e) => e.isNotEmpty);
@@ -43,6 +45,12 @@ class AEntity {
         (e) {
           if (e.rawFromJson) {
             return '${e.nameDefault}: ${e.dartType}.fromJson(json)';
+          }
+          if (e.dartType.toString().contains('DateTime')) {
+            return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'${e.nameFromJson}\'] as int? ?? -1,)';
+          }
+          if (e.dartType.isDartCoreBool) {
+            return '${e.nameDefault}: (json[\'${e.nameFromJson}\'] as int?) == 1';
           }
           return '${e.nameDefault}: json[\'${e.nameFromJson}\'] as ${e.dartType}';
         },
@@ -62,6 +70,12 @@ class AEntity {
         (e) {
           if (e.rawFromJson) {
             return '\'${e.nameToJson}\': ${e.nameDefault}.id';
+          }
+          if (e.dartType.toString().contains('DateTime')) {
+            if (e.dartType.nullabilitySuffix == NullabilitySuffix.question) {
+              return '\'${e.nameToJson}\': ${e.nameDefault}?.millisecondsSinceEpoch';
+            }
+            return '\'${e.nameToJson}\': ${e.nameDefault}.millisecondsSinceEpoch';
           }
           return '\'${e.nameToJson}\':${e.nameDefault}';
         },
@@ -95,7 +109,7 @@ class AEntity {
     final fores = foreignKeys.map((e) {
       return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
           ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToJson}'
-          ' = ${className.toSnakeCase()}.${e.name}';
+          ' = ${className.toSnakeCase()}.${e.name?.toSnakeCase()}';
     }).toList();
 
     return [
@@ -130,7 +144,7 @@ class AEntity {
     final fores = foreignKeys.map((e) {
       return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
           ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToJson}'
-          ' = ${className.toSnakeCase()}.${e.name}';
+          ' = ${className.toSnakeCase()}.${e.name?.toSnakeCase()}';
     }).toList();
 
     return [
@@ -163,21 +177,26 @@ class AEntity {
     final fieldsValue = fields.map((e) {
       if (e.rawFromJson) {
         // TODO(hodoan): hard id
-        return '${parent ?? 'model'}.${e.nameDefault}.id';
+        if (parent != null) return '$parent.${e.nameDefault}.id';
+        if (e is AForeignKey) {
+          return '\$${e.entityParent.className.toCamelCase()}Id';
+        }
       }
-      return '${parent ?? 'model'}.${e.nameDefault}';
+      if (parent != null) return '$parent.${e.nameDefault}';
+      return e.nameDefault;
     }).join(',');
 
     return [
       ...foreignKeys.map(
-        (e) => e.entityParent.rawInsert('model.${e.nameDefault}'),
+        (e) => e.entityParent.rawInsert(e.nameDefault),
       ),
-      '''await database.rawInsert(\'\'\'INSERT INTO $className ($fieldsRaw) 
+      '''final \$${className.toCamelCase()}Id = await database.rawInsert(\'\'\'INSERT INTO $className ($fieldsRaw) 
        VALUES(${List.generate(fields.length, (index) => '?').join(', ')})\'\'\',
        [
         $fieldsValue,
        ]
       );''',
+      if (parent == null) 'return \$${className.toCamelCase()}Id;'
     ].join('\n');
   }
 
@@ -202,7 +221,17 @@ class AEntity {
     final fields = element.fields.cast<FieldElement>();
     return AEntity(
       className: element.displayName,
-      columns: AColumnX.fields(fields, element.displayName),
+      columns: AColumnX.fields(
+        fields,
+        element.displayName,
+        [
+          for (final s in element.constructors)
+            ...s.parameters
+                .whereType<FieldFormalParameterElement>()
+                .cast()
+                .toList(),
+        ],
+      ),
       foreignKeys: AForeignKeyX.fields(fields, element.displayName),
       primaryKeys: APrimaryKeyX.fields(fields, element.displayName),
       indices: AIndexX.fields(fields, element.displayName),

@@ -45,9 +45,9 @@ class AForeignKey extends AProperty {
 
 extension AForeignKeyX on AForeignKey {
   String get rawCreateForeign =>
-      'FOREIGN KEY (${name ?? nameDefault}) REFERENCES ${element.type.toString()} '
+      'FOREIGN KEY ($nameToJson) REFERENCES ${element.type.toString()} '
       '(${entityParent.primaryKeys.first.name ?? entityParent.primaryKeys.first.nameDefault})'
-      ' ON ${onUpdate.str} ${onDelete.str}';
+      ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(List<FieldElement> fields, String className) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))

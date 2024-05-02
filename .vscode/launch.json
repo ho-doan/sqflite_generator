@@ -20,12 +20,14 @@
     {
       "name": "example",
       "cwd": "packages/example",
+      "program": "lib/main.dart",
       "request": "launch",
       "type": "dart"
     },
     {
       "name": "example (profile mode)",
       "cwd": "packages/example",
+      "program": "lib/main.dart",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"

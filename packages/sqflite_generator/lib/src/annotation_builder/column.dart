@@ -33,11 +33,25 @@ class AColumn extends AProperty {
 }
 
 extension AColumnX on AColumn {
-  static List<AColumn> fields(List<FieldElement> fields, String className) {
-    return fields
-        .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => AColumn.fromElement(e, className))
-        .toList();
+  static List<AColumn> fields(
+    List<FieldElement> fields,
+    String className,
+    List<FieldFormalParameterElement> cons,
+  ) {
+    return [
+      ...fields
+          .where(
+            (e) =>
+                e.metadata.isEmpty &&
+                cons.any((f) => f.displayName == e.displayName),
+          )
+          .map((e) => AColumn.fromElement(e, className))
+          .toList(),
+      ...fields
+          .where((e) => _checker.hasAnnotationOfExact(e))
+          .map((e) => AColumn.fromElement(e, className))
+          .toList(),
+    ];
   }
 
   static String? name(FieldElement field) {
