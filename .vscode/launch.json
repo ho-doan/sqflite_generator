@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Debug Widgetbook Generator",
-      "cwd": "packages/sqflite_generator/example",
+      "cwd": "packages/example",
       "request": "launch",
       "program": ".dart_tool/build/entrypoint/build.dart",
       "type": "dart",
@@ -19,20 +19,20 @@
     },
     {
       "name": "example",
-      "cwd": "example",
+      "cwd": "packages/example",
       "request": "launch",
       "type": "dart"
     },
     {
       "name": "example (profile mode)",
-      "cwd": "example",
+      "cwd": "packages/example",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"
     },
     {
       "name": "example (release mode)",
-      "cwd": "example",
+      "cwd": "packages/example",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"

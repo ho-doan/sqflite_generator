@@ -21,4 +21,5 @@ class User {
 
   factory User.fromJson(Map<dynamic, dynamic> json) =>
       UserQuery.$fromJson(json);
+  Map<String, dynamic> toJson() => $toJson();
 }

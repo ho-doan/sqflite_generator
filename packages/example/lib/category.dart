@@ -44,4 +44,6 @@ class Category {
 
   factory Category.fromJson(Map<dynamic, dynamic> json) =>
       CategoryQuery.$fromJson(json);
+
+  Map<String, dynamic> toJson() => $toJson();
 }

@@ -49,4 +49,5 @@ class Product {
 
   factory Product.fromJson(Map<dynamic, dynamic> json) =>
       ProductQuery.$fromJson(json);
+  Map<String, dynamic> toJson() => $toJson();
 }
