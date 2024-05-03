@@ -1,7 +1,8 @@
 name: sqflite_generator
-description: A new Flutter package project.
+description: Sqflite annotation for Sqflite
 version: 0.0.1
-publish_to: none
+# publish_to: https://github.com/ho-doan/sqflite_generator
+homepage: https://github.com/ho-doan/sqflite_generator
 
 environment:
   sdk: '>=3.1.4 <4.0.0'
@@ -16,8 +17,8 @@ dependencies:
   collection: ^1.17.2
   path: ^1.8.3
   glob: ^2.1.2
-  sqflite_annotation:
-    path: ../sqflite_annotation
+  sqflite_annotation: ^0.0.1
+    # path: ../sqflite_annotation
   change_case: ^2.0.1
 
 dev_dependencies:
