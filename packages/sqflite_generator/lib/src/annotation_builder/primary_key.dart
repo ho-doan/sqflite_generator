@@ -13,6 +13,7 @@ class APrimaryKey extends AProperty {
   const APrimaryKey({
     this.auto = true,
     super.name,
+    required super.version,
     super.rawFromDB,
     required super.nameDefault,
     required super.dartType,
@@ -22,6 +23,7 @@ class APrimaryKey extends AProperty {
   factory APrimaryKey.fromElement(FieldElement element, String className) {
     return APrimaryKey(
       name: APrimaryKeyX._name(element),
+      version: APrimaryKeyX._version(element),
       nameDefault: element.displayName,
       dartType: element.type,
       rawFromDB: element.type.element is ClassElement &&
@@ -43,6 +45,15 @@ extension APrimaryKeyX on APrimaryKey {
 
   static bool isElement(Element e) {
     return _checker.hasAnnotationOfExact(e);
+  }
+
+  static int _version(Element field) {
+    return _checker
+            .firstAnnotationOfExact(field)
+            ?.getField('(super)')
+            ?.getField('version')
+            ?.toIntValue() ??
+        -1;
   }
 
   static String? _name(FieldElement field) {

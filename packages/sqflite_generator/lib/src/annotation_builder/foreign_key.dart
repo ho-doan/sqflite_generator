@@ -16,6 +16,7 @@ class AForeignKey extends AProperty {
 
   const AForeignKey({
     super.name,
+    required super.version,
     super.rawFromDB,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,
@@ -30,6 +31,7 @@ class AForeignKey extends AProperty {
       dartType: element.type,
       entityParent: AEntity.fromElement(element.type.element as ClassElement),
       name: AForeignKeyX._name(element),
+      version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
       rawFromDB: element.type.element is ClassElement &&
@@ -48,6 +50,7 @@ class AForeignKey extends AProperty {
       dartType: element.type,
       entityParent: AEntity.fromElement(element.type.element as ClassElement),
       name: AForeignKeyX._name(element),
+      version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
       rawFromDB: element.type.element is ClassElement &&
@@ -87,6 +90,15 @@ extension AForeignKeyX on AForeignKey {
         ?.getField('(super)')
         ?.getField('name')
         ?.toStringValue();
+  }
+
+  static int _version(Element field) {
+    return _checker
+            .firstAnnotationOfExact(field)
+            ?.getField('(super)')
+            ?.getField('version')
+            ?.toIntValue() ??
+        -1;
   }
 
   static ForeignAction _updValue(Element element) {

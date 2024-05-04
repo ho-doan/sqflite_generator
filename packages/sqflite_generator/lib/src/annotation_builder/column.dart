@@ -13,6 +13,7 @@ final _checker = const TypeChecker.fromRuntime(Column);
 class AColumn extends AProperty {
   const AColumn({
     super.name,
+    required super.version,
     super.rawFromDB,
     required super.dartType,
     required super.nameDefault,
@@ -21,7 +22,8 @@ class AColumn extends AProperty {
   factory AColumn.fromElement(FieldElement element, String className) {
     final type = element.type;
     return AColumn(
-      name: AColumnX.name(element),
+      name: AColumnX._name(element),
+      version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
       rawFromDB: element.type.element is ClassElement &&
@@ -34,7 +36,8 @@ class AColumn extends AProperty {
   factory AColumn.fromConsElement(ParameterElement element, String className) {
     final type = element.type;
     return AColumn(
-      name: AColumnX.nameP(element),
+      name: AColumnX._name(element),
+      version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
       rawFromDB: element.type.element is ClassElement &&
@@ -78,15 +81,16 @@ extension AColumnX on AColumn {
     ];
   }
 
-  static String? name(FieldElement field) {
+  static int _version(Element field) {
     return _checker
-        .firstAnnotationOfExact(field)
-        ?.getField('(super)')
-        ?.getField('name')
-        ?.toStringValue();
+            .firstAnnotationOfExact(field)
+            ?.getField('(super)')
+            ?.getField('version')
+            ?.toIntValue() ??
+        -1;
   }
 
-  static String? nameP(ParameterElement field) {
+  static String? _name(Element field) {
     return _checker
         .firstAnnotationOfExact(field)
         ?.getField('(super)')

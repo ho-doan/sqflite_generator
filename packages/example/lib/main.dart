@@ -56,7 +56,7 @@ class _MyAppState extends State<MyApp> {
                     DBProvider.instance.deleteClient(item.id!);
                   },
                   child: ListTile(
-                    title: Text(jsonEncode(item)),
+                    title: Text(jsonEncode(item.toDB())),
                     leading: Text(item.id.toString()),
                     trailing: Checkbox(
                       onChanged: (value) {

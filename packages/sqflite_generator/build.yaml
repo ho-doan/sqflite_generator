@@ -3,8 +3,8 @@ targets:
     builders:
       sqflite_model_builder:
         enabled: true
-      # config_builder:
-      #   enabled: true
+      config_builder:
+        enabled: true
       # checked_db_builder:
       #   enabled: true
 
@@ -16,13 +16,13 @@ builders:
     auto_apply: dependents
     build_to: cache
     applies_builders: ["source_gen|combining_builder"]
-  # config_builder:
-  #   import: "package:db_sql_generator/builder.dart"
-  #   builder_factories: ["configBuilder"]
-  #   build_extensions: { ".dart": [".config.dart"] }
-  #   auto_apply: dependents
-  #   build_to: source
-  #   applies_builders: ["source_gen|combining_builder"]
+  config_builder:
+    import: "package:sqflite_generator/sqflite_generator.dart"
+    builder_factories: ["configBuilder"]
+    build_extensions: { ".dart": [".config.dart"] } #".config_builder.g.part",
+    auto_apply: dependents
+    build_to: source
+    # applies_builders: ["source_gen|combining_builder"]
   # checked_db_builder:
   #   import: "package:db_sql_generator/builder.dart"
   #   builder_factories: ["checkedBuilder"]

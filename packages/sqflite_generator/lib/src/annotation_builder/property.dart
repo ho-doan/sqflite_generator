@@ -5,6 +5,7 @@ import 'package:sqflite_generator/src/extensions/sql_type.dart';
 
 class AProperty {
   final String? name;
+  final int version;
   final String nameDefault;
   final DartType dartType;
   final bool rawFromDB;
@@ -12,6 +13,7 @@ class AProperty {
 
   const AProperty({
     this.name,
+    required this.version,
     required this.nameDefault,
     required this.dartType,
     required this.className,

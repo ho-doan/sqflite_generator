@@ -13,6 +13,7 @@ class AIndex extends AProperty {
   const AIndex({
     this.unique = false,
     super.name,
+    required super.version,
     required super.nameDefault,
     required super.dartType,
     required super.className,
@@ -22,6 +23,8 @@ class AIndex extends AProperty {
     return AIndex(
       nameDefault: element.displayName,
       dartType: element.type,
+      name: AIndexX._name(element),
+      version: AIndexX._version(element),
       rawFromDB: element.type.element is ClassElement &&
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
@@ -39,7 +42,16 @@ extension AIndexX on AIndex {
         .toList();
   }
 
-  static String? name(FieldElement field) {
+  static int _version(Element field) {
+    return _checker
+            .firstAnnotationOfExact(field)
+            ?.getField('(super)')
+            ?.getField('version')
+            ?.toIntValue() ??
+        -1;
+  }
+
+  static String? _name(FieldElement field) {
     return _checker
         .firstAnnotationOfExact(field)
         ?.getField('(super)')
