@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:example/src/db/models/product.dart';
 import 'package:flutter/material.dart';
 
@@ -22,30 +24,11 @@ class _MyAppState extends State<MyApp> {
   // data for testing
   List<Client> testClients = [
     Client(
-      firstName: "a",
-      lastName: "b",
-      blocked: false,
-      product: Product(
-        firstName: "c",
-        lastName: "d",
-        blocked: false,
-      ),
-    ),
-    Client(
-      firstName: "e",
-      lastName: "f",
-      blocked: true,
-      product: Product(
-        firstName: "g",
-        lastName: "h",
-        blocked: true,
-      ),
-    ),
-    Client(
       firstName: "i",
       lastName: "k",
       blocked: false,
       product: Product(
+        id: 1,
         firstName: "l",
         lastName: "m",
         blocked: false,
@@ -73,7 +56,7 @@ class _MyAppState extends State<MyApp> {
                     DBProvider.instance.deleteClient(item.id!);
                   },
                   child: ListTile(
-                    title: Text(item.lastName),
+                    title: Text(jsonEncode(item)),
                     leading: Text(item.id.toString()),
                     trailing: Checkbox(
                       onChanged: (value) {

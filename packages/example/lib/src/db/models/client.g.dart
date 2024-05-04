@@ -31,20 +31,12 @@ product.blocked as product_blocked FROM Client client
 
   static Future<List<Client>> getAll(Database database) async =>
       (await database.rawQuery(ClientQuery._selectAll) as List<Map>)
-          .map(Client.fromJson)
+          .map(Client.fromDB)
           .toList();
   Future<int> insert(Database database) async {
-    final $productId = await database.rawInsert('''INSERT INTO Product (id,
-last_name,
-first_name,
-blocked) 
-       VALUES(?, ?, ?, ?)''', [
-      product.id,
-      product.lastName,
-      product.firstName,
-      product.blocked,
-    ]);
-    final $clientId = await database.rawInsert('''INSERT INTO Client (id,
+    final $productId = await product.insert(database);
+    final $clientId =
+        await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
 first_name,
 last_name,
 blocked,
@@ -63,11 +55,11 @@ product_id)
     Database database,
     Client model,
   ) async {
-    await database.update('Product', model.product.toJson());
-    await database.update('Client', model.toJson());
+    await database.update('Product', model.product.toDB());
+    await database.update('Client', model.toDB());
   }
 
-  Future<Client?> getById(
+  static Future<Client?> getById(
     Database database,
     int? id,
   ) async {
@@ -83,7 +75,7 @@ product.blocked as product_blocked,
 WHERE client.id = ? FROM Client client
  INNER JOIN Product product ON product.id = client.product_id''', [id])
         as List<Map>);
-    return res.isNotEmpty ? Client.fromJson(res.first) : null;
+    return res.isNotEmpty ? Client.fromDB(res.first) : null;
   }
 
   Future<void> delete(
@@ -98,14 +90,14 @@ WHERE client.id = ? FROM Client client
     await database.rawDelete('''DELETE * FROM Client''');
   }
 
-  static Client $fromJson(Map json) => Client(
+  static Client $fromDB(Map json) => Client(
         id: json['client_id'] as int?,
         firstName: json['client_first_name'] as String,
         lastName: json['client_last_name'] as String,
         blocked: (json['client_blocked'] as int?) == 1,
-        product: Product.fromJson(json),
+        product: Product.fromDB(json),
       );
-  Map<String, dynamic> $toJson() => {
+  Map<String, dynamic> $toDB() => {
         'id': id,
         'first_name': firstName,
         'last_name': lastName,

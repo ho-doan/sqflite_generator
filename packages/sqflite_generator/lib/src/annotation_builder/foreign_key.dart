@@ -16,25 +16,41 @@ class AForeignKey extends AProperty {
 
   const AForeignKey({
     super.name,
-    super.rawFromJson,
+    super.rawFromDB,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,
     required this.entityParent,
     required super.nameDefault,
     required super.dartType,
-    required super.element,
     required super.className,
   });
   factory AForeignKey.fromElement(FieldElement element, String className) {
     return AForeignKey(
       nameDefault: element.displayName,
       dartType: element.type,
-      element: element,
       entityParent: AEntity.fromElement(element.type.element as ClassElement),
       name: AForeignKeyX._name(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
-      rawFromJson: element.type.element is ClassElement &&
+      rawFromDB: element.type.element is ClassElement &&
+          AEntity.fromElement(element.type.element as ClassElement)
+              .primaryKeys
+              .isNotEmpty,
+      className: className,
+    );
+  }
+  factory AForeignKey.fromSuperElement(
+    SuperFormalParameterElement element,
+    String className,
+  ) {
+    return AForeignKey(
+      nameDefault: element.displayName,
+      dartType: element.type,
+      entityParent: AEntity.fromElement(element.type.element as ClassElement),
+      name: AForeignKeyX._name(element),
+      onDelete: AForeignKeyX._delValue(element),
+      onUpdate: AForeignKeyX._updValue(element),
+      rawFromDB: element.type.element is ClassElement &&
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
               .isNotEmpty,
@@ -45,17 +61,27 @@ class AForeignKey extends AProperty {
 
 extension AForeignKeyX on AForeignKey {
   String get rawCreateForeign =>
-      'FOREIGN KEY ($nameToJson) REFERENCES ${element.type.toString()} '
+      'FOREIGN KEY ($nameToDB) REFERENCES ${dartType.toString()} '
       '(${entityParent.primaryKeys.first.name ?? entityParent.primaryKeys.first.nameDefault})'
       ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
-  static List<AForeignKey> fields(List<FieldElement> fields, String className) {
-    return fields
-        .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => AForeignKey.fromElement(e, className))
-        .toList();
+  static List<AForeignKey> fields(
+    List<FieldElement> fields,
+    String className,
+    List<SuperFormalParameterElement> cons,
+  ) {
+    return [
+      ...cons
+          .where((e) => _checker.hasAnnotationOfExact(e))
+          .map((e) => AForeignKey.fromSuperElement(e, className))
+          .toList(),
+      ...fields
+          .where((e) => _checker.hasAnnotationOfExact(e))
+          .map((e) => AForeignKey.fromElement(e, className))
+          .toList()
+    ];
   }
 
-  static String? _name(FieldElement field) {
+  static String? _name(Element field) {
     return _checker
         .firstAnnotationOfExact(field)
         ?.getField('(super)')
@@ -63,7 +89,7 @@ extension AForeignKeyX on AForeignKey {
         ?.toStringValue();
   }
 
-  static ForeignAction _updValue(FieldElement element) {
+  static ForeignAction _updValue(Element element) {
     DartObject? dartObject;
     dartObject = _checker.firstAnnotationOfExact(element);
 
@@ -73,7 +99,7 @@ extension AForeignKeyX on AForeignKey {
     return ForeignAction.values.byName(v);
   }
 
-  static ForeignAction _delValue(FieldElement element) {
+  static ForeignAction _delValue(Element element) {
     DartObject? dartObject;
     dartObject = _checker.firstAnnotationOfExact(element);
 
@@ -82,4 +108,6 @@ extension AForeignKeyX on AForeignKey {
 
     return ForeignAction.values.byName(v);
   }
+
+  static bool isElement(Element f) => _checker.hasAnnotationOfExact(f);
 }

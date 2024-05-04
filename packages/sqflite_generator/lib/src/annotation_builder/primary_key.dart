@@ -13,10 +13,9 @@ class APrimaryKey extends AProperty {
   const APrimaryKey({
     this.auto = true,
     super.name,
-    super.rawFromJson,
+    super.rawFromDB,
     required super.nameDefault,
     required super.dartType,
-    required super.element,
     required super.className,
   });
 
@@ -25,8 +24,7 @@ class APrimaryKey extends AProperty {
       name: APrimaryKeyX._name(element),
       nameDefault: element.displayName,
       dartType: element.type,
-      element: element,
-      rawFromJson: element.type.element is ClassElement &&
+      rawFromDB: element.type.element is ClassElement &&
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
               .isNotEmpty,
@@ -41,6 +39,10 @@ extension APrimaryKeyX on APrimaryKey {
         .where((e) => _checker.hasAnnotationOfExact(e))
         .map((e) => APrimaryKey.fromElement(e, className))
         .toList();
+  }
+
+  static bool isElement(Element e) {
+    return _checker.hasAnnotationOfExact(e);
   }
 
   static String? _name(FieldElement field) {

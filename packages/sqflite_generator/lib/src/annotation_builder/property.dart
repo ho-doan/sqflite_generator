@@ -1,4 +1,3 @@
-import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:change_case/change_case.dart';
@@ -8,17 +7,15 @@ class AProperty {
   final String? name;
   final String nameDefault;
   final DartType dartType;
-  final FieldElement element;
-  final bool rawFromJson;
+  final bool rawFromDB;
   final String className;
 
   const AProperty({
     this.name,
     required this.nameDefault,
     required this.dartType,
-    required this.element,
     required this.className,
-    this.rawFromJson = false,
+    this.rawFromDB = false,
   });
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
   String get _isNull => _isQues ? '' : 'NOT NULL';
@@ -26,8 +23,8 @@ class AProperty {
 
   bool get isEnum => dartType.isEnum;
 
-  String get nameToJson => (name ?? nameDefault).toSnakeCase();
-  String get nameFromJson => '${className}_$nameToJson'.toSnakeCase();
+  String get nameToDB => (name ?? nameDefault).toSnakeCase();
+  String get nameFromDB => '${className}_$nameToDB'.toSnakeCase();
 
   String rawCreate({
     bool isId = false,
@@ -35,7 +32,7 @@ class AProperty {
     bool isIds = false,
   }) =>
       [
-        nameToJson,
+        nameToDB,
         _sqlType,
         if (isId && !isIds) 'PRIMARY KEY',
         if (autoId && !isIds) 'AUTOINCREMENT',

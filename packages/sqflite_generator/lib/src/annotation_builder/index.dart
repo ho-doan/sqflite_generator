@@ -15,16 +15,14 @@ class AIndex extends AProperty {
     super.name,
     required super.nameDefault,
     required super.dartType,
-    required super.element,
     required super.className,
-    super.rawFromJson,
+    super.rawFromDB,
   });
   factory AIndex.fromElement(FieldElement element, String className) {
     return AIndex(
       nameDefault: element.displayName,
       dartType: element.type,
-      element: element,
-      rawFromJson: element.type.element is ClassElement &&
+      rawFromDB: element.type.element is ClassElement &&
           AEntity.fromElement(element.type.element as ClassElement)
               .primaryKeys
               .isNotEmpty,
@@ -47,5 +45,9 @@ extension AIndexX on AIndex {
         ?.getField('(super)')
         ?.getField('name')
         ?.toStringValue();
+  }
+
+  static bool isElement(Element e) {
+    return _checker.hasAnnotationOfExact(e);
   }
 }

@@ -22,8 +22,8 @@ class Product {
     required this.blocked,
   });
 
-  factory Product.fromJson(Map<dynamic, dynamic> json) =>
-      ProductQuery.$fromJson(json);
+  factory Product.fromDB(Map<dynamic, dynamic> json) =>
+      ProductQuery.$fromDB(json);
 
-  Map<String, dynamic> toJson() => $toJson();
+  Map<String, dynamic> toDB() => $toDB();
 }

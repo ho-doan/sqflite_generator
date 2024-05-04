@@ -34,7 +34,7 @@ class AEntity {
     return 'CREATE TABLE IF NOT EXISTS $className(\n\t\t${all.join(',\n\t\t\t')}\n\t)';
   }
 
-  String get rawFromJson {
+  String get rawFromDB {
     return [
       [
         ...primaryKeys,
@@ -43,23 +43,23 @@ class AEntity {
         ...foreignKeys,
       ].lst.map(
         (e) {
-          if (e.rawFromJson) {
-            return '${e.nameDefault}: ${e.dartType}.fromJson(json)';
+          if (e.rawFromDB) {
+            return '${e.nameDefault}: ${e.dartType}.fromDB(json)';
           }
           if (e.dartType.toString().contains('DateTime')) {
-            return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'${e.nameFromJson}\'] as int? ?? -1,)';
+            return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'${e.nameFromDB}\'] as int? ?? -1,)';
           }
           if (e.dartType.isDartCoreBool) {
-            return '${e.nameDefault}: (json[\'${e.nameFromJson}\'] as int?) == 1';
+            return '${e.nameDefault}: (json[\'${e.nameFromDB}\'] as int?) == 1';
           }
-          return '${e.nameDefault}: json[\'${e.nameFromJson}\'] as ${e.dartType}';
+          return '${e.nameDefault}: json[\'${e.nameFromDB}\'] as ${e.dartType}';
         },
       ).join(','),
       ','
     ].join();
   }
 
-  String get rawToJson {
+  String get rawToDB {
     return [
       [
         ...primaryKeys,
@@ -68,16 +68,16 @@ class AEntity {
         ...foreignKeys,
       ].lst.map(
         (e) {
-          if (e.rawFromJson) {
-            return '\'${e.nameToJson}\': ${e.nameDefault}.id';
+          if (e.rawFromDB) {
+            return '\'${e.nameToDB}\': ${e.nameDefault}.id';
           }
           if (e.dartType.toString().contains('DateTime')) {
             if (e.dartType.nullabilitySuffix == NullabilitySuffix.question) {
-              return '\'${e.nameToJson}\': ${e.nameDefault}?.millisecondsSinceEpoch';
+              return '\'${e.nameToDB}\': ${e.nameDefault}?.millisecondsSinceEpoch';
             }
-            return '\'${e.nameToJson}\': ${e.nameDefault}.millisecondsSinceEpoch';
+            return '\'${e.nameToDB}\': ${e.nameDefault}.millisecondsSinceEpoch';
           }
-          return '\'${e.nameToJson}\':${e.nameDefault}';
+          return '\'${e.nameToDB}\':${e.nameDefault}';
         },
       ).join(','),
       ','
@@ -103,12 +103,12 @@ class AEntity {
       ],
     ]
         .map((e) =>
-            '${e.className.toSnakeCase()}.${e.nameToJson} as ${e.nameFromJson}')
+            '${e.className.toSnakeCase()}.${e.nameToDB} as ${e.nameFromDB}')
         .join(',\n');
 
     final fores = foreignKeys.map((e) {
       return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
-          ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToJson}'
+          ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToDB}'
           ' = ${className.toSnakeCase()}.${e.name?.toSnakeCase()}';
     }).toList();
 
@@ -137,13 +137,13 @@ class AEntity {
             ].lst,
         ],
       ].map((e) =>
-          '${e.className.toSnakeCase()}.${e.nameToJson} as ${e.nameFromJson}'),
-      'WHERE ${className.toSnakeCase()}.${primaryKeys.first.nameToJson} = ?'
+          '${e.className.toSnakeCase()}.${e.nameToDB} as ${e.nameFromDB}'),
+      'WHERE ${className.toSnakeCase()}.${primaryKeys.first.nameToDB} = ?'
     ].join(',\n');
 
     final fores = foreignKeys.map((e) {
       return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
-          ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToJson}'
+          ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToDB}'
           ' = ${className.toSnakeCase()}.${e.name?.toSnakeCase()}';
     }).toList();
 
@@ -155,7 +155,7 @@ class AEntity {
 
   String get delete {
     return [
-      'DELETE FROM $className ${className.toSnakeCase()} WHERE ${primaryKeys.map((e) => '${e.nameToJson} = ?').join(' AND ')}',
+      'DELETE FROM $className ${className.toSnakeCase()} WHERE ${primaryKeys.map((e) => '${e.nameToDB} = ?').join(' AND ')}',
     ].join('\n');
   }
 
@@ -172,10 +172,14 @@ class AEntity {
       ...indices,
       ...foreignKeys,
     ].lst;
-    final fieldsRaw = fields.map((e) => e.nameToJson).join(',\n');
+    final fieldsRaw = fields.map((e) => e.nameToDB).join(',\n');
+
+    if (parent != null) {
+      return 'final \$${className.toCamelCase()}Id = await $parent.insert(database);';
+    }
 
     final fieldsValue = fields.map((e) {
-      if (e.rawFromJson) {
+      if (e.rawFromDB) {
         // TODO(hodoan): hard id
         if (parent != null) return '$parent.${e.nameDefault}.id';
         if (e is AForeignKey) {
@@ -190,7 +194,7 @@ class AEntity {
       ...foreignKeys.map(
         (e) => e.entityParent.rawInsert(e.nameDefault),
       ),
-      '''final \$${className.toCamelCase()}Id = await database.rawInsert(\'\'\'INSERT INTO $className ($fieldsRaw) 
+      '''final \$${className.toCamelCase()}Id = await database.rawInsert(\'\'\'INSERT OR REPLACE INTO $className ($fieldsRaw) 
        VALUES(${List.generate(fields.length, (index) => '?').join(', ')})\'\'\',
        [
         $fieldsValue,
@@ -204,7 +208,7 @@ class AEntity {
     return {
       for (final fore in foreignKeys)
         ...fore.entityParent.rawUpdate('model.${fore.nameDefault}'),
-      'await database.update(\'$className\',${parent ?? 'model'}.toJson());',
+      'await database.update(\'$className\',${parent ?? 'model'}.toDB());',
     }.toList();
   }
 
@@ -219,22 +223,39 @@ class AEntity {
 
   factory AEntity.fromElement(ClassElement element) {
     final fields = element.fields.cast<FieldElement>();
+
+    final cons = element.constructors.where((e) => !e.isFactory);
+    final fs = <FieldFormalParameterElement>[
+      for (final s in cons)
+        ...s.parameters
+            .whereType<FieldFormalParameterElement>()
+            .cast()
+            .toList(),
+    ];
+    final ss = <SuperFormalParameterElement>[
+      for (final s in cons)
+        ...s.parameters
+            .whereType<SuperFormalParameterElement>()
+            .cast()
+            .toList(),
+    ];
+    final indies = AIndexX.fields(fields, element.displayName);
+    final primaries = APrimaryKeyX.fields(fields, element.displayName);
+    final fores = AForeignKeyX.fields(fields, element.displayName, ss);
+
     return AEntity(
       className: element.displayName,
       columns: AColumnX.fields(
         fields,
         element.displayName,
-        [
-          for (final s in element.constructors)
-            ...s.parameters
-                .whereType<FieldFormalParameterElement>()
-                .cast()
-                .toList(),
-        ],
+        [...fs, ...ss],
+        primaries,
+        indies,
+        fores,
       ),
-      foreignKeys: AForeignKeyX.fields(fields, element.displayName),
-      primaryKeys: APrimaryKeyX.fields(fields, element.displayName),
-      indices: AIndexX.fields(fields, element.displayName),
+      foreignKeys: fores,
+      primaryKeys: primaries,
+      indices: indies,
     );
   }
 }

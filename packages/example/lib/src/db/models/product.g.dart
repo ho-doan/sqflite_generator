@@ -23,10 +23,11 @@ product.blocked as product_blocked FROM Product product''';
 
   static Future<List<Product>> getAll(Database database) async =>
       (await database.rawQuery(ProductQuery._selectAll) as List<Map>)
-          .map(Product.fromJson)
+          .map(Product.fromDB)
           .toList();
   Future<int> insert(Database database) async {
-    final $productId = await database.rawInsert('''INSERT INTO Product (id,
+    final $productId =
+        await database.rawInsert('''INSERT OR REPLACE INTO Product (id,
 last_name,
 first_name,
 blocked) 
@@ -43,10 +44,10 @@ blocked)
     Database database,
     Product model,
   ) async {
-    await database.update('Product', model.toJson());
+    await database.update('Product', model.toDB());
   }
 
-  Future<Product?> getById(
+  static Future<Product?> getById(
     Database database,
     int? id,
   ) async {
@@ -55,7 +56,7 @@ product.last_name as product_last_name,
 product.first_name as product_first_name,
 product.blocked as product_blocked,
 WHERE product.id = ? FROM Product product''', [id]) as List<Map>);
-    return res.isNotEmpty ? Product.fromJson(res.first) : null;
+    return res.isNotEmpty ? Product.fromDB(res.first) : null;
   }
 
   Future<void> delete(
@@ -70,13 +71,13 @@ WHERE product.id = ? FROM Product product''', [id]) as List<Map>);
     await database.rawDelete('''DELETE * FROM Product''');
   }
 
-  static Product $fromJson(Map json) => Product(
+  static Product $fromDB(Map json) => Product(
         id: json['product_id'] as int?,
         lastName: json['product_last_name'] as String,
         firstName: json['product_first_name'] as String,
         blocked: (json['product_blocked'] as int?) == 1,
       );
-  Map<String, dynamic> $toJson() => {
+  Map<String, dynamic> $toDB() => {
         'id': id,
         'last_name': lastName,
         'first_name': firstName,

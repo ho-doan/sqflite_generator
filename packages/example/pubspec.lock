@@ -521,7 +521,7 @@ packages:
     source: hosted
     version: "2.3.3"
   sqflite_annotation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../sqflite_annotation"
       relative: true

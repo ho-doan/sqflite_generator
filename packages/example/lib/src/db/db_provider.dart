@@ -51,14 +51,14 @@ class DBProvider {
       blocked: !client.blocked,
       product: client.product,
     );
-    var res = await db.update("Client", blocked.toJson(),
+    var res = await db.update("Client", blocked.toDB(),
         where: "id = ?", whereArgs: [client.id]);
     return res;
   }
 
   updateClient(Client newClient) async {
     final db = _database;
-    var res = await db.update("Client", newClient.toJson(),
+    var res = await db.update("Client", newClient.toDB(),
         where: "id = ?", whereArgs: [newClient.id]);
     return res;
   }
@@ -66,7 +66,7 @@ class DBProvider {
   getClient(int id) async {
     final db = _database;
     var res = await db.query("Client", where: "id = ?", whereArgs: [id]);
-    return res.isNotEmpty ? Client.fromJson(res.first) : null;
+    return res.isNotEmpty ? Client.fromDB(res.first) : null;
   }
 
   Future<List<Client>> getBlockedClients() async {
@@ -76,7 +76,7 @@ class DBProvider {
     var res = await db.query("Client", where: "blocked = ? ", whereArgs: [1]);
 
     List<Client> list =
-        res.isNotEmpty ? res.map((c) => Client.fromJson(c)).toList() : [];
+        res.isNotEmpty ? res.map((c) => Client.fromDB(c)).toList() : [];
     return list;
   }
 

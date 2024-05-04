@@ -29,8 +29,8 @@ class Client {
     required this.product,
   });
 
-  factory Client.fromJson(Map<dynamic, dynamic> json) =>
-      ClientQuery.$fromJson(json);
+  factory Client.fromDB(Map<dynamic, dynamic> json) =>
+      ClientQuery.$fromDB(json);
 
-  Map<String, dynamic> toJson() => $toJson();
+  Map<String, dynamic> toDB() => $toDB();
 }

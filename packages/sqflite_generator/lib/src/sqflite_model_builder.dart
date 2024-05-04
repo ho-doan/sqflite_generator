@@ -51,7 +51,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..modifier = MethodModifier.async
             ..body = Code(
                 '(await database.rawQuery(${entity.extensionName}._selectAll) as List<Map>)'
-                '.map(${entity.className}.fromJson).toList()')
+                '.map(${entity.className}.fromDB).toList()')
             ..requiredParameters.add(
               Parameter(
                 (p) => p
@@ -104,9 +104,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           m
             ..name = 'getById'
             ..modifier = MethodModifier.async
+            ..static = true
             ..body = Code(
                 'final res = (await database.rawQuery(\'\'\'${entity.rawFindOne}\'\'\',[id]) as List<Map>);'
-                'return res.isNotEmpty? ${entity.className}.fromJson(res.first):null;')
+                'return res.isNotEmpty? ${entity.className}.fromDB(res.first):null;')
             ..requiredParameters.addAll([
               Parameter(
                 (p) => p
@@ -161,10 +162,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         }),
         Method((m) {
           m
-            ..name = '\$fromJson'
+            ..name = '\$fromDB'
             ..lambda = true
             ..static = true
-            ..body = Code('${entity.className}(${entity.rawFromJson})')
+            ..body = Code('${entity.className}(${entity.rawFromDB})')
             ..requiredParameters.add(
               Parameter(
                 (p) => p
@@ -176,9 +177,9 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         }),
         Method((m) {
           m
-            ..name = '\$toJson'
+            ..name = '\$toDB'
             ..lambda = true
-            ..body = Code('{${entity.rawToJson}}')
+            ..body = Code('{${entity.rawToDB}}')
             ..returns = refer('Map<String,dynamic>');
         }),
       ]);
