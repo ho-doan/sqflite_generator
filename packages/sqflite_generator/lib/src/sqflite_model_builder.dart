@@ -86,13 +86,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..name = 'database'
                   ..type = refer('Database'),
               ),
-              Parameter(
-                (p) => p
-                  ..name = 'model'
-                  ..type = refer(entity.className),
-              ),
             ])
-            ..returns = refer('Future<void>');
+            ..returns = refer('Future<int>');
         }),
         Method((m) {
           final t = entity.primaryKeys.first;
@@ -146,8 +141,33 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         }),
         Method((m) {
           m
+            ..name = 'deleteById'
+            ..modifier = MethodModifier.async
+            ..static = true
+            ..body = Code(
+              'await database.rawQuery(\'\'\'${entity.delete}\'\'\','
+              '[${entity.primaryKeys.map((e) => e.nameDefault).join(',')}]);',
+            )
+            ..requiredParameters.addAll([
+              Parameter(
+                (p) => p
+                  ..name = 'database'
+                  ..type = refer('Database'),
+              ),
+              for (final key in entity.primaryKeys)
+                Parameter(
+                  (p) => p
+                    ..name = key.nameDefault
+                    ..type = refer(key.dartType.toString()),
+                ),
+            ])
+            ..returns = refer('Future<void>');
+        }),
+        Method((m) {
+          m
             ..name = 'deleteAll'
             ..modifier = MethodModifier.async
+            ..static = true
             ..body = Code(
               'await database.rawDelete(\'\'\'${entity.deleteAll}\'\'\');',
             )

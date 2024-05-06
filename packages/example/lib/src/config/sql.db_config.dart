@@ -12,20 +12,19 @@ import 'dart:developer';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 
-import 'package:example/src/db/models/product.dart' as _i0;
+import 'package:example/src/db/models/product.dart' as i0;
 
-import 'package:example/src/db/models/client.dart' as _i1;
+import 'package:example/src/db/models/client.dart' as i1;
 
-import 'package:example/src/db/models/category.dart' as _i2;
+import 'package:example/src/db/models/category.dart' as i2;
 
 final List<String> _schemas = [
-  _i0.ProductQuery.createTable,
-  _i1.ClientQuery.createTable,
-  _i2.CategoryQuery.createTable
+  i0.ProductQuery.createTable,
+  i1.ClientQuery.createTable,
+  i2.CategoryQuery.createTable
 ];
 
 Future<Database> $configSql([RootIsolateToken? token]) async {
-  // init
   if (token != null) {
     BackgroundIsolateBinaryMessenger.ensureInitialized(token);
   }

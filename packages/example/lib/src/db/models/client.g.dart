@@ -51,12 +51,10 @@ product_id)
     return $clientId;
   }
 
-  Future<void> update(
-    Database database,
-    Client model,
-  ) async {
-    await database.update('Product', model.product.toDB());
-    await database.update('Client', model.toDB());
+  Future<int> update(Database database) async {
+    await product.update(database);
+    return await database
+        .update('Client', toDB(), where: "id = ?", whereArgs: [id]);
   }
 
   static Future<Client?> getById(
@@ -86,7 +84,14 @@ WHERE client.id = ? FROM Client client
         .rawQuery('''DELETE FROM Client client WHERE id = ?''', [model.id]);
   }
 
-  Future<void> deleteAll(Database database) async {
+  static Future<void> deleteById(
+    Database database,
+    int? id,
+  ) async {
+    await database.rawQuery('''DELETE FROM Client client WHERE id = ?''', [id]);
+  }
+
+  static Future<void> deleteAll(Database database) async {
     await database.rawDelete('''DELETE * FROM Client''');
   }
 

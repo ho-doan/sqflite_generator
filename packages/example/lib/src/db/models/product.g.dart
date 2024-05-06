@@ -40,11 +40,9 @@ blocked)
     return $productId;
   }
 
-  Future<void> update(
-    Database database,
-    Product model,
-  ) async {
-    await database.update('Product', model.toDB());
+  Future<int> update(Database database) async {
+    return await database
+        .update('Product', toDB(), where: "id = ?", whereArgs: [id]);
   }
 
   static Future<Product?> getById(
@@ -67,7 +65,15 @@ WHERE product.id = ? FROM Product product''', [id]) as List<Map>);
         .rawQuery('''DELETE FROM Product product WHERE id = ?''', [model.id]);
   }
 
-  Future<void> deleteAll(Database database) async {
+  static Future<void> deleteById(
+    Database database,
+    int? id,
+  ) async {
+    await database
+        .rawQuery('''DELETE FROM Product product WHERE id = ?''', [id]);
+  }
+
+  static Future<void> deleteAll(Database database) async {
     await database.rawDelete('''DELETE * FROM Product''');
   }
 

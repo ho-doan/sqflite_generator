@@ -41,12 +41,12 @@ class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
 
     final entitiesImports = <String>[
       for (int i = 0; i < configs.length; i++)
-        for (final item in configs[i].imports) "import '$item' as _i$i;",
+        for (final item in configs[i].imports) "import '$item' as i$i;",
     ];
 
     final schemas = <String>[
       for (int i = 0; i < configs.length; i++)
-        '_i$i.${configs[i].name}Query.createTable',
+        'i$i.${configs[i].name}Query.createTable',
     ].join(',');
 
     final schemaValue = Field((f) {
@@ -67,7 +67,7 @@ class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
             // ..covariant = true
             ..type = refer('RootIsolateToken?');
         }))
-        ..body = Code('''// init
+        ..body = Code('''
           if (token != null) {
             BackgroundIsolateBinaryMessenger.ensureInitialized(token);
           }

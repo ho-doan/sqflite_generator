@@ -205,10 +205,15 @@ class AEntity {
   }
 
   List<String> rawUpdate([String? parent]) {
+    if (parent != null) return ['await $parent.update(database);'];
     return {
       for (final fore in foreignKeys)
-        ...fore.entityParent.rawUpdate('model.${fore.nameDefault}'),
-      'await database.update(\'$className\',${parent ?? 'model'}.toDB());',
+        ...fore.entityParent.rawUpdate(fore.nameDefault),
+      'return await database.update(\'$className\',toDB(), where: "${[
+        for (final key in primaryKeys) '${key.nameToDB} = ?'
+      ].join(' AND ')}", whereArgs: [${[
+        for (final key in primaryKeys) key.nameToDB
+      ].join(' , ')}]);',
     }.toList();
   }
 

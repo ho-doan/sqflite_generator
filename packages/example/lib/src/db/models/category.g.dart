@@ -47,12 +47,10 @@ product_id)
     return $categoryId;
   }
 
-  Future<void> update(
-    Database database,
-    Category model,
-  ) async {
-    await database.update('Product', model.product.toDB());
-    await database.update('Category', model.toDB());
+  Future<int> update(Database database) async {
+    await product.update(database);
+    return await database
+        .update('Category', toDB(), where: "key = ?", whereArgs: [key]);
   }
 
   static Future<Category?> getById(
@@ -81,7 +79,15 @@ WHERE category.key = ? FROM Category category
         '''DELETE FROM Category category WHERE key = ?''', [model.key]);
   }
 
-  Future<void> deleteAll(Database database) async {
+  static Future<void> deleteById(
+    Database database,
+    int? key,
+  ) async {
+    await database
+        .rawQuery('''DELETE FROM Category category WHERE key = ?''', [key]);
+  }
+
+  static Future<void> deleteAll(Database database) async {
     await database.rawDelete('''DELETE * FROM Category''');
   }
 
