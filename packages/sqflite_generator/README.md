@@ -1,3 +1,3 @@
 # sqflite_generator
 
-![more](../../README.md)
+[more](../../README.md)
