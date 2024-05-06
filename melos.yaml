@@ -9,6 +9,7 @@ packages:
   - packages/sqflite_annotation/**
   - packages/sqflite_generator/**
   - packages/example/**
+  - packages/domain/**
   - packages/sqflite_query/**
   - '*'
 
