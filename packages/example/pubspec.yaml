@@ -4,7 +4,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: ">=1.17.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -21,7 +22,7 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   sqflite_generator:
     path: ../sqflite_generator
-  build_runner: ^2.4.6
+  build_runner: ^2.4.8
 flutter:
   generate: true
   uses-material-design: true
