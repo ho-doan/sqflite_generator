@@ -1,3 +1,7 @@
+## 0.0.5
+
+* add ignore lint config database gen
+
 ## 0.0.4
 
 * hotfix import config database gen

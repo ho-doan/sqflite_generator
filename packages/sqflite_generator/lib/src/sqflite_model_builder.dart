@@ -8,7 +8,8 @@ import 'package:sqflite_annotation/sqflite_annotation.dart';
 
 import 'annotation_builder/entity.dart';
 
-const _analyzerIgnores = '// ignore_for_file: ';
+const _analyzerIgnores = '// ignore_for_file: lines_longer_than_80_chars, '
+    'prefer_relative_imports, directives_ordering, require_trailing_commas';
 
 class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
   @override
