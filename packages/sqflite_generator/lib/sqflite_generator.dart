@@ -11,5 +11,5 @@ Builder sqfliteModelBuilder(BuilderOptions options) =>
 
 Builder configBuilder(BuilderOptions options) => LibraryBuilder(
       ConfigGenerator(),
-      generatedExtension: '.config.dart',
+      generatedExtension: '.db_config.dart',
     );

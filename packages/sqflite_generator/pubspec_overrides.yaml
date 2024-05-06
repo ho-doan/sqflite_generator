@@ -1,3 +1,3 @@
 dependency_overrides:
-  sqflite_annotation:
-    path: ../sqflite_annotation
+  # sqflite_annotation:
+  #   path: ../sqflite_annotation

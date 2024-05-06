@@ -19,7 +19,7 @@ builders:
   config_builder:
     import: "package:sqflite_generator/sqflite_generator.dart"
     builder_factories: ["configBuilder"]
-    build_extensions: { ".dart": [".config.dart"] } #".config_builder.g.part",
+    build_extensions: { ".dart": [".db_config.dart"] } #".config_builder.g.part",
     auto_apply: dependents
     build_to: source
     # applies_builders: ["source_gen|combining_builder"]
