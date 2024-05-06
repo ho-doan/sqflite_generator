@@ -1,11 +1,8 @@
 # sqflite_annotation
 
 * [![sqflite_annotation version](https://img.shields.io/pub/v/sqflite_annotation?label=sqflite_annotation)](https://pub.dev/packages/sqflite_annotation)
-
 [![sqflite_annotation size](https://img.shields.io/github/repo-size/ho-doan/sqflite_generator)](https://github.com/ho-doan/sqflite_generator)
-
 [![sqflite_annotation issues](https://img.shields.io/github/issues/ho-doan/sqflite_generator)](https://github.com/ho-doan/sqflite_generator)
-
 [![sqflite_annotation issues](https://img.shields.io/pub/likes/sqflite_annotation)](https://github.com/ho-doan/sqflite_generator)
 
 * Sqflite annotation for Sqflite

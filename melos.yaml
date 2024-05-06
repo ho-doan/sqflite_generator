@@ -53,3 +53,15 @@ scripts:
     packageFilters:
       scope: "*example*"
     description: build_runner build all modules.
+  pg:
+    exec: flutter pub publish
+    failFast: true
+    packageFilters:
+      scope: "*sqflite_generator*"
+    description: build_runner build all modules.
+  pa:
+    exec: flutter pub publish
+    failFast: true
+    packageFilters:
+      scope: "*sqflite_annotation*"
+    description: build_runner build all modules.

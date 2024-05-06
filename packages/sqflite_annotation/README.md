@@ -1,3 +1,3 @@
 # sqflite_annotation
 
-![more](../../README.md)
+[more](../../README.md)
