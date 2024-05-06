@@ -1,6 +1,6 @@
 name: sqflite_generator
 description: Sqflite annotation for Sqflite
-version: 0.0.3
+version: 0.0.4
 # publish_to: https://github.com/ho-doan/sqflite_generator
 homepage: https://github.com/ho-doan/sqflite_generator
 

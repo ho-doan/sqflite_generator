@@ -1,3 +1,7 @@
+## 0.0.4
+
+* hotfix import config database gen
+
 ## 0.0.3
 
 * create config database gen

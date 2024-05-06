@@ -41,7 +41,7 @@ class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
 
     final entitiesImports = <String>[
       for (int i = 0; i < configs.length; i++)
-        for (final item in configs[i].imports) "import '$item' as i$i;",
+        "import '${configs[i].imports.first}' as i$i;",
     ];
 
     final schemas = <String>[
