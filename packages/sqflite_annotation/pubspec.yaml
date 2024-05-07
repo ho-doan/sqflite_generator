@@ -1,13 +1,13 @@
 name: sqflite_annotation
 description: Sqflite annotation for Sqflite
-version: 0.0.2
+version: 0.1.0
 homepage: https://github.com/ho-doan/sqflite_generator
 
 environment:
   sdk: '>=3.1.4 <4.0.0'
 
 dependencies:
-  meta: ^1.11.0
+  meta: ^1.10.0
 
 dev_dependencies:
   lints: ^2.0.0

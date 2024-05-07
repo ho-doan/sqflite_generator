@@ -6,7 +6,7 @@ part of 'product.dart';
 // SqfliteModelGenerator
 // **************************************************************************
 
-// ignore_for_file:
+// ignore_for_file: lines_longer_than_80_chars, prefer_relative_imports, directives_ordering, require_trailing_commas
 
 extension ProductQuery on Product {
   static String createTable = '''CREATE TABLE IF NOT EXISTS Product(

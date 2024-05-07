@@ -1,3 +1,7 @@
+## 0.1.0
+
+* update version
+
 ## 0.0.5
 
 * add ignore lint config database gen
