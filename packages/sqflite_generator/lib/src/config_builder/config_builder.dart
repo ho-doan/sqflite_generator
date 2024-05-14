@@ -18,7 +18,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 ''';
 
-const _analyzerIgnores = '// ignore_for_file: ';
+const _analyzerIgnores = '// ignore_for_file: lines_longer_than_80_chars, '
+    'prefer_relative_imports, directives_ordering, require_trailing_commas';
 
 class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
   @override
