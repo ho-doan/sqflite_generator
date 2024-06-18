@@ -4,7 +4,7 @@
 // ConfigGenerator
 // **************************************************************************
 
-// ignore_for_file:
+// ignore_for_file: lines_longer_than_80_chars, prefer_relative_imports, directives_ordering, require_trailing_commas
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -50,3 +50,9 @@ Future<Database> $configSql([RootIsolateToken? token]) async {
 
   return database;
 }
+
+Future<void> $clearDatabase(Database db) => Future.wait([
+      i0.ProductQuery.deleteAll(db),
+      i1.ClientQuery.deleteAll(db),
+      i2.CategoryQuery.deleteAll(db)
+    ]);

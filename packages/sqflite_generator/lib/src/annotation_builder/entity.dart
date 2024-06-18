@@ -84,28 +84,7 @@ class AEntity {
     ].join();
   }
 
-  String get rawFindAll {
-    final fields = [
-      ...[
-        ...primaryKeys,
-        ...columns,
-        ...indices,
-        ...foreignKeys,
-      ].lst,
-      ...[
-        for (final item in foreignKeys)
-          ...[
-            ...item.entityParent.primaryKeys,
-            ...item.entityParent.columns,
-            ...item.entityParent.indices,
-            ...item.entityParent.foreignKeys,
-          ].lst,
-      ],
-    ]
-        .map((e) =>
-            '${e.className.toSnakeCase()}.${e.nameToDB} as ${e.nameFromDB}')
-        .join(',\n');
-
+  String rawFindAll(String select) {
     final fores = foreignKeys.map((e) {
       return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
           ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToDB}'
@@ -113,34 +92,12 @@ class AEntity {
     }).toList();
 
     return [
-      'SELECT $fields FROM $className ${className.toSnakeCase()}',
+      'SELECT $select FROM $className ${className.toSnakeCase()}',
       ...fores
     ].join('\n');
   }
 
-  String get rawFindOne {
-    final fields = [
-      ...[
-        ...[
-          ...primaryKeys,
-          ...columns,
-          ...indices,
-          ...foreignKeys,
-        ].lst,
-        ...[
-          for (final item in foreignKeys)
-            ...[
-              ...item.entityParent.primaryKeys,
-              ...item.entityParent.columns,
-              ...item.entityParent.indices,
-              ...item.entityParent.foreignKeys,
-            ].lst,
-        ],
-      ].map((e) =>
-          '${e.className.toSnakeCase()}.${e.nameToDB} as ${e.nameFromDB}'),
-      'WHERE ${className.toSnakeCase()}.${primaryKeys.first.nameToDB} = ?'
-    ].join(',\n');
-
+  String rawFindOne(String select) {
     final fores = foreignKeys.map((e) {
       return ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
           ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToDB}'
@@ -148,7 +105,7 @@ class AEntity {
     }).toList();
 
     return [
-      'SELECT $fields FROM $className ${className.toSnakeCase()}',
+      'SELECT $select FROM $className ${className.toSnakeCase()}',
       ...fores
     ].join('\n');
   }
@@ -163,58 +120,6 @@ class AEntity {
     return [
       'DELETE * FROM $className',
     ].join('\n');
-  }
-
-  String rawInsert([String? parent]) {
-    final fields = [
-      ...primaryKeys,
-      ...columns,
-      ...indices,
-      ...foreignKeys,
-    ].lst;
-    final fieldsRaw = fields.map((e) => e.nameToDB).join(',\n');
-
-    if (parent != null) {
-      return 'final \$${className.toCamelCase()}Id = await $parent.insert(database);';
-    }
-
-    final fieldsValue = fields.map((e) {
-      if (e.rawFromDB) {
-        // TODO(hodoan): hard id
-        if (parent != null) return '$parent.${e.nameDefault}.id';
-        if (e is AForeignKey) {
-          return '\$${e.entityParent.className.toCamelCase()}Id';
-        }
-      }
-      if (parent != null) return '$parent.${e.nameDefault}';
-      return e.nameDefault;
-    }).join(',');
-
-    return [
-      ...foreignKeys.map(
-        (e) => e.entityParent.rawInsert(e.nameDefault),
-      ),
-      '''final \$${className.toCamelCase()}Id = await database.rawInsert(\'\'\'INSERT OR REPLACE INTO $className ($fieldsRaw) 
-       VALUES(${List.generate(fields.length, (index) => '?').join(', ')})\'\'\',
-       [
-        $fieldsValue,
-       ]
-      );''',
-      if (parent == null) 'return \$${className.toCamelCase()}Id;'
-    ].join('\n');
-  }
-
-  List<String> rawUpdate([String? parent]) {
-    if (parent != null) return ['await $parent.update(database);'];
-    return {
-      for (final fore in foreignKeys)
-        ...fore.entityParent.rawUpdate(fore.nameDefault),
-      'return await database.update(\'$className\',toDB(), where: "${[
-        for (final key in primaryKeys) '${key.nameToDB} = ?'
-      ].join(' AND ')}", whereArgs: [${[
-        for (final key in primaryKeys) key.nameToDB
-      ].join(' , ')}]);',
-    }.toList();
   }
 
   const AEntity({
@@ -262,5 +167,79 @@ class AEntity {
       primaryKeys: primaries,
       indices: indies,
     );
+  }
+}
+
+extension AUpdate on AEntity {
+  List<String> rawUpdate([String? parent]) {
+    if (parent != null) return ['await $parent.update(database);'];
+    return {
+      for (final fore in foreignKeys)
+        ...fore.entityParent.rawUpdate(fore.nameDefault),
+      'return await database.update(\'$className\',toDB(), where: "${[
+        for (final key in primaryKeys) '${key.nameToDB} = ?'
+      ].join(' AND ')}", whereArgs: [${[
+        for (final key in primaryKeys) key.nameToDB
+      ].join(' , ')}]);',
+    }.toList();
+  }
+}
+
+extension AInsert on AEntity {
+  String rawInsert([String? parent]) {
+    final fields = [
+      ...primaryKeys,
+      ...columns,
+      ...indices,
+      ...foreignKeys,
+    ].lst;
+    final fieldsRaw = fields.map((e) => e.nameToDB).join(',\n');
+
+    if (parent != null) {
+      return 'final \$${className.toCamelCase()}Id = await $parent.insert(database);';
+    }
+
+    final fieldsValue = fields.map((e) {
+      if (e.rawFromDB) {
+        if (e is AForeignKey) {
+          return '\$${e.entityParent.className.toCamelCase()}Id';
+        }
+      }
+      if (parent != null) return '$parent.${e.nameDefault}';
+      return e.nameDefault;
+    }).join(',');
+
+    return [
+      ...foreignKeys.map(
+        (e) => e.entityParent.rawInsert(e.nameDefault),
+      ),
+      '''final \$${className.toCamelCase()}Id = await database.rawInsert(\'\'\'INSERT OR REPLACE INTO $className ($fieldsRaw) 
+       VALUES(${List.generate(fields.length, (index) => '?').join(', ')})\'\'\',
+       [
+        $fieldsValue,
+       ]
+      );''',
+      if (parent == null) 'return \$${className.toCamelCase()}Id;'
+    ].join('\n');
+  }
+}
+
+extension AQuery on AEntity {
+  List<String> get aFieldNames {
+    return [
+      ...primaryKeys,
+      ...columns,
+      ...indices,
+      ...foreignKeys,
+    ].map((e) => e.nameToDB).toList();
+  }
+
+  List<AProperty> get aPs {
+    return [
+      ...primaryKeys,
+      ...columns,
+      ...indices,
+      ...foreignKeys,
+    ];
   }
 }

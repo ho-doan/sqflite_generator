@@ -79,6 +79,10 @@ class _MyAppState extends State<MyApp> {
         onPressed: () async {
           Client rnd = testClients[math.Random().nextInt(testClients.length)];
           await DBProvider.instance.newClient(rnd);
+          // CategoryQuery.getAll(
+          //   db,
+          //   select: const $CategorySelectArgs(),
+          // );
           setState(() {});
         },
       ),

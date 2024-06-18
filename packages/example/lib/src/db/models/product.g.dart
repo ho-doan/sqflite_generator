@@ -16,13 +16,28 @@ extension ProductQuery on Product {
 			blocked BIT NOT NULL
 	)''';
 
-  static const String _selectAll = '''SELECT product.id as product_id,
-product.last_name as product_last_name,
-product.first_name as product_first_name,
-product.blocked as product_blocked FROM Product product''';
+  static final String _selectAll =
+      '''SELECT ${$createSelect($default)} FROM Product product''';
 
-  static Future<List<Product>> getAll(Database database) async =>
-      (await database.rawQuery(ProductQuery._selectAll) as List<Map>)
+  static const $ProductSelectArgs $default = $ProductSelectArgs(
+      id: true, lastName: true, firstName: true, blocked: true);
+
+  static String $createSelect($ProductSelectArgs? args) => args?.$check == true
+      ? [
+          if (args?.id ?? false) 'product.id as product_id',
+          if (args?.lastName ?? false) 'product.last_name as product_last_name',
+          if (args?.firstName ?? false)
+            'product.first_name as product_first_name',
+          if (args?.blocked ?? false) 'product.blocked as product_blocked'
+        ].join(',')
+      : $createSelect($default);
+  static Future<List<Product>> getAll(
+    Database database, {
+    $ProductSelectArgs? select,
+  }) async =>
+      (await database.rawQuery(select != null
+              ? $createSelect(select)
+              : ProductQuery._selectAll) as List<Map>)
           .map(Product.fromDB)
           .toList();
   Future<int> insert(Database database) async {
@@ -47,22 +62,18 @@ blocked)
 
   static Future<Product?> getById(
     Database database,
-    int? id,
-  ) async {
-    final res = (await database.rawQuery('''SELECT product.id as product_id,
-product.last_name as product_last_name,
-product.first_name as product_first_name,
-product.blocked as product_blocked,
-WHERE product.id = ? FROM Product product''', [id]) as List<Map>);
+    int? id, {
+    $ProductSelectArgs? select,
+  }) async {
+    final res = (await database.rawQuery(
+            '''SELECT ${$createSelect(select)} FROM Product product''', [id])
+        as List<Map>);
     return res.isNotEmpty ? Product.fromDB(res.first) : null;
   }
 
-  Future<void> delete(
-    Database database,
-    Product model,
-  ) async {
+  Future<void> delete(Database database) async {
     await database
-        .rawQuery('''DELETE FROM Product product WHERE id = ?''', [model.id]);
+        .rawQuery('''DELETE FROM Product product WHERE id = ?''', [id]);
   }
 
   static Future<void> deleteById(
@@ -89,4 +100,41 @@ WHERE product.id = ? FROM Product product''', [id]) as List<Map>);
         'first_name': firstName,
         'blocked': blocked,
       };
+}
+
+class $ProductSelectArgs {
+  const $ProductSelectArgs({
+    this.id,
+    this.lastName,
+    this.firstName,
+    this.blocked,
+  });
+
+  final bool? id;
+
+  final bool? lastName;
+
+  final bool? firstName;
+
+  final bool? blocked;
+
+  bool get $check =>
+      id == true || lastName == true || firstName == true || blocked == true;
+}
+
+class $ProductWhereArgs {
+  const $ProductWhereArgs({
+    this.id,
+    this.lastName,
+    this.firstName,
+    this.blocked,
+  });
+
+  final int? id;
+
+  final String? lastName;
+
+  final String? firstName;
+
+  final bool? blocked;
 }

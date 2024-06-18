@@ -17,18 +17,28 @@ extension CategoryQuery on Category {
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String _selectAll = '''SELECT category.key as category_key,
-category.id as category_id,
-category.name as category_name,
-category.product_id as category_product_id,
-product.id as product_id,
-product.last_name as product_last_name,
-product.first_name as product_first_name,
-product.blocked as product_blocked FROM Category category
+  static final String _selectAll =
+      '''SELECT ${$createSelect($default)} FROM Category category
  INNER JOIN Product product ON product.id = category.product_id''';
 
-  static Future<List<Category>> getAll(Database database) async =>
-      (await database.rawQuery(CategoryQuery._selectAll) as List<Map>)
+  static const $CategorySelectArgs $default = $CategorySelectArgs(
+      key: true, id: true, name: true, product: ProductQuery.$default);
+
+  static String $createSelect($CategorySelectArgs? args) => args?.$check == true
+      ? [
+          if (args?.key ?? false) 'category.key as category_key',
+          if (args?.id ?? false) 'category.id as category_id',
+          if (args?.name ?? false) 'category.name as category_name',
+          ProductQuery.$createSelect(args?.product)
+        ].join(',')
+      : $createSelect($default);
+  static Future<List<Category>> getAll(
+    Database database, {
+    $CategorySelectArgs? select,
+  }) async =>
+      (await database.rawQuery(select != null
+              ? $createSelect(select)
+              : CategoryQuery._selectAll) as List<Map>)
           .map(Category.fromDB)
           .toList();
   Future<int> insert(Database database) async {
@@ -55,28 +65,19 @@ product_id)
 
   static Future<Category?> getById(
     Database database,
-    int? id,
-  ) async {
-    final res = (await database.rawQuery('''SELECT category.key as category_key,
-category.id as category_id,
-category.name as category_name,
-category.product_id as category_product_id,
-product.id as product_id,
-product.last_name as product_last_name,
-product.first_name as product_first_name,
-product.blocked as product_blocked,
-WHERE category.key = ? FROM Category category
+    int? id, {
+    $CategorySelectArgs? select,
+  }) async {
+    final res = (await database
+            .rawQuery('''SELECT ${$createSelect(select)} FROM Category category
  INNER JOIN Product product ON product.id = category.product_id''', [id])
         as List<Map>);
     return res.isNotEmpty ? Category.fromDB(res.first) : null;
   }
 
-  Future<void> delete(
-    Database database,
-    Category model,
-  ) async {
-    await database.rawQuery(
-        '''DELETE FROM Category category WHERE key = ?''', [model.key]);
+  Future<void> delete(Database database) async {
+    await database
+        .rawQuery('''DELETE FROM Category category WHERE key = ?''', [key]);
   }
 
   static Future<void> deleteById(
@@ -103,4 +104,41 @@ WHERE category.key = ? FROM Category category
         'name': name,
         'product_id': product.id,
       };
+}
+
+class $CategorySelectArgs {
+  const $CategorySelectArgs({
+    this.key,
+    this.id,
+    this.name,
+    this.product,
+  });
+
+  final bool? key;
+
+  final bool? id;
+
+  final bool? name;
+
+  final $ProductSelectArgs? product;
+
+  bool get $check =>
+      key == true || id == true || name == true || product?.$check == true;
+}
+
+class $CategoryWhereArgs {
+  const $CategoryWhereArgs({
+    this.key,
+    this.id,
+    this.name,
+    this.product,
+  });
+
+  final int? key;
+
+  final String? id;
+
+  final String? name;
+
+  final $ProductWhereArgs? product;
 }

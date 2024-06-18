@@ -18,19 +18,34 @@ extension ClientQuery on Client {
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String _selectAll = '''SELECT client.id as client_id,
-client.first_name as client_first_name,
-client.last_name as client_last_name,
-client.blocked as client_blocked,
-client.product_id as client_product_id,
-product.id as product_id,
-product.last_name as product_last_name,
-product.first_name as product_first_name,
-product.blocked as product_blocked FROM Client client
+  static final String _selectAll =
+      '''SELECT ${$createSelect($default)} FROM Client client
  INNER JOIN Product product ON product.id = client.product_id''';
 
-  static Future<List<Client>> getAll(Database database) async =>
-      (await database.rawQuery(ClientQuery._selectAll) as List<Map>)
+  static const $ClientSelectArgs $default = $ClientSelectArgs(
+      id: true,
+      firstName: true,
+      lastName: true,
+      blocked: true,
+      product: ProductQuery.$default);
+
+  static String $createSelect($ClientSelectArgs? args) => args?.$check == true
+      ? [
+          if (args?.id ?? false) 'client.id as client_id',
+          if (args?.firstName ?? false)
+            'client.first_name as client_first_name',
+          if (args?.lastName ?? false) 'client.last_name as client_last_name',
+          if (args?.blocked ?? false) 'client.blocked as client_blocked',
+          ProductQuery.$createSelect(args?.product)
+        ].join(',')
+      : $createSelect($default);
+  static Future<List<Client>> getAll(
+    Database database, {
+    $ClientSelectArgs? select,
+  }) async =>
+      (await database.rawQuery(select != null
+              ? $createSelect(select)
+              : ClientQuery._selectAll) as List<Map>)
           .map(Client.fromDB)
           .toList();
   Future<int> insert(Database database) async {
@@ -59,29 +74,18 @@ product_id)
 
   static Future<Client?> getById(
     Database database,
-    int? id,
-  ) async {
-    final res = (await database.rawQuery('''SELECT client.id as client_id,
-client.first_name as client_first_name,
-client.last_name as client_last_name,
-client.blocked as client_blocked,
-client.product_id as client_product_id,
-product.id as product_id,
-product.last_name as product_last_name,
-product.first_name as product_first_name,
-product.blocked as product_blocked,
-WHERE client.id = ? FROM Client client
+    int? id, {
+    $ClientSelectArgs? select,
+  }) async {
+    final res = (await database
+            .rawQuery('''SELECT ${$createSelect(select)} FROM Client client
  INNER JOIN Product product ON product.id = client.product_id''', [id])
         as List<Map>);
     return res.isNotEmpty ? Client.fromDB(res.first) : null;
   }
 
-  Future<void> delete(
-    Database database,
-    Client model,
-  ) async {
-    await database
-        .rawQuery('''DELETE FROM Client client WHERE id = ?''', [model.id]);
+  Future<void> delete(Database database) async {
+    await database.rawQuery('''DELETE FROM Client client WHERE id = ?''', [id]);
   }
 
   static Future<void> deleteById(
@@ -109,4 +113,51 @@ WHERE client.id = ? FROM Client client
         'blocked': blocked,
         'product_id': product.id,
       };
+}
+
+class $ClientSelectArgs {
+  const $ClientSelectArgs({
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.blocked,
+    this.product,
+  });
+
+  final bool? id;
+
+  final bool? firstName;
+
+  final bool? lastName;
+
+  final bool? blocked;
+
+  final $ProductSelectArgs? product;
+
+  bool get $check =>
+      id == true ||
+      firstName == true ||
+      lastName == true ||
+      blocked == true ||
+      product?.$check == true;
+}
+
+class $ClientWhereArgs {
+  const $ClientWhereArgs({
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.blocked,
+    this.product,
+  });
+
+  final int? id;
+
+  final String? firstName;
+
+  final String? lastName;
+
+  final bool? blocked;
+
+  final $ProductWhereArgs? product;
 }

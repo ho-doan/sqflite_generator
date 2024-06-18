@@ -45,9 +45,12 @@ class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
         "import '${configs[i].imports.first}' as i$i;",
     ];
 
+    final schemasGen = <String>[
+      for (int i = 0; i < configs.length; i++) 'i$i.${configs[i].name}Query',
+    ];
+
     final schemas = <String>[
-      for (int i = 0; i < configs.length; i++)
-        'i$i.${configs[i].name}Query.createTable',
+      for (final item in schemasGen) '$item.createTable',
     ].join(',');
 
     final schemaValue = Field((f) {
@@ -57,6 +60,21 @@ class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
         ..assignment = Code('[$schemas]')
         ..type = refer('List<String>');
     });
+
+    final schemaClear = [for (final item in schemasGen) '$item.deleteAll(db)'];
+
+    final funcClearDbBuilder = Method(
+      (m) => m
+        ..name = '\$clearDatabase'
+        ..requiredParameters.add(Parameter(
+          (p) => p
+            ..name = 'db'
+            ..type = refer('Database'),
+        ))
+        ..returns = refer('Future<void>')
+        ..body = Code('Future.wait([${schemaClear.join(',')}]);')
+        ..lambda = true,
+    );
 
     final functionConfigBuilder = Method((m) {
       m
@@ -95,18 +113,6 @@ class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
           return database;''')
         ..returns = refer('Future<Database>');
     });
-    // final s = await buildStep.resolver.libraries.toList();
-
-    // final jsonData = <Map>[];
-    // await for (final id in buildStep.findAssets(injectableConfigFiles)) {
-    //   final json = jsonDecode(await buildStep.readAsString(id));
-    //   jsonData.addAll([...json]);
-    // }
-
-    // final deps = <DependencyConfig>[];
-    // for (final json in jsonData) {
-    //   deps.add(DependencyConfig.fromJson(json));
-    // }
 
     return DartFormatter().format([
       _analyzerIgnores,
@@ -114,6 +120,7 @@ class ConfigGenerator extends GeneratorForAnnotation<SqlConfig> {
       ...entitiesImports,
       schemaValue.accept(emitter),
       functionConfigBuilder.accept(emitter),
+      funcClearDbBuilder.accept(emitter),
     ].join('\n\n'));
   }
 }
