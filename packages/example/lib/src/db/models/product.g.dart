@@ -16,28 +16,27 @@ extension ProductQuery on Product {
 			blocked BIT NOT NULL
 	)''';
 
-  static final String _selectAll =
-      '''SELECT ${$createSelect($default)} FROM Product product''';
-
   static const $ProductSelectArgs $default = $ProductSelectArgs(
       id: true, lastName: true, firstName: true, blocked: true);
 
-  static String $createSelect($ProductSelectArgs? args) => args?.$check == true
-      ? [
-          if (args?.id ?? false) 'product.id as product_id',
-          if (args?.lastName ?? false) 'product.last_name as product_last_name',
-          if (args?.firstName ?? false)
-            'product.first_name as product_first_name',
-          if (args?.blocked ?? false) 'product.blocked as product_blocked'
-        ].join(',')
-      : $createSelect($default);
+  static String $createSelect($ProductSelectArgs? select) =>
+      select?.$check == true
+          ? [
+              if (select?.id ?? false) 'product.id as product_id',
+              if (select?.lastName ?? false)
+                'product.last_name as product_last_name',
+              if (select?.firstName ?? false)
+                'product.first_name as product_first_name',
+              if (select?.blocked ?? false) 'product.blocked as product_blocked'
+            ].join(',')
+          : $createSelect($default);
   static Future<List<Product>> getAll(
     Database database, {
     $ProductSelectArgs? select,
   }) async =>
-      (await database.rawQuery(select != null
-              ? $createSelect(select)
-              : ProductQuery._selectAll) as List<Map>)
+      (await database.rawQuery(
+              '''SELECT ${$createSelect($default)} FROM Product product
+''') as List<Map>)
           .map(Product.fromDB)
           .toList();
   Future<int> insert(Database database) async {
@@ -65,9 +64,12 @@ blocked)
     int? id, {
     $ProductSelectArgs? select,
   }) async {
-    final res = (await database.rawQuery(
-            '''SELECT ${$createSelect(select)} FROM Product product''', [id])
-        as List<Map>);
+    final res = (await database.rawQuery('''
+SELECT 
+${$createSelect(select)}
+ FROM Product product
+WHERE id = ?
+''', [id]) as List<Map>);
     return res.isNotEmpty ? Product.fromDB(res.first) : null;
   }
 

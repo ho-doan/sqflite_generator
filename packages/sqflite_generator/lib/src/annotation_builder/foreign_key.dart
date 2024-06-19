@@ -64,7 +64,7 @@ class AForeignKey extends AProperty {
 
 extension AForeignKeyX on AForeignKey {
   String get rawCreateForeign =>
-      'FOREIGN KEY ($nameToDB) REFERENCES ${dartType.toString()} '
+      'FOREIGN KEY ($nameToDB) REFERENCES ${dartType.toString().replaceFirst('?', '')} '
       '(${entityParent.primaryKeys.first.name ?? entityParent.primaryKeys.first.nameDefault})'
       ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(

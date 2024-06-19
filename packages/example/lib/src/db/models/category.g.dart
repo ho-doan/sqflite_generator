@@ -17,42 +17,40 @@ extension CategoryQuery on Category {
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static final String _selectAll =
-      '''SELECT ${$createSelect($default)} FROM Category category
- INNER JOIN Product product ON product.id = category.product_id''';
-
   static const $CategorySelectArgs $default = $CategorySelectArgs(
-      key: true, id: true, name: true, product: ProductQuery.$default);
+      key: true, product: ProductQuery.$default, id: true, name: true);
 
-  static String $createSelect($CategorySelectArgs? args) => args?.$check == true
-      ? [
-          if (args?.key ?? false) 'category.key as category_key',
-          if (args?.id ?? false) 'category.id as category_id',
-          if (args?.name ?? false) 'category.name as category_name',
-          ProductQuery.$createSelect(args?.product)
-        ].join(',')
-      : $createSelect($default);
+  static String $createSelect($CategorySelectArgs? select) =>
+      select?.$check == true
+          ? [
+              if (select?.key ?? false) 'category.key as category_key',
+              ProductQuery.$createSelect(select?.product),
+              if (select?.id ?? false) 'category.id as category_id',
+              if (select?.name ?? false) 'category.name as category_name'
+            ].join(',')
+          : $createSelect($default);
   static Future<List<Category>> getAll(
     Database database, {
     $CategorySelectArgs? select,
   }) async =>
-      (await database.rawQuery(select != null
-              ? $createSelect(select)
-              : CategoryQuery._selectAll) as List<Map>)
+      (await database.rawQuery(
+              '''SELECT ${$createSelect($default)} FROM Category category
+ INNER JOIN Product product ON product.id = category.product_id
+''') as List<Map>)
           .map(Category.fromDB)
           .toList();
   Future<int> insert(Database database) async {
     final $productId = await product.insert(database);
     final $categoryId =
         await database.rawInsert('''INSERT OR REPLACE INTO Category (key,
+product_id,
 id,
-name,
-product_id) 
+name) 
        VALUES(?, ?, ?, ?)''', [
       key,
+      $productId,
       id,
       name,
-      $productId,
     ]);
     return $categoryId;
   }
@@ -65,13 +63,16 @@ product_id)
 
   static Future<Category?> getById(
     Database database,
-    int? id, {
+    int? key, {
     $CategorySelectArgs? select,
   }) async {
-    final res = (await database
-            .rawQuery('''SELECT ${$createSelect(select)} FROM Category category
- INNER JOIN Product product ON product.id = category.product_id''', [id])
-        as List<Map>);
+    final res = (await database.rawQuery('''
+SELECT 
+${$createSelect(select)}
+ FROM Category category
+WHERE key = ?
+ INNER JOIN Product product ON product.id = category.product_id
+''', [key]) as List<Map>);
     return res.isNotEmpty ? Category.fromDB(res.first) : null;
   }
 
@@ -94,51 +95,51 @@ product_id)
 
   static Category $fromDB(Map json) => Category(
         key: json['category_key'] as int?,
+        product: Product.fromDB(json),
         id: json['category_id'] as String,
         name: json['category_name'] as String,
-        product: Product.fromDB(json),
       );
   Map<String, dynamic> $toDB() => {
         'key': key,
+        'product_id': product.id,
         'id': id,
         'name': name,
-        'product_id': product.id,
       };
 }
 
 class $CategorySelectArgs {
   const $CategorySelectArgs({
     this.key,
+    this.product,
     this.id,
     this.name,
-    this.product,
   });
 
   final bool? key;
+
+  final $ProductSelectArgs? product;
 
   final bool? id;
 
   final bool? name;
 
-  final $ProductSelectArgs? product;
-
   bool get $check =>
-      key == true || id == true || name == true || product?.$check == true;
+      key == true || product?.$check == true || id == true || name == true;
 }
 
 class $CategoryWhereArgs {
   const $CategoryWhereArgs({
     this.key,
+    this.product,
     this.id,
     this.name,
-    this.product,
   });
 
   final int? key;
 
+  final $ProductWhereArgs? product;
+
   final String? id;
 
   final String? name;
-
-  final $ProductWhereArgs? product;
 }

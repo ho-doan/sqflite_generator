@@ -18,10 +18,13 @@ import 'package:example/src/db/models/client.dart' as i1;
 
 import 'package:example/src/db/models/category.dart' as i2;
 
+import 'package:example/src/db/models/bill.dart' as i3;
+
 final List<String> _schemas = [
   i0.ProductQuery.createTable,
   i1.ClientQuery.createTable,
-  i2.CategoryQuery.createTable
+  i2.CategoryQuery.createTable,
+  i3.BillQuery.createTable
 ];
 
 Future<Database> $configSql([RootIsolateToken? token]) async {
@@ -54,5 +57,6 @@ Future<Database> $configSql([RootIsolateToken? token]) async {
 Future<void> $clearDatabase(Database db) => Future.wait([
       i0.ProductQuery.deleteAll(db),
       i1.ClientQuery.deleteAll(db),
-      i2.CategoryQuery.deleteAll(db)
+      i2.CategoryQuery.deleteAll(db),
+      i3.BillQuery.deleteAll(db)
     ]);

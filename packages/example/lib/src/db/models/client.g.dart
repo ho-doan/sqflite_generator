@@ -18,50 +18,49 @@ extension ClientQuery on Client {
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static final String _selectAll =
-      '''SELECT ${$createSelect($default)} FROM Client client
- INNER JOIN Product product ON product.id = client.product_id''';
-
   static const $ClientSelectArgs $default = $ClientSelectArgs(
       id: true,
+      product: ProductQuery.$default,
       firstName: true,
       lastName: true,
-      blocked: true,
-      product: ProductQuery.$default);
+      blocked: true);
 
-  static String $createSelect($ClientSelectArgs? args) => args?.$check == true
-      ? [
-          if (args?.id ?? false) 'client.id as client_id',
-          if (args?.firstName ?? false)
-            'client.first_name as client_first_name',
-          if (args?.lastName ?? false) 'client.last_name as client_last_name',
-          if (args?.blocked ?? false) 'client.blocked as client_blocked',
-          ProductQuery.$createSelect(args?.product)
-        ].join(',')
-      : $createSelect($default);
+  static String $createSelect($ClientSelectArgs? select) =>
+      select?.$check == true
+          ? [
+              if (select?.id ?? false) 'client.id as client_id',
+              ProductQuery.$createSelect(select?.product),
+              if (select?.firstName ?? false)
+                'client.first_name as client_first_name',
+              if (select?.lastName ?? false)
+                'client.last_name as client_last_name',
+              if (select?.blocked ?? false) 'client.blocked as client_blocked'
+            ].join(',')
+          : $createSelect($default);
   static Future<List<Client>> getAll(
     Database database, {
     $ClientSelectArgs? select,
   }) async =>
-      (await database.rawQuery(select != null
-              ? $createSelect(select)
-              : ClientQuery._selectAll) as List<Map>)
+      (await database
+              .rawQuery('''SELECT ${$createSelect($default)} FROM Client client
+ INNER JOIN Product product ON product.id = client.product_id
+''') as List<Map>)
           .map(Client.fromDB)
           .toList();
   Future<int> insert(Database database) async {
     final $productId = await product.insert(database);
     final $clientId =
         await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
+product_id,
 first_name,
 last_name,
-blocked,
-product_id) 
+blocked) 
        VALUES(?, ?, ?, ?, ?)''', [
       id,
+      $productId,
       firstName,
       lastName,
       blocked,
-      $productId,
     ]);
     return $clientId;
   }
@@ -77,10 +76,13 @@ product_id)
     int? id, {
     $ClientSelectArgs? select,
   }) async {
-    final res = (await database
-            .rawQuery('''SELECT ${$createSelect(select)} FROM Client client
- INNER JOIN Product product ON product.id = client.product_id''', [id])
-        as List<Map>);
+    final res = (await database.rawQuery('''
+SELECT 
+${$createSelect(select)}
+ FROM Client client
+WHERE id = ?
+ INNER JOIN Product product ON product.id = client.product_id
+''', [id]) as List<Map>);
     return res.isNotEmpty ? Client.fromDB(res.first) : null;
   }
 
@@ -101,30 +103,32 @@ product_id)
 
   static Client $fromDB(Map json) => Client(
         id: json['client_id'] as int?,
+        product: Product.fromDB(json),
         firstName: json['client_first_name'] as String,
         lastName: json['client_last_name'] as String,
         blocked: (json['client_blocked'] as int?) == 1,
-        product: Product.fromDB(json),
       );
   Map<String, dynamic> $toDB() => {
         'id': id,
+        'product_id': product.id,
         'first_name': firstName,
         'last_name': lastName,
         'blocked': blocked,
-        'product_id': product.id,
       };
 }
 
 class $ClientSelectArgs {
   const $ClientSelectArgs({
     this.id,
+    this.product,
     this.firstName,
     this.lastName,
     this.blocked,
-    this.product,
   });
 
   final bool? id;
+
+  final $ProductSelectArgs? product;
 
   final bool? firstName;
 
@@ -132,32 +136,30 @@ class $ClientSelectArgs {
 
   final bool? blocked;
 
-  final $ProductSelectArgs? product;
-
   bool get $check =>
       id == true ||
+      product?.$check == true ||
       firstName == true ||
       lastName == true ||
-      blocked == true ||
-      product?.$check == true;
+      blocked == true;
 }
 
 class $ClientWhereArgs {
   const $ClientWhereArgs({
     this.id,
+    this.product,
     this.firstName,
     this.lastName,
     this.blocked,
-    this.product,
   });
 
   final int? id;
+
+  final $ProductWhereArgs? product;
 
   final String? firstName;
 
   final String? lastName;
 
   final bool? blocked;
-
-  final $ProductWhereArgs? product;
 }
