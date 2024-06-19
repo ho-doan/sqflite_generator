@@ -10,35 +10,39 @@ final _checker = const TypeChecker.fromRuntime(Index);
 class AIndex extends AProperty {
   final bool unique;
 
-  const AIndex({
+  const AIndex._({
     this.unique = false,
     super.name,
     required super.version,
+    required super.step,
     required super.nameDefault,
     required super.dartType,
     required super.className,
     super.rawFromDB,
   });
-  factory AIndex.fromElement(FieldElement element, String className) {
-    return AIndex(
+  factory AIndex.fromElement(FieldElement element, String className, int step) {
+    return AIndex._(
+      step: step,
       nameDefault: element.displayName,
       dartType: element.type,
       name: AIndexX._name(element),
       version: AIndexX._version(element),
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.fromElement(element.type.element as ClassElement)
-              .primaryKeys
-              .isNotEmpty,
+          AEntity.of(element.type.element as ClassElement, step + 1)
+                  ?.primaryKeys
+                  .isNotEmpty ==
+              true,
       className: className,
     );
   }
 }
 
 extension AIndexX on AIndex {
-  static List<AIndex> fields(List<FieldElement> fields, String className) {
+  static List<AIndex> fields(
+      List<FieldElement> fields, String className, int step) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => AIndex.fromElement(e, className))
+        .map((e) => AIndex.fromElement(e, className, step))
         .toList();
   }
 

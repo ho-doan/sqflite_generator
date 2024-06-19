@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:change_case/change_case.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'package:sqflite_generator/src/annotation_builder/entity.dart';
@@ -12,9 +13,9 @@ class AForeignKey extends AProperty {
   final ForeignAction onUpdate;
   final ForeignAction onDelete;
 
-  final AEntity entityParent;
+  final AEntity? entityParent;
 
-  const AForeignKey({
+  const AForeignKey._({
     super.name,
     required super.version,
     super.rawFromDB,
@@ -24,39 +25,43 @@ class AForeignKey extends AProperty {
     required super.nameDefault,
     required super.dartType,
     required super.className,
+    required super.step,
   });
-  factory AForeignKey.fromElement(FieldElement element, String className) {
-    return AForeignKey(
+  factory AForeignKey.fromElement(
+      FieldElement element, String className, int step) {
+    return AForeignKey._(
+      step: step,
       nameDefault: element.displayName,
       dartType: element.type,
-      entityParent: AEntity.fromElement(element.type.element as ClassElement),
+      entityParent: AEntity.of(element.type.element as ClassElement, step + 1),
       name: AForeignKeyX._name(element),
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.fromElement(element.type.element as ClassElement)
-              .primaryKeys
-              .isNotEmpty,
+          AEntity.of(element.type.element as ClassElement, step + 1)
+                  ?.primaryKeys
+                  .isNotEmpty ==
+              true,
       className: className,
     );
   }
   factory AForeignKey.fromSuperElement(
-    SuperFormalParameterElement element,
-    String className,
-  ) {
-    return AForeignKey(
+      SuperFormalParameterElement element, String className, int step) {
+    return AForeignKey._(
+      step: step,
       nameDefault: element.displayName,
       dartType: element.type,
-      entityParent: AEntity.fromElement(element.type.element as ClassElement),
+      entityParent: AEntity.of(element.type.element as ClassElement, step + 1),
       name: AForeignKeyX._name(element),
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.fromElement(element.type.element as ClassElement)
-              .primaryKeys
-              .isNotEmpty,
+          AEntity.of(element.type.element as ClassElement, step + 1)
+                  ?.primaryKeys
+                  .isNotEmpty ==
+              true,
       className: className,
     );
   }
@@ -65,9 +70,10 @@ class AForeignKey extends AProperty {
 extension AForeignKeyX on AForeignKey {
   String get rawCreateForeign =>
       'FOREIGN KEY ($nameToDB) REFERENCES ${dartType.toString().replaceFirst('?', '')} '
-      '(${entityParent.primaryKeys.first.name ?? entityParent.primaryKeys.first.nameDefault})'
+      '(${entityParent?.primaryKeys.first.name ?? entityParent?.primaryKeys.first.nameDefault})'
       ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(
+    int step,
     List<FieldElement> fields,
     String className,
     List<SuperFormalParameterElement> cons,
@@ -75,11 +81,11 @@ extension AForeignKeyX on AForeignKey {
     return [
       ...cons
           .where((e) => _checker.hasAnnotationOfExact(e))
-          .map((e) => AForeignKey.fromSuperElement(e, className))
+          .map((e) => AForeignKey.fromSuperElement(e, className, step + 1))
           .toList(),
       ...fields
           .where((e) => _checker.hasAnnotationOfExact(e))
-          .map((e) => AForeignKey.fromElement(e, className))
+          .map((e) => AForeignKey.fromElement(e, className, step + 1))
           .toList()
     ];
   }
@@ -122,4 +128,13 @@ extension AForeignKeyX on AForeignKey {
   }
 
   static bool isElement(Element f) => _checker.hasAnnotationOfExact(f);
+
+  String get joinAsStr =>
+      entityParent != null && dartType.toString().contains(className)
+          ? '${nameDefault}_${entityParent!.className}'.toSnakeCase()
+          : entityParent?.className.toSnakeCase() ?? nameDefault;
+  String get subSelect =>
+      entityParent != null && dartType.toString().contains(className)
+          ? '\'${nameDefault.toSnakeCase()}_\''
+          : '\'\'';
 }

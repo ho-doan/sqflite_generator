@@ -24,7 +24,8 @@ class Bill {
     required this.product,
   });
 
-  factory Bill.fromDB(Map<dynamic, dynamic> json) => BillQuery.$fromDB(json);
+  factory Bill.fromDB(Map<dynamic, dynamic> json, [String childName = '']) =>
+      BillQuery.$fromDB(json);
 
   Map<String, dynamic> toDB() => $toDB();
 }

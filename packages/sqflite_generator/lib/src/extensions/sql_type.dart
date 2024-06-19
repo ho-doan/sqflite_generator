@@ -47,7 +47,7 @@ extension DartTypeX on DartType {
   /// * enum
   /// * Uint8list
   /// * DateTime
-  TypeSql? get typeSql {
+  TypeSql? typeSql(int step) {
     if (isDartCoreBool) return TypeSql.bool;
     if (isDartCoreDouble) return TypeSql.double;
     if (isDartCoreInt) return TypeSql.integer;
@@ -60,8 +60,8 @@ extension DartTypeX on DartType {
       return TypeSql.enumerated;
     }
     if (element != null && element is ClassElement) {
-      final parent = AEntity.fromElement(element as ClassElement);
-      return parent.primaryKeys.first.dartType.typeSql;
+      final parent = AEntity.of(element as ClassElement, step + 1);
+      return parent?.primaryKeys.first.dartType.typeSql(step + 1);
     }
     return null;
   }

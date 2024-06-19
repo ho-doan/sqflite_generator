@@ -9,7 +9,6 @@ import 'package:sqflite_generator/src/annotation_builder/primary_key.dart';
 import 'package:sqflite_generator/src/annotation_builder/property.dart';
 
 class AEntity {
-  final String? name;
   final List<AColumn> columns;
   final List<AForeignKey> foreignKeys;
   final List<APrimaryKey> primaryKeys;
@@ -41,15 +40,15 @@ class AEntity {
       aPs.map(
         (e) {
           if (e.rawFromDB) {
-            return '${e.nameDefault}: ${e.dartType}.fromDB(json)';
+            return '${e.nameDefault}: ${e.dartType}.fromDB(json,${e is AForeignKey ? e.subSelect : '\'\''})';
           }
           if (e.dartType.toString().contains('DateTime')) {
-            return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'${e.nameFromDB}\'] as int? ?? -1,)';
+            return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.nameFromDB}\'] as int? ?? -1,)';
           }
           if (e.dartType.isDartCoreBool) {
             return '${e.nameDefault}: (json[\'${e.nameFromDB}\'] as int?) == 1';
           }
-          return '${e.nameDefault}: json[\'${e.nameFromDB}\'] as ${e.dartType}';
+          return '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}';
         },
       ).join(','),
       ','
@@ -111,8 +110,7 @@ class AEntity {
     ].join('\n');
   }
 
-  const AEntity({
-    this.name,
+  const AEntity._({
     required this.columns,
     required this.foreignKeys,
     required this.primaryKeys,
@@ -120,7 +118,12 @@ class AEntity {
     required this.className,
   });
 
-  factory AEntity.fromElement(ClassElement element) {
+  static AEntity? of(ClassElement element, [int step = 0]) {
+    if (step > 3) return null;
+    return AEntity._fromElement(element, step);
+  }
+
+  factory AEntity._fromElement(ClassElement element, int step) {
     final fields = element.fields.cast<FieldElement>();
 
     final cons = element.constructors.where((e) => !e.isFactory);
@@ -138,13 +141,16 @@ class AEntity {
             .cast()
             .toList(),
     ];
-    final indies = AIndexX.fields(fields, element.displayName);
-    final primaries = APrimaryKeyX.fields(fields, element.displayName);
-    final fores = AForeignKeyX.fields(fields, element.displayName, ss);
+    final indies = AIndexX.fields(fields, element.displayName, step + 1);
+    final primaries =
+        APrimaryKeyX.fields(fields, element.displayName, step + 1);
+    final fores =
+        AForeignKeyX.fields(step + 1, fields, element.displayName, ss);
 
-    return AEntity(
+    return AEntity._(
       className: element.displayName,
       columns: AColumnX.fields(
+        step + 1,
         fields,
         element.displayName,
         [...fs, ...ss],
@@ -165,7 +171,8 @@ extension AUpdate on AEntity {
       return ['await ${parent.defaultSuffix}.update(database);'];
     }
     return {
-      for (final fore in foreignKeys) ...fore.entityParent.rawUpdate(fore),
+      for (final fore in foreignKeys)
+        ...fore.entityParent?.rawUpdate(fore) ?? <String>[],
       'return await database.update(\'$className\',toDB(), '
           'where: "${_whereDB.join(' AND ')}",'
           ' whereArgs: [${_whereArgs.join(' , ')}]);',
@@ -174,17 +181,17 @@ extension AUpdate on AEntity {
 }
 
 extension AInsert on AEntity {
-  String rawInsert([AProperty? ps]) {
+  String rawInsert([AForeignKey? ps]) {
     final fieldsRaw = aPs.map((e) => e.nameToDB).join(',\n');
 
     if (ps != null) {
-      return 'final \$${className.toCamelCase()}Id = await ${ps.defaultSuffix}.insert(database);';
+      return 'final \$${'${className}Id_${ps.nameDefault}'.toCamelCase()} = await ${ps.defaultSuffix}.insert(database);';
     }
 
     final fieldsValue = aPs.map((e) {
       if (e.rawFromDB) {
         if (e is AForeignKey) {
-          return '\$${e.entityParent.className.toCamelCase()}Id';
+          return '\$${'${e.entityParent?.className}Id_${e.nameDefault}'.toCamelCase()}';
         }
       }
       if (ps != null) return '$ps.${e.nameDefault}';
@@ -193,15 +200,15 @@ extension AInsert on AEntity {
 
     return [
       ...foreignKeys.map(
-        (e) => e.entityParent.rawInsert(e),
+        (e) => e.entityParent?.rawInsert(e),
       ),
-      '''final \$${className.toCamelCase()}Id = await database.rawInsert(\'\'\'INSERT OR REPLACE INTO $className ($fieldsRaw) 
+      '''final \$id = await database.rawInsert(\'\'\'INSERT OR REPLACE INTO $className ($fieldsRaw) 
        VALUES(${List.generate(fFields.length, (index) => '?').join(', ')})\'\'\',
        [
         $fieldsValue,
        ]
       );''',
-      if (ps == null) 'return \$${className.toCamelCase()}Id;'
+      if (ps == null) 'return \$id;'
     ].join('\n');
   }
 }
@@ -222,8 +229,8 @@ extension AQuery on AEntity {
   List<String> get aFores {
     return [
       for (final e in foreignKeys)
-        ' INNER JOIN ${e.entityParent.className} ${e.entityParent.className.toSnakeCase()}'
-            ' ON ${e.entityParent.className.toSnakeCase()}.${e.entityParent.primaryKeys.first.nameToDB}'
+        ' INNER JOIN ${e.entityParent?.className} ${e.joinAsStr}'
+            ' ON ${e.joinAsStr}.${e.entityParent?.primaryKeys.first.nameToDB}'
             ' = ${className.toSnakeCase()}.${e.name?.toSnakeCase()}'
     ];
   }
@@ -253,6 +260,12 @@ extension AParam on AEntity {
     ..type = refer('$selectClassName?')
     ..named = true
     ..required = false);
+  Parameter get selectChildArgs => Parameter((p) => p
+    ..name = 'childName'
+    ..type = refer('String')
+    ..defaultTo = Code('\'\'')
+    ..named = false
+    ..required = false);
   Parameter get databaseArgs => Parameter((p) => p
     ..name = 'database'
     ..type = refer('Database'));
@@ -262,9 +275,9 @@ extension AParam on AEntity {
   List<Parameter> get keysRequiredArgs => [
         for (final key in keys)
           if (key is AForeignKey)
-            for (final k in key.entityParent.keys)
+            for (final k in key.entityParent?.keys ?? <AProperty>[])
               if (k is AForeignKey)
-                for (final sk in key.entityParent.keys)
+                for (final sk in key.entityParent?.keys ?? <AProperty>[])
                   Parameter((p) => p
                     ..name = '${k.nameDefault}_${sk.nameDefault}'.toCamelCase()
                     ..type = refer(sk.dartType.toString()))
@@ -295,7 +308,7 @@ extension AFields on AEntity {
               ..name = item.nameDefault
               ..modifier = FieldModifier.final$
               ..type = refer(item is AForeignKey
-                  ? '${item.entityParent.selectClassName}?'
+                  ? '${item.entityParent?.selectClassName}?'
                   : 'bool?'),
           ),
       ];
@@ -305,7 +318,7 @@ extension AFields on AEntity {
             ..name = item.nameDefault
             ..modifier = FieldModifier.final$
             ..type = refer(item is AForeignKey
-                ? '${item.entityParent.selectClassName}?'
+                ? '${item.entityParent?.selectClassName}?'
                 : 'bool?'))
       ];
   List<Field> get whereFields => [
@@ -314,7 +327,7 @@ extension AFields on AEntity {
             ..name = item.nameDefault
             ..modifier = FieldModifier.final$
             ..type = refer(item is AForeignKey
-                ? '\$${item.entityParent.className}WhereArgs?'
+                ? '\$${item.entityParent?.className}WhereArgs?'
                 : '${item.dartType.toString().replaceFirst('?', '')}?'))
       ];
   List<AProperty> get keys {
@@ -330,7 +343,7 @@ extension AFields on AEntity {
     return [
       for (final key in keys)
         if (key is AForeignKey)
-          for (final item in key.entityParent.keys)
+          for (final item in key.entityParent?.keys ?? [])
             '${key.defaultSuffix}.${item.nameToDB}'
         else
           key.nameToDB
@@ -341,6 +354,8 @@ extension AFields on AEntity {
       _whereArgs.map((e) => e.toCamelCase()).toList();
 
   List<String> get _whereDB {
-    return [for (final key in keys) '${key.nameToDB} = ?'];
+    return [
+      for (final key in keys) '${className.toSnakeCase()}.${key.nameToDB} = ?'
+    ];
   }
 }

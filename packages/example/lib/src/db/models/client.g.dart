@@ -25,16 +25,21 @@ extension ClientQuery on Client {
       lastName: true,
       blocked: true);
 
-  static String $createSelect($ClientSelectArgs? select) =>
+  static String $createSelect(
+    $ClientSelectArgs? select, [
+    String childName = '',
+  ]) =>
       select?.$check == true
           ? [
-              if (select?.id ?? false) 'client.id as client_id',
-              ProductQuery.$createSelect(select?.product),
+              if (select?.id ?? false)
+                '${childName}client.id as ${childName}client_id',
+              ProductQuery.$createSelect(select?.product, ''),
               if (select?.firstName ?? false)
-                'client.first_name as client_first_name',
+                '${childName}client.first_name as ${childName}client_first_name',
               if (select?.lastName ?? false)
-                'client.last_name as client_last_name',
-              if (select?.blocked ?? false) 'client.blocked as client_blocked'
+                '${childName}client.last_name as ${childName}client_last_name',
+              if (select?.blocked ?? false)
+                '${childName}client.blocked as ${childName}client_blocked'
             ].join(',')
           : $createSelect($default);
   static Future<List<Client>> getAll(
@@ -48,27 +53,26 @@ extension ClientQuery on Client {
           .map(Client.fromDB)
           .toList();
   Future<int> insert(Database database) async {
-    final $productId = await product.insert(database);
-    final $clientId =
-        await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
+    final $productIdProduct = await product.insert(database);
+    final $id = await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
 product_id,
 first_name,
 last_name,
 blocked) 
        VALUES(?, ?, ?, ?, ?)''', [
       id,
-      $productId,
+      $productIdProduct,
       firstName,
       lastName,
       blocked,
     ]);
-    return $clientId;
+    return $id;
   }
 
   Future<int> update(Database database) async {
     await product.update(database);
     return await database
-        .update('Client', toDB(), where: "id = ?", whereArgs: [id]);
+        .update('Client', toDB(), where: "client.id = ?", whereArgs: [id]);
   }
 
   static Future<Client?> getById(
@@ -80,32 +84,38 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Client client
-WHERE id = ?
+WHERE client.id = ?
  INNER JOIN Product product ON product.id = client.product_id
 ''', [id]) as List<Map>);
     return res.isNotEmpty ? Client.fromDB(res.first) : null;
   }
 
   Future<void> delete(Database database) async {
-    await database.rawQuery('''DELETE FROM Client client WHERE id = ?''', [id]);
+    await database
+        .rawQuery('''DELETE FROM Client client WHERE client.id = ?''', [id]);
   }
 
   static Future<void> deleteById(
     Database database,
     int? id,
   ) async {
-    await database.rawQuery('''DELETE FROM Client client WHERE id = ?''', [id]);
+    await database
+        .rawQuery('''DELETE FROM Client client WHERE client.id = ?''', [id]);
   }
 
   static Future<void> deleteAll(Database database) async {
     await database.rawDelete('''DELETE * FROM Client''');
   }
 
-  static Client $fromDB(Map json) => Client(
-        id: json['client_id'] as int?,
-        product: Product.fromDB(json),
-        firstName: json['client_first_name'] as String,
-        lastName: json['client_last_name'] as String,
+  static Client $fromDB(
+    Map json, [
+    String childName = '',
+  ]) =>
+      Client(
+        id: json['${childName}client_id'] as int?,
+        product: Product.fromDB(json, ''),
+        firstName: json['${childName}client_first_name'] as String,
+        lastName: json['${childName}client_last_name'] as String,
         blocked: (json['client_blocked'] as int?) == 1,
       );
   Map<String, dynamic> $toDB() => {

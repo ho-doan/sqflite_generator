@@ -21,13 +21,18 @@ extension BillQuery on Bill {
   static const $BillSelectArgs $default = $BillSelectArgs(
       product: ProductQuery.$default, client: ClientQuery.$default, time: true);
 
-  static String $createSelect($BillSelectArgs? select) => select?.$check == true
-      ? [
-          ProductQuery.$createSelect(select?.product),
-          ClientQuery.$createSelect(select?.client),
-          if (select?.time ?? false) 'bill.time as bill_time'
-        ].join(',')
-      : $createSelect($default);
+  static String $createSelect(
+    $BillSelectArgs? select, [
+    String childName = '',
+  ]) =>
+      select?.$check == true
+          ? [
+              ProductQuery.$createSelect(select?.product, ''),
+              ClientQuery.$createSelect(select?.client, ''),
+              if (select?.time ?? false)
+                '${childName}bill.time as ${childName}bill_time'
+            ].join(',')
+          : $createSelect($default);
   static Future<List<Bill>> getAll(
     Database database, {
     $BillSelectArgs? select,
@@ -40,25 +45,25 @@ extension BillQuery on Bill {
           .map(Bill.fromDB)
           .toList();
   Future<int> insert(Database database) async {
-    final $productId = await product?.insert(database);
-    final $clientId = await client?.insert(database);
-    final $billId =
+    final $productIdProduct = await product?.insert(database);
+    final $clientIdClient = await client?.insert(database);
+    final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Bill (product_id,
 client_id,
 time) 
        VALUES(?, ?, ?)''', [
-      $productId,
-      $clientId,
+      $productIdProduct,
+      $clientIdClient,
       time,
     ]);
-    return $billId;
+    return $id;
   }
 
   Future<int> update(Database database) async {
     await product?.update(database);
     await client?.update(database);
     return await database.update('Bill', toDB(),
-        where: "product_id = ? AND client_id = ?",
+        where: "bill.product_id = ? AND bill.client_id = ?",
         whereArgs: [product?.id, client?.id]);
   }
 
@@ -72,7 +77,7 @@ time)
 SELECT 
 ${$createSelect(select)}
  FROM Bill bill
-WHERE product_id = ? AND client_id = ?
+WHERE bill.product_id = ? AND bill.client_id = ?
  INNER JOIN Product product ON product.id = bill.product_id
  INNER JOIN Client client ON client.id = bill.client_id
 ''', [productId, clientId]) as List<Map>);
@@ -81,7 +86,7 @@ WHERE product_id = ? AND client_id = ?
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE product_id = ? AND client_id = ?''',
+        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ?''',
         [product?.id, client?.id]);
   }
 
@@ -91,7 +96,7 @@ WHERE product_id = ? AND client_id = ?
     int? clientId,
   ) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE product_id = ? AND client_id = ?''',
+        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ?''',
         [productId, clientId]);
   }
 
@@ -99,11 +104,15 @@ WHERE product_id = ? AND client_id = ?
     await database.rawDelete('''DELETE * FROM Bill''');
   }
 
-  static Bill $fromDB(Map json) => Bill(
-        product: Product?.fromDB(json),
-        client: Client?.fromDB(json),
+  static Bill $fromDB(
+    Map json, [
+    String childName = '',
+  ]) =>
+      Bill(
+        product: Product?.fromDB(json, ''),
+        client: Client?.fromDB(json, ''),
         time: DateTime.fromMillisecondsSinceEpoch(
-          json['bill_time'] as int? ?? -1,
+          json['${childName}bill_time'] as int? ?? -1,
         ),
       );
   Map<String, dynamic> $toDB() => {

@@ -10,7 +10,8 @@ final _checker = const TypeChecker.fromRuntime(PrimaryKey);
 class APrimaryKey extends AProperty {
   final bool auto;
 
-  const APrimaryKey({
+  const APrimaryKey._({
+    required super.step,
     this.auto = true,
     super.name,
     required super.version,
@@ -20,26 +21,30 @@ class APrimaryKey extends AProperty {
     required super.className,
   });
 
-  factory APrimaryKey.fromElement(FieldElement element, String className) {
-    return APrimaryKey(
+  factory APrimaryKey.fromElement(
+      FieldElement element, String className, int step) {
+    return APrimaryKey._(
+      step: step,
       name: APrimaryKeyX._name(element),
       version: APrimaryKeyX._version(element),
       nameDefault: element.displayName,
       dartType: element.type,
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.fromElement(element.type.element as ClassElement)
-              .primaryKeys
-              .isNotEmpty,
+          AEntity.of(element.type.element as ClassElement, step + 1)
+                  ?.primaryKeys
+                  .isNotEmpty ==
+              true,
       className: className,
     );
   }
 }
 
 extension APrimaryKeyX on APrimaryKey {
-  static List<APrimaryKey> fields(List<FieldElement> fields, String className) {
+  static List<APrimaryKey> fields(
+      List<FieldElement> fields, String className, int step) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => APrimaryKey.fromElement(e, className))
+        .map((e) => APrimaryKey.fromElement(e, className, step))
         .toList();
   }
 

@@ -22,7 +22,7 @@ class Product {
     required this.blocked,
   });
 
-  factory Product.fromDB(Map<dynamic, dynamic> json) =>
+  factory Product.fromDB(Map<dynamic, dynamic> json, [String childName = '']) =>
       ProductQuery.$fromDB(json);
 
   Map<String, dynamic> toDB() => $toDB();

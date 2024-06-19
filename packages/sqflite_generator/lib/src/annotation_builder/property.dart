@@ -12,9 +12,11 @@ class AProperty {
   final DartType dartType;
   final bool rawFromDB;
   final String className;
+  final int step;
 
   const AProperty({
     this.name,
+    required this.step,
     required this.version,
     required this.nameDefault,
     required this.dartType,
@@ -23,7 +25,7 @@ class AProperty {
   });
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
   String get _isNull => _isQues ? '' : 'NOT NULL';
-  String get _sqlType => dartType.typeSql?.str ?? 'NONE';
+  String get _sqlType => dartType.typeSql(step)?.str ?? 'NONE';
 
   bool get isEnum => dartType.isEnum;
 
@@ -76,6 +78,8 @@ extension on DartType {
 extension Aps on AProperty {
   String get fieldSuffix => '${name ?? nameDefault}${dartType.fieldSuffix}';
   String get defaultSuffix => '$nameDefault${dartType.fieldSuffix}';
+  String selectField([String? child]) =>
+      '\'\${childName}${className.toSnakeCase()}.$nameToDB as \${childName}$nameFromDB\'';
 }
 
 extension APropertyX on List<AProperty> {

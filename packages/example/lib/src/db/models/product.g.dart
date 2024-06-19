@@ -19,15 +19,20 @@ extension ProductQuery on Product {
   static const $ProductSelectArgs $default = $ProductSelectArgs(
       id: true, lastName: true, firstName: true, blocked: true);
 
-  static String $createSelect($ProductSelectArgs? select) =>
+  static String $createSelect(
+    $ProductSelectArgs? select, [
+    String childName = '',
+  ]) =>
       select?.$check == true
           ? [
-              if (select?.id ?? false) 'product.id as product_id',
+              if (select?.id ?? false)
+                '${childName}product.id as ${childName}product_id',
               if (select?.lastName ?? false)
-                'product.last_name as product_last_name',
+                '${childName}product.last_name as ${childName}product_last_name',
               if (select?.firstName ?? false)
-                'product.first_name as product_first_name',
-              if (select?.blocked ?? false) 'product.blocked as product_blocked'
+                '${childName}product.first_name as ${childName}product_first_name',
+              if (select?.blocked ?? false)
+                '${childName}product.blocked as ${childName}product_blocked'
             ].join(',')
           : $createSelect($default);
   static Future<List<Product>> getAll(
@@ -40,8 +45,7 @@ extension ProductQuery on Product {
           .map(Product.fromDB)
           .toList();
   Future<int> insert(Database database) async {
-    final $productId =
-        await database.rawInsert('''INSERT OR REPLACE INTO Product (id,
+    final $id = await database.rawInsert('''INSERT OR REPLACE INTO Product (id,
 last_name,
 first_name,
 blocked) 
@@ -51,12 +55,12 @@ blocked)
       firstName,
       blocked,
     ]);
-    return $productId;
+    return $id;
   }
 
   Future<int> update(Database database) async {
     return await database
-        .update('Product', toDB(), where: "id = ?", whereArgs: [id]);
+        .update('Product', toDB(), where: "product.id = ?", whereArgs: [id]);
   }
 
   static Future<Product?> getById(
@@ -68,14 +72,14 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Product product
-WHERE id = ?
+WHERE product.id = ?
 ''', [id]) as List<Map>);
     return res.isNotEmpty ? Product.fromDB(res.first) : null;
   }
 
   Future<void> delete(Database database) async {
     await database
-        .rawQuery('''DELETE FROM Product product WHERE id = ?''', [id]);
+        .rawQuery('''DELETE FROM Product product WHERE product.id = ?''', [id]);
   }
 
   static Future<void> deleteById(
@@ -83,17 +87,21 @@ WHERE id = ?
     int? id,
   ) async {
     await database
-        .rawQuery('''DELETE FROM Product product WHERE id = ?''', [id]);
+        .rawQuery('''DELETE FROM Product product WHERE product.id = ?''', [id]);
   }
 
   static Future<void> deleteAll(Database database) async {
     await database.rawDelete('''DELETE * FROM Product''');
   }
 
-  static Product $fromDB(Map json) => Product(
-        id: json['product_id'] as int?,
-        lastName: json['product_last_name'] as String,
-        firstName: json['product_first_name'] as String,
+  static Product $fromDB(
+    Map json, [
+    String childName = '',
+  ]) =>
+      Product(
+        id: json['${childName}product_id'] as int?,
+        lastName: json['${childName}product_last_name'] as String,
+        firstName: json['${childName}product_first_name'] as String,
         blocked: (json['product_blocked'] as int?) == 1,
       );
   Map<String, dynamic> $toDB() => {

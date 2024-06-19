@@ -1,11 +1,11 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
+import 'package:sqflite_generator/src/annotation_builder/property.dart';
 
 import 'annotation_builder/entity.dart';
 
@@ -13,12 +13,16 @@ const _analyzerIgnores = '// ignore_for_file: lines_longer_than_80_chars, '
     'prefer_relative_imports, directives_ordering, require_trailing_commas';
 
 class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
+  final _parsedElementCheckSet = <ClassElement>{};
   @override
   generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) async {
     if (element is! ClassElement) return;
 
-    final entity = AEntity.fromElement(element);
+    if (_parsedElementCheckSet.contains(element)) return null;
+    _parsedElementCheckSet.add(element);
+
+    final entity = AEntity.of(element)!;
 
     final classSelectBuilder = Class(
       (c) => c
@@ -67,11 +71,14 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..assignment = Code('''${entity.selectClassName}(${[
               for (final e in entity.aPs)
                 if (e is AForeignKey)
-                  '${e.nameDefault}: ${e.entityParent.className}Query.${entity.defaultSelectClass}'
+                  '${e.nameDefault}: ${e.entityParent?.className}Query.${entity.defaultSelectClass}'
                 else
                   '${e.nameDefault}: true'
             ].join(',')})''')
-            ..modifier = FieldModifier.constant
+            ..modifier = entity.aPs.any(
+                    (e) => e.dartType.toString().contains(entity.className))
+                ? FieldModifier.final$
+                : FieldModifier.constant
             ..static = true,
         ),
       ])
@@ -84,14 +91,15 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ${[
             for (final e in entity.aPs)
               if (e is AForeignKey)
-                '${e.entityParent.className}Query.\$createSelect(select?.${e.nameDefault})'
+                '${e.entityParent?.className}Query.\$createSelect(select?.${e.nameDefault}, ${e.subSelect})'
               else
-                'if(select?.${e.nameDefault}??false) \'${e.className.toSnakeCase()}.${e.nameToDB} as ${e.nameFromDB}\''
+                'if(select?.${e.nameDefault}??false) ${e.selectField()}'
           ]}
                 .join(','):\$createSelect(${entity.defaultSelectClass})''')
           ..requiredParameters.addAll([
             entity.selectArgs,
           ])
+          ..optionalParameters.add(entity.selectChildArgs)
           ..returns = refer('String')),
         Method((m) => m
           ..name = 'getAll'
@@ -156,6 +164,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..static = true
           ..body = Code('${entity.className}(${entity.rawFromDB})')
           ..requiredParameters.add(entity.fromArgs)
+          ..optionalParameters.add(entity.selectChildArgs)
           ..returns = refer(entity.className)),
         Method((m) => m
           ..name = '\$toDB'

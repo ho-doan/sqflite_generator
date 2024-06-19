@@ -29,7 +29,7 @@ class Client {
     required this.product,
   });
 
-  factory Client.fromDB(Map<dynamic, dynamic> json) =>
+  factory Client.fromDB(Map<dynamic, dynamic> json, [String childName = '']) =>
       ClientQuery.$fromDB(json);
 
   Map<String, dynamic> toDB() => $toDB();

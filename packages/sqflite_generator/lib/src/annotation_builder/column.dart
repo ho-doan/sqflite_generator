@@ -11,39 +11,46 @@ import 'property.dart';
 final _checker = const TypeChecker.fromRuntime(Column);
 
 class AColumn extends AProperty {
-  const AColumn({
+  const AColumn._({
     super.name,
     required super.version,
     super.rawFromDB,
     required super.dartType,
     required super.nameDefault,
     required super.className,
+    required super.step,
   });
-  factory AColumn.fromElement(FieldElement element, String className) {
+  factory AColumn.fromElement(
+      FieldElement element, String className, int step) {
     final type = element.type;
-    return AColumn(
+    return AColumn._(
+      step: step,
       name: AColumnX._name(element),
       version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.fromElement(element.type.element as ClassElement)
-              .primaryKeys
-              .isNotEmpty,
+          AEntity.of(element.type.element as ClassElement, step + 1)
+                  ?.primaryKeys
+                  .isNotEmpty ==
+              true,
       className: className,
     );
   }
-  factory AColumn.fromConsElement(ParameterElement element, String className) {
+  factory AColumn.fromConsElement(
+      ParameterElement element, String className, int step) {
     final type = element.type;
-    return AColumn(
+    return AColumn._(
+      step: step,
       name: AColumnX._name(element),
       version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.fromElement(element.type.element as ClassElement)
-              .primaryKeys
-              .isNotEmpty,
+          AEntity.of(element.type.element as ClassElement, step + 1)
+                  ?.primaryKeys
+                  .isNotEmpty ==
+              true,
       className: className,
     );
   }
@@ -51,6 +58,7 @@ class AColumn extends AProperty {
 
 extension AColumnX on AColumn {
   static List<AColumn> fields(
+    int step,
     List<FieldElement> fields,
     String className,
     List<ParameterElement> cons,
@@ -76,8 +84,12 @@ extension AColumnX on AColumn {
       }
     }
     return [
-      ...columns.map((e) => AColumn.fromConsElement(e, className)).toList(),
-      ...aColumns.map((e) => AColumn.fromElement(e, className)).toList(),
+      ...columns
+          .map((e) => AColumn.fromConsElement(e, className, step + 1))
+          .toList(),
+      ...aColumns
+          .map((e) => AColumn.fromElement(e, className, step + 1))
+          .toList(),
     ];
   }
 

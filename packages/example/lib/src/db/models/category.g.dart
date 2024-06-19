@@ -20,13 +20,19 @@ extension CategoryQuery on Category {
   static const $CategorySelectArgs $default = $CategorySelectArgs(
       key: true, product: ProductQuery.$default, id: true, name: true);
 
-  static String $createSelect($CategorySelectArgs? select) =>
+  static String $createSelect(
+    $CategorySelectArgs? select, [
+    String childName = '',
+  ]) =>
       select?.$check == true
           ? [
-              if (select?.key ?? false) 'category.key as category_key',
-              ProductQuery.$createSelect(select?.product),
-              if (select?.id ?? false) 'category.id as category_id',
-              if (select?.name ?? false) 'category.name as category_name'
+              if (select?.key ?? false)
+                '${childName}category.key as ${childName}category_key',
+              ProductQuery.$createSelect(select?.product, ''),
+              if (select?.id ?? false)
+                '${childName}category.id as ${childName}category_id',
+              if (select?.name ?? false)
+                '${childName}category.name as ${childName}category_name'
             ].join(',')
           : $createSelect($default);
   static Future<List<Category>> getAll(
@@ -40,25 +46,25 @@ extension CategoryQuery on Category {
           .map(Category.fromDB)
           .toList();
   Future<int> insert(Database database) async {
-    final $productId = await product.insert(database);
-    final $categoryId =
+    final $productIdProduct = await product.insert(database);
+    final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Category (key,
 product_id,
 id,
 name) 
        VALUES(?, ?, ?, ?)''', [
       key,
-      $productId,
+      $productIdProduct,
       id,
       name,
     ]);
-    return $categoryId;
+    return $id;
   }
 
   Future<int> update(Database database) async {
     await product.update(database);
-    return await database
-        .update('Category', toDB(), where: "key = ?", whereArgs: [key]);
+    return await database.update('Category', toDB(),
+        where: "category.key = ?", whereArgs: [key]);
   }
 
   static Future<Category?> getById(
@@ -70,34 +76,38 @@ name)
 SELECT 
 ${$createSelect(select)}
  FROM Category category
-WHERE key = ?
+WHERE category.key = ?
  INNER JOIN Product product ON product.id = category.product_id
 ''', [key]) as List<Map>);
     return res.isNotEmpty ? Category.fromDB(res.first) : null;
   }
 
   Future<void> delete(Database database) async {
-    await database
-        .rawQuery('''DELETE FROM Category category WHERE key = ?''', [key]);
+    await database.rawQuery(
+        '''DELETE FROM Category category WHERE category.key = ?''', [key]);
   }
 
   static Future<void> deleteById(
     Database database,
     int? key,
   ) async {
-    await database
-        .rawQuery('''DELETE FROM Category category WHERE key = ?''', [key]);
+    await database.rawQuery(
+        '''DELETE FROM Category category WHERE category.key = ?''', [key]);
   }
 
   static Future<void> deleteAll(Database database) async {
     await database.rawDelete('''DELETE * FROM Category''');
   }
 
-  static Category $fromDB(Map json) => Category(
-        key: json['category_key'] as int?,
-        product: Product.fromDB(json),
-        id: json['category_id'] as String,
-        name: json['category_name'] as String,
+  static Category $fromDB(
+    Map json, [
+    String childName = '',
+  ]) =>
+      Category(
+        key: json['${childName}category_key'] as int?,
+        product: Product.fromDB(json, ''),
+        id: json['${childName}category_id'] as String,
+        name: json['${childName}category_name'] as String,
       );
   Map<String, dynamic> $toDB() => {
         'key': key,
