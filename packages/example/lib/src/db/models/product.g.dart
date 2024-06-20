@@ -11,8 +11,8 @@ part of 'product.dart';
 extension ProductQuery on Product {
   static String createTable = '''CREATE TABLE IF NOT EXISTS Product(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-			last_name TEXT NOT NULL,
-			first_name TEXT NOT NULL,
+			last_name TEXT,
+			first_name TEXT,
 			blocked BIT NOT NULL
 	)''';
 
@@ -35,12 +35,26 @@ extension ProductQuery on Product {
                 '${childName}product.blocked as ${childName}product_blocked'
             ].join(',')
           : $createSelect($default);
+  static String $createWhere(
+    $ProductWhereArgs? where, [
+    String childName = '',
+  ]) =>
+      [
+        if (where?.id != null) '${childName}product.id = ${where?.id}',
+        if (where?.lastName != null)
+          '${childName}product.last_name = \'${where?.lastName}\'',
+        if (where?.firstName != null)
+          '${childName}product.first_name = \'${where?.firstName}\'',
+        if (where?.blocked != null)
+          '${childName}product.blocked = ${where?.blocked}'
+      ].join(' AND ').whereStr;
   static Future<List<Product>> getAll(
     Database database, {
     $ProductSelectArgs? select,
+    $ProductWhereArgs? where,
   }) async =>
-      (await database.rawQuery(
-              '''SELECT ${$createSelect($default)} FROM Product product
+      (await database
+              .rawQuery('''SELECT ${$createSelect(select)} FROM Product product
 ''') as List<Map>)
           .map(Product.fromDB)
           .toList();
@@ -100,8 +114,8 @@ WHERE product.id = ?
   ]) =>
       Product(
         id: json['${childName}product_id'] as int?,
-        lastName: json['${childName}product_last_name'] as String,
-        firstName: json['${childName}product_first_name'] as String,
+        lastName: json['${childName}product_last_name'] as String?,
+        firstName: json['${childName}product_first_name'] as String?,
         blocked: (json['product_blocked'] as int?) == 1,
       );
   Map<String, dynamic> $toDB() => {

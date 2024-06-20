@@ -10,10 +10,10 @@ class Client {
   final int? id;
 
   @column
-  final String firstName;
+  final String? firstName;
 
   @column
-  final String lastName;
+  final String? lastName;
 
   @column
   final bool blocked;

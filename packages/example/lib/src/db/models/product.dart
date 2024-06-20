@@ -9,8 +9,8 @@ class Product {
   final int? id;
 
   @column
-  final String firstName;
-  final String lastName;
+  final String? firstName;
+  final String? lastName;
 
   @column
   final bool blocked;

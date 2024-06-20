@@ -102,6 +102,24 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..optionalParameters.add(entity.selectChildArgs)
           ..returns = refer('String')),
         Method((m) => m
+          ..name = '\$createWhere'
+          ..lambda = true
+          ..static = true
+          ..body = Code('''
+                  ${[
+            for (final e in entity.aPs)
+              if (e is AForeignKey)
+                '${e.entityParent?.className}Query.\$createWhere(where?.${e.nameDefault}, ${e.subSelect})'
+              else
+                'if(where?.${e.nameDefault}!=null) ${e.whereField}'
+          ]}
+                .join(' AND ').whereStr''')
+          ..requiredParameters.addAll([
+            entity.whereArgs,
+          ])
+          ..optionalParameters.add(entity.selectChildArgs)
+          ..returns = refer('String')),
+        Method((m) => m
           ..name = 'getAll'
           ..lambda = true
           ..static = true
@@ -110,6 +128,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..requiredParameters.add(entity.databaseArgs)
           ..optionalParameters.addAll([
             entity.selectArgs,
+            entity.whereArgs,
           ])
           ..returns = refer('Future<List<${entity.className}>>')),
         Method((m) => m

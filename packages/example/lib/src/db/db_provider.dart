@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:example/src/db/models/product.dart';
 import 'package:sqflite/sqflite.dart';
 import '../config/sql.dart';
 import 'models/client.dart';
@@ -19,6 +20,18 @@ class DBProvider {
   newClient(Client newClient) async {
     final db = _database;
     await newClient.insert(db);
+  }
+
+  Future<void> sort() async {
+    ClientQuery.getAll(
+      _database,
+      where: const $ClientWhereArgs(
+        lastName: 'k',
+        product: $ProductWhereArgs(
+          blocked: true,
+        ),
+      ),
+    );
   }
 
   blockOrUnblock(Client client) async {
@@ -59,7 +72,23 @@ class DBProvider {
   Future<List<Client>> getAllClients() async {
     final db = _database;
     log('get all----');
-    return await ClientQuery.getAll(db);
+    return await ClientQuery.getAll(
+      db,
+      select: const $ClientSelectArgs(
+        id: true,
+        blocked: true,
+        product: $ProductSelectArgs(
+          lastName: true,
+          id: true,
+        ),
+      ),
+      where: const $ClientWhereArgs(
+        lastName: 'k',
+        product: $ProductWhereArgs(
+          blocked: true,
+        ),
+      ),
+    );
   }
 
   deleteClient(int id) async {

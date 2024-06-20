@@ -33,17 +33,24 @@ extension BillQuery on Bill {
                 '${childName}bill.time as ${childName}bill_time'
             ].join(',')
           : $createSelect($default);
+  static String $createWhere(
+    $BillWhereArgs? where, [
+    String childName = '',
+  ]) =>
+      [
+        ProductQuery.$createWhere(where?.product, ''),
+        ClientQuery.$createWhere(where?.client, ''),
+        if (where?.time != null) '${childName}bill.time = ${where?.time}'
+      ].join(' AND ').whereStr;
   static Future<List<Bill>> getAll(
     Database database, {
     $BillSelectArgs? select,
+    $BillWhereArgs? where,
   }) async =>
-      (await database
-              .rawQuery('''SELECT ${$createSelect($default)} FROM Bill bill
+      (await database.rawQuery('''SELECT ${$createSelect(select)} FROM Bill bill
  INNER JOIN Product product ON product.id = bill.product_id
  INNER JOIN Client client ON client.id = bill.client_id
-''') as List<Map>)
-          .map(Bill.fromDB)
-          .toList();
+''') as List<Map>).map(Bill.fromDB).toList();
   Future<int> insert(Database database) async {
     final $productIdProduct = await product?.insert(database);
     final $clientIdClient = await client?.insert(database);

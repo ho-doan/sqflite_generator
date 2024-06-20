@@ -80,6 +80,14 @@ extension Aps on AProperty {
   String get defaultSuffix => '$nameDefault${dartType.fieldSuffix}';
   String selectField([String? child]) =>
       '\'\${childName}${className.toSnakeCase()}.$nameToDB as \${childName}$nameFromDB\'';
+  String get whereField {
+    final str = '\'\${childName}${className.toSnakeCase()}.$nameToDB = ';
+    if (dartType.toString().contains('String')) {
+      return '$str\\\'\${where?.$nameDefault}\\\'\'';
+    } else {
+      return '$str\${where?.$nameDefault}\'';
+    }
+  }
 }
 
 extension APropertyX on List<AProperty> {

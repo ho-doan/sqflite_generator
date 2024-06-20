@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:example/src/db/models/product.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_query/sqflite_query.dart';

@@ -75,7 +75,7 @@ class AEntity {
   String get rawGetAll {
     return [
       '(await database.rawQuery(',
-      '\'\'\'SELECT \${\$createSelect($defaultSelectClass)} FROM $className ${className.toSnakeCase()}',
+      '\'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
       ...aFores,
       '\'\'\') as List<Map>).map($className.fromDB).toList()'
     ].join('\n');
@@ -258,6 +258,11 @@ extension AParam on AEntity {
   Parameter get selectArgs => Parameter((p) => p
     ..name = 'select'
     ..type = refer('$selectClassName?')
+    ..named = true
+    ..required = false);
+  Parameter get whereArgs => Parameter((p) => p
+    ..name = 'where'
+    ..type = refer('$whereClassName?')
     ..named = true
     ..required = false);
   Parameter get selectChildArgs => Parameter((p) => p

@@ -35,12 +35,24 @@ extension CategoryQuery on Category {
                 '${childName}category.name as ${childName}category_name'
             ].join(',')
           : $createSelect($default);
+  static String $createWhere(
+    $CategoryWhereArgs? where, [
+    String childName = '',
+  ]) =>
+      [
+        if (where?.key != null) '${childName}category.key = ${where?.key}',
+        ProductQuery.$createWhere(where?.product, ''),
+        if (where?.id != null) '${childName}category.id = \'${where?.id}\'',
+        if (where?.name != null)
+          '${childName}category.name = \'${where?.name}\''
+      ].join(' AND ').whereStr;
   static Future<List<Category>> getAll(
     Database database, {
     $CategorySelectArgs? select,
+    $CategoryWhereArgs? where,
   }) async =>
       (await database.rawQuery(
-              '''SELECT ${$createSelect($default)} FROM Category category
+              '''SELECT ${$createSelect(select)} FROM Category category
  INNER JOIN Product product ON product.id = category.product_id
 ''') as List<Map>)
           .map(Category.fromDB)

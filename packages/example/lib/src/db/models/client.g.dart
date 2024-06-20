@@ -11,8 +11,8 @@ part of 'client.dart';
 extension ClientQuery on Client {
   static String createTable = '''CREATE TABLE IF NOT EXISTS Client(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-			first_name TEXT NOT NULL,
-			last_name TEXT NOT NULL,
+			first_name TEXT,
+			last_name TEXT,
 			blocked BIT NOT NULL,
 			product_id INTEGER NOT NULL,
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -42,12 +42,27 @@ extension ClientQuery on Client {
                 '${childName}client.blocked as ${childName}client_blocked'
             ].join(',')
           : $createSelect($default);
+  static String $createWhere(
+    $ClientWhereArgs? where, [
+    String childName = '',
+  ]) =>
+      [
+        if (where?.id != null) '${childName}client.id = ${where?.id}',
+        ProductQuery.$createWhere(where?.product, ''),
+        if (where?.firstName != null)
+          '${childName}client.first_name = \'${where?.firstName}\'',
+        if (where?.lastName != null)
+          '${childName}client.last_name = \'${where?.lastName}\'',
+        if (where?.blocked != null)
+          '${childName}client.blocked = ${where?.blocked}'
+      ].join(' AND ').whereStr;
   static Future<List<Client>> getAll(
     Database database, {
     $ClientSelectArgs? select,
+    $ClientWhereArgs? where,
   }) async =>
       (await database
-              .rawQuery('''SELECT ${$createSelect($default)} FROM Client client
+              .rawQuery('''SELECT ${$createSelect(select)} FROM Client client
  INNER JOIN Product product ON product.id = client.product_id
 ''') as List<Map>)
           .map(Client.fromDB)
@@ -114,8 +129,8 @@ WHERE client.id = ?
       Client(
         id: json['${childName}client_id'] as int?,
         product: Product.fromDB(json, ''),
-        firstName: json['${childName}client_first_name'] as String,
-        lastName: json['${childName}client_last_name'] as String,
+        firstName: json['${childName}client_first_name'] as String?,
+        lastName: json['${childName}client_last_name'] as String?,
         blocked: (json['client_blocked'] as int?) == 1,
       );
   Map<String, dynamic> $toDB() => {

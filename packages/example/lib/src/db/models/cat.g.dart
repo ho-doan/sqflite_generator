@@ -38,11 +38,22 @@ extension CatQuery on Cat {
                 '${childName}cat.birth as ${childName}cat_birth'
             ].join(',')
           : $createSelect($default);
+  static String $createWhere(
+    $CatWhereArgs? where, [
+    String childName = '',
+  ]) =>
+      [
+        if (where?.id != null) '${childName}cat.id = ${where?.id}',
+        CatQuery.$createWhere(where?.parent, 'parent_'),
+        CatQuery.$createWhere(where?.child, 'child_'),
+        if (where?.birth != null) '${childName}cat.birth = ${where?.birth}'
+      ].join(' AND ').whereStr;
   static Future<List<Cat>> getAll(
     Database database, {
     $CatSelectArgs? select,
+    $CatWhereArgs? where,
   }) async =>
-      (await database.rawQuery('''SELECT ${$createSelect($default)} FROM Cat cat
+      (await database.rawQuery('''SELECT ${$createSelect(select)} FROM Cat cat
  INNER JOIN Cat parent_cat ON parent_cat.id = cat.parent_id
  INNER JOIN Cat child_cat ON child_cat.id = cat.child_id
 ''') as List<Map>).map(Cat.fromDB).toList();
