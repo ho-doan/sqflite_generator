@@ -1,8 +1,6 @@
-# melos_managed_dependency_overrides: sqflite_annotation,sqflite_generator,sqflite_query
+# melos_managed_dependency_overrides: sqflite_annotation,sqflite_generator
 dependency_overrides:
   sqflite_annotation:
     path: ../sqflite_annotation
   sqflite_generator:
     path: ../sqflite_generator
-  sqflite_query:
-    path: ../sqflite_query

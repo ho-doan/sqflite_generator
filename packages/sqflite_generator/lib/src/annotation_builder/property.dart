@@ -1,9 +1,36 @@
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:change_case/change_case.dart';
+import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'package:sqflite_generator/src/extensions/sql_type.dart';
 
 import 'foreign_key.dart';
+
+enum AlterTypeGen {
+  add,
+  @Deprecated('not support')
+  rename,
+  drop,
+}
+
+AlterTypeGen partAlterType(String v) => switch (v) {
+      'add' => AlterTypeGen.add,
+      // ignore: deprecated_member_use_from_same_package
+      'rename' => AlterTypeGen.rename,
+      'drop' => AlterTypeGen.drop,
+      // ignore: deprecated_member_use_from_same_package
+      _ => AlterTypeGen.rename,
+    };
+
+class AlterDBGen {
+  final int version;
+  final AlterTypeGen type;
+
+  const AlterDBGen({
+    required this.version,
+    required this.type,
+  });
+}
 
 class AProperty {
   final String? name;
@@ -13,9 +40,11 @@ class AProperty {
   final bool rawFromDB;
   final String className;
   final int step;
+  final List<AlterDBGen> alters;
 
   const AProperty({
     this.name,
+    this.alters = const [],
     required this.step,
     required this.version,
     required this.nameDefault,
@@ -30,7 +59,7 @@ class AProperty {
   bool get isEnum => dartType.isEnum;
 
   String get nameToDB => (name ?? nameDefault).toSnakeCase();
-  String get nameFromDB => '${className}_$nameToDB'.toSnakeCase();
+  String get nameFromDB => '${className.$rm}_$nameToDB'.toSnakeCase();
 
   /// ```
   /// @primaryKey
@@ -68,6 +97,18 @@ class AProperty {
               if (autoId && !isIds) 'AUTOINCREMENT',
               _isNull,
             ].where((e) => e.isNotEmpty).join(' ');
+
+  Map<int, List<String>> rawUpdate() {
+    return {
+      for (final item in alters.groupBy((e) => e.version).entries)
+        item.key: [
+          // TODO(hodoan): for rename, drop
+          for (final sql in item.value)
+            if (sql.type == AlterTypeGen.add)
+              '\'ALTER TABLE $className ADD $nameToDB $_sqlType;\''
+        ],
+    };
+  }
 }
 
 extension on DartType {
@@ -75,19 +116,16 @@ extension on DartType {
       nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
 }
 
+extension StringXm on String {
+  String get $rm => replaceFirst('\$', '');
+}
+
 extension Aps on AProperty {
   String get fieldSuffix => '${name ?? nameDefault}${dartType.fieldSuffix}';
   String get defaultSuffix => '$nameDefault${dartType.fieldSuffix}';
+
   String selectField([String? child]) =>
-      '\'\${childName}${className.toSnakeCase()}.$nameToDB as \${childName}$nameFromDB\'';
-  String get whereField {
-    final str = '\'\${childName}${className.toSnakeCase()}.$nameToDB = ';
-    if (dartType.toString().contains('String')) {
-      return '$str\\\'\${where?.$nameDefault}\\\'\'';
-    } else {
-      return '$str\${where?.$nameDefault}\'';
-    }
-  }
+      '\'\${childName}${className.$rm.toSnakeCase()}.$nameToDB as \${childName}$nameFromDB\'';
 }
 
 extension APropertyX on List<AProperty> {

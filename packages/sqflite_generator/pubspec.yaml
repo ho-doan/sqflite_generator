@@ -1,6 +1,6 @@
 name: sqflite_generator
 description: Sqflite annotation for Sqflite
-version: 0.1.1
+version: 0.1.2
 # publish_to: https://github.com/ho-doan/sqflite_generator
 homepage: https://github.com/ho-doan/sqflite_generator
 repository: https://github.com/ho-doan/sqflite_generator/tree/master/packages/sqflite_generator
@@ -10,7 +10,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  analyzer: ^5.13.0
+  analyzer: ^6.4.1
   build: ^2.4.1
   source_gen: ^1.4.0
   dart_style: ^2.3.2
@@ -18,7 +18,7 @@ dependencies:
   collection: ^1.17.2
   path: ^1.8.3
   glob: ^2.1.2
-  sqflite_annotation: ^0.1.0
+  sqflite_annotation: ^0.1.2
     # path: ../sqflite_annotation
   change_case: ^2.0.1
 

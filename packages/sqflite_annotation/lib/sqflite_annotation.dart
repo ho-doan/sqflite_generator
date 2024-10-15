@@ -3,6 +3,8 @@ library sqflite_annotation;
 import 'package:meta/meta.dart';
 
 export 'src/common/where_ext.dart';
+export 'src/common/migration_model.dart';
+export 'src/common/map_ext.dart';
 
 part 'src/entity.dart';
 part 'src/foreign_key.dart';

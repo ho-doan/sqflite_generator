@@ -4,3 +4,147 @@ extension StringWhere on String? {
     return 'WHERE $this';
   }
 }
+
+abstract class WhereModel<T> {
+  final String field;
+
+  const WhereModel({
+    required this.field,
+  });
+}
+
+abstract class EntityQuery {}
+
+extension $EntityQuery on EntityQuery {
+  /// EXISTS
+  WhereResult<String> exists(String subQuery) =>
+      WhereResult('', 'EXISTS', '($subQuery)');
+
+  /// NOT EXISTS
+  WhereResult<String> notExists(String subQuery) =>
+      WhereResult('', 'NOT EXISTS', '($subQuery)');
+}
+
+class WhereResult<T> {
+  final String key;
+  final T value;
+  final int? value2;
+  final String compare;
+
+  WhereResult(
+    this.key,
+    this.compare,
+    this.value, [
+    this.value2,
+  ]);
+}
+
+extension $WhereResult on Set<WhereResult>? {
+  String get whereSql =>
+      this
+          ?.map((e) => [
+                e.key,
+                e.compare,
+                if (e.value is String &&
+                    !['IN', 'LIKE', 'EXISTS'].contains(e.compare))
+                  "'${e.value}'"
+                else
+                  e.value,
+                if (e.value2 != null) 'AND ${e.value2}',
+              ].join(' '))
+          .join(' AND ')
+          .whereStr ??
+      '';
+}
+
+extension $WhereResultLst on List<Set<WhereResult>>? {
+  String get whereSql =>
+      this
+          ?.map((e) => e.whereSql.replaceFirst('WHERE ', ''))
+          .where((e) => e.isNotEmpty)
+          .map((e) => '($e)')
+          .join(' OR ')
+          .whereStr ??
+      '';
+}
+
+extension $WhereExt<T> on WhereModel<T> {
+  /// v = 0
+  WhereResult<T> equal(T value) => WhereResult(field, '=', value);
+
+  /// v IN (1,2,3)
+  WhereResult<String> in$(List<T> value) =>
+      WhereResult(field, 'IN', '(${value.join(',')})');
+
+  /// v NOT IN (1,2,3)
+  WhereResult<String> notIn(List<T> value) =>
+      WhereResult(field, 'NOT IN', '(${value.join(',')})');
+
+  /// v IS NOT NULL
+  WhereResult<String> notNull() => WhereResult(field, 'IS NOT', 'NULL');
+
+  /// v IS NULL
+  WhereResult<String> null$() => WhereResult(field, 'IS', 'NULL');
+
+  /// v <> 0
+  WhereResult<T> notEqual(T value) => WhereResult(field, '<>', value);
+}
+
+extension $WhereExtString on WhereModel<String> {
+  /// v IN (SELECT key from tbl_a)
+  WhereResult<String> inQuery(String query) =>
+      WhereResult(field, 'IN', '($query)');
+
+  /// v NOT IN (SELECT key from tbl_a)
+  WhereResult<String> notInQuery(String query) =>
+      WhereResult(field, 'NOT IN', '($query)');
+
+  /// v LIKE 'value%'
+  WhereResult<String> likeStart(String value) =>
+      WhereResult(field, 'LIKE', '\'$value%\'');
+
+  /// v LIKE '%value'
+  WhereResult<String> likeEnd(String value) =>
+      WhereResult(field, 'LIKE', '\'%$value\'');
+
+  /// v LIKE '%value%'
+  WhereResult<String> likeContain(String value) =>
+      WhereResult(field, 'LIKE', '\'%$value%\'');
+
+  /// v LIKE '%10\\%%' => LIKE 10%
+  WhereResult<String> likeContainEscape(String value, String escape) =>
+      WhereResult(field, 'LIKE', '\'%$value%\' ESCAPE \'$escape\'');
+
+  /// * [start] = Br
+  /// * [end] = wn
+  /// * [character] = _
+  /// * [count] = 1, [count] = 2 => [character]  _ => __
+  /// * v LIKE '%Br_wn%'
+  WhereResult<String> likeContainByCharacter(
+          String start, String end, String character, int count) =>
+      WhereResult(field, 'LIKE', '\'%$start${character * count}$end%\'');
+}
+
+extension $WhereExtInt on WhereModel<int> {
+  /// v < 0
+  WhereResult<int> lessThan(int value) => WhereResult(field, '<', value);
+
+  /// v > 0
+  WhereResult<int> greaterThan(int value) => WhereResult(field, '>', value);
+
+  /// v >= 0
+  WhereResult<int> greaterThanOrEqual(int value) =>
+      WhereResult(field, '>=', value);
+
+  /// v <= 0
+  WhereResult<int> lessThanOrEqual(int value) =>
+      WhereResult(field, '<=', value);
+
+  /// v BETWEEN 0 and 1
+  WhereResult<int> between(int from, int to) =>
+      WhereResult(field, 'BETWEEN', from, to);
+
+  /// v NOT BETWEEN 0 and 1
+  WhereResult<int> notBetween(int from, int to) =>
+      WhereResult(field, 'NOT BETWEEN', from, to);
+}

@@ -16,6 +16,7 @@ builders:
     auto_apply: dependents
     build_to: cache
     applies_builders: ["source_gen|combining_builder"]
+    runs_before: ["sqflite_generator|db_config_builder"]
   db_config_builder:
     import: "package:sqflite_generator/sqflite_generator.dart"
     builder_factories: ["configBuilder"]

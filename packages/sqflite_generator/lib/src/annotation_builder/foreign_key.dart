@@ -5,6 +5,8 @@ import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'package:sqflite_generator/src/annotation_builder/entity.dart';
 
+import 'package:collection/collection.dart';
+
 import 'property.dart';
 
 final _checker = const TypeChecker.fromRuntime(ForeignKey);
@@ -29,11 +31,27 @@ class AForeignKey extends AProperty {
   });
   factory AForeignKey.fromElement(
       FieldElement element, String className, int step) {
+    AEntity? aEntity;
+    if (element.type.isDartCoreList) {
+      final pElement = element.library.children
+          .whereType<CompilationUnitElement>()
+          .expand((e) => e.children)
+          .firstWhereOrNull(
+            (e) =>
+                e is ClassElement &&
+                e.displayName == AForeignKeyX._name(element),
+          );
+      if (pElement != null) {
+        aEntity = AEntity.of(pElement as ClassElement, step + 1);
+      }
+    } else {
+      aEntity = AEntity.of(element.type.element as ClassElement, step + 1);
+    }
     return AForeignKey._(
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
-      entityParent: AEntity.of(element.type.element as ClassElement, step + 1),
+      entityParent: aEntity,
       name: AForeignKeyX._name(element),
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
@@ -68,10 +86,13 @@ class AForeignKey extends AProperty {
 }
 
 extension AForeignKeyX on AForeignKey {
-  String get rawCreateForeign =>
-      'FOREIGN KEY ($nameToDB) REFERENCES ${dartType.toString().replaceFirst('?', '')} '
-      '(${entityParent?.primaryKeys.first.name ?? entityParent?.primaryKeys.first.nameDefault})'
-      ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
+  String get typeNotSuffix =>
+      dartType.toString().replaceFirst('?', '').replaceFirst('\$', '');
+  String? get rawCreateForeign => dartType.isDartCoreList
+      ? null
+      : 'FOREIGN KEY ($nameToDB) REFERENCES $typeNotSuffix '
+          '(${entityParent?.primaryKeys.first.name ?? entityParent?.primaryKeys.first.nameDefault})'
+          ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(
     int step,
     List<FieldElement> fields,
@@ -129,12 +150,12 @@ extension AForeignKeyX on AForeignKey {
 
   static bool isElement(Element f) => _checker.hasAnnotationOfExact(f);
 
-  String get joinAsStr =>
-      entityParent != null && dartType.toString().contains(className)
-          ? '${nameDefault}_${entityParent!.className}'.toSnakeCase()
-          : entityParent?.className.toSnakeCase() ?? nameDefault;
-  String get subSelect =>
-      entityParent != null && dartType.toString().contains(className)
-          ? '\'${nameDefault.toSnakeCase()}_\''
-          : '\'\'';
+  String joinAsStr(bool duplicate) => entityParent != null &&
+          (dartType.toString().contains(className) || duplicate)
+      ? '${nameDefault}_${entityParent!.className}'.toSnakeCase()
+      : entityParent?.className.toSnakeCase() ?? nameDefault;
+  String subSelect(bool duplicate) => entityParent != null &&
+          (dartType.toString().contains(className) || duplicate)
+      ? '\'${nameDefault.toSnakeCase()}_\''
+      : '\'\'';
 }

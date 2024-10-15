@@ -1,88 +1,109 @@
-import 'dart:convert';
+import 'dart:async';
+import 'dart:developer';
 
-import 'package:example/src/db/models/product.dart';
+import 'package:example/authentication_model.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_annotation/sqflite_annotation.dart' hide Column;
 
-import 'src/db/db_provider.dart';
-import 'src/db/models/client.dart';
-import 'dart:math' as math;
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await DBProvider.instance.initDB();
-  runApp(const MaterialApp(home: MyApp()));
+void main() {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await configSql(
+      null,
+      [
+        const MigrationModel(
+          uidKey: 'uidV1',
+          sqlInsert: '''INSERT INTO Bill(name) VALUES('bill 1'),('bill 2');''',
+        ),
+        const MigrationModel(
+          uidKey: 'uidV1-detail',
+          sqlInsert:
+              '''INSERT INTO BillDetail(name, bill) VALUES('dt 1', 1),('dt 2', 1),('dt 3', 1),('dt 4', 1),('dt 5', 1),('dt 6', 2),('dt 7', 2),('dt 8', 2),('dt 9', 2);''',
+        )
+      ],
+    );
+    runApp(const MyApp());
+  }, (e, s) {
+    log('error app: $e', stackTrace: s);
+  });
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  // data for testing
-  List<Client> testClients = [
-    Client(
-      firstName: "i",
-      lastName: "k",
-      blocked: false,
-      product: Product(
-        id: 1,
-        firstName: "l",
-        lastName: "m",
-        blocked: false,
-      ),
-    ),
-  ];
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  late Database database;
+
+  List<Bill> bills = [];
+
+  @override
+  void initState() {
+    configSql().then((db) {
+      BillQuery.getAll(
+        db,
+        where: {
+          BillQuery.key.equal(1),
+        },
+        whereOr: [
+          {
+            BillQuery.key.equal(0),
+            BillQuery.name.equal('1'),
+            BillQuery.key.lessThan(1),
+          },
+        ],
+      ).then(
+        (v) => setState(() => bills = v),
+      );
+      return database = db;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Flutter SQLite")),
-      body: FutureBuilder<List<Client>>(
-        future: DBProvider.instance.getAllClients(),
-        builder: (BuildContext context, AsyncSnapshot<List<Client>> snapshot) {
-          if (snapshot.hasData) {
-            final data = snapshot.data ?? [];
-            return ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (BuildContext context, int index) {
-                Client item = data[index];
-                return Dismissible(
-                  key: UniqueKey(),
-                  background: Container(color: Colors.red),
-                  onDismissed: (direction) {
-                    DBProvider.instance.deleteClient(item.id!);
-                  },
-                  child: ListTile(
-                    title: Text(jsonEncode(item.toDB())),
-                    leading: Text(item.id.toString()),
-                    trailing: Checkbox(
-                      onChanged: (value) {
-                        DBProvider.instance.blockOrUnblock(item);
-                        setState(() {});
-                      },
-                      value: item.blocked,
-                    ),
-                  ),
-                );
-              },
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          Client rnd = testClients[math.Random().nextInt(testClients.length)];
-          await DBProvider.instance.newClient(rnd);
-          await DBProvider.instance.sort();
-
-          setState(() {});
-        },
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              '',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            for (final item in bills)
+              Text('${item.name} ${item.details.map((e) => e.name)}')
+          ],
+        ),
       ),
     );
   }

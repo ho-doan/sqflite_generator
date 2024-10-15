@@ -9,15 +9,18 @@ class AConfig {
     this.name, {
     this.version = 1,
     this.isForeign = true,
+    this.externalDB,
   });
   final String name;
   final int version;
   final bool isForeign;
+  final String? externalDB;
   factory AConfig.fromElement(Element element) {
     return AConfig(
       AConfigX._name(element),
       version: AConfigX._version(element),
       isForeign: AConfigX._isForeign(element),
+      externalDB: AConfigX._isExternalDB(element),
     );
   }
 }
@@ -49,5 +52,12 @@ extension AConfigX on AConfig {
             ?.getField('isForeign')
             ?.toBoolValue() ??
         true;
+  }
+
+  static String? _isExternalDB(Element field) {
+    return _checker
+        .firstAnnotationOfExact(field)
+        ?.getField('isExternalDB')
+        ?.toStringValue();
   }
 }

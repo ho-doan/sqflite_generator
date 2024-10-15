@@ -24,6 +24,7 @@ class APrimaryKey extends AProperty {
   factory APrimaryKey.fromElement(
       FieldElement element, String className, int step) {
     return APrimaryKey._(
+      auto: APrimaryKeyX._auto(element),
       step: step,
       name: APrimaryKeyX._name(element),
       version: APrimaryKeyX._version(element),
@@ -67,5 +68,12 @@ extension APrimaryKeyX on APrimaryKey {
         ?.getField('(super)')
         ?.getField('name')
         ?.toStringValue();
+  }
+
+  static bool _auto(FieldElement field) {
+    return _checker
+        .firstAnnotationOfExact(field)!
+        .getField('auto')!
+        .toBoolValue()!;
   }
 }
