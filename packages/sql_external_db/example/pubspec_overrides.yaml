@@ -1,0 +1,4 @@
+# melos_managed_dependency_overrides: sql_external_db
+dependency_overrides:
+  sql_external_db:
+    path: ..

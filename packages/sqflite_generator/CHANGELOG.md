@@ -1,3 +1,9 @@
+## 0.1.2
+
+* gen alter table
+* gen migration data
+* handle onUpgrade
+
 ## 0.1.1
 
 * add ignore lint config database gen

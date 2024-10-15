@@ -25,6 +25,7 @@ class ForeignKey extends Property {
 
   const ForeignKey({
     required super.name,
+    super.alters = const [],
     super.version = 1,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,

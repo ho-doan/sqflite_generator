@@ -11,6 +11,8 @@ class AIndex extends AProperty {
   final bool unique;
 
   const AIndex._({
+    // TODO(hodoan): unused
+    // ignore: unused_element
     this.unique = false,
     super.name,
     required super.version,

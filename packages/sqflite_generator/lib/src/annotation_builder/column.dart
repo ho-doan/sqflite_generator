@@ -11,7 +11,10 @@ import 'property.dart';
 final _checker = const TypeChecker.fromRuntime(Column);
 
 class AColumn extends AProperty {
+  final String? converter;
   const AColumn._({
+    required this.converter,
+    super.alters,
     super.name,
     required super.version,
     super.rawFromDB,
@@ -23,7 +26,10 @@ class AColumn extends AProperty {
   factory AColumn.fromElement(
       FieldElement element, String className, int step) {
     final type = element.type;
+
     return AColumn._(
+      alters: AColumnX._alters(element),
+      converter: AColumnX._type(element),
       step: step,
       name: AColumnX._name(element),
       version: AColumnX._version(element),
@@ -41,6 +47,8 @@ class AColumn extends AProperty {
       ParameterElement element, String className, int step) {
     final type = element.type;
     return AColumn._(
+      alters: AColumnX._alters(element),
+      converter: AColumnX._type(element),
       step: step,
       name: AColumnX._name(element),
       version: AColumnX._version(element),
@@ -108,5 +116,34 @@ extension AColumnX on AColumn {
         ?.getField('(super)')
         ?.getField('name')
         ?.toStringValue();
+  }
+
+  static String? _type(Element field) {
+    final s = _checker
+        .firstAnnotationOfExact(field)
+        ?.getField('converter')
+        ?.type
+        .toString();
+    if (s == 'Null') return null;
+    return s;
+  }
+
+  static List<AlterDBGen> _alters(Element field) {
+    final lst = _checker
+        .firstAnnotationOfExact(field)
+        ?.getField('(super)')
+        ?.getField('alters')
+        ?.toListValue();
+    final alters = lst?.map((e) {
+          final version = e.getField('version')?.toIntValue() ?? -1;
+          final type =
+              e.getField('type')?.getField('_name')?.toStringValue() ?? '';
+          return AlterDBGen(
+            version: version,
+            type: partAlterType(type),
+          );
+        }).toList() ??
+        [];
+    return alters;
   }
 }

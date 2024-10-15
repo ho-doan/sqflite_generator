@@ -1,16 +1,14 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
-import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
+import 'package:sqflite_generator/src/annotation_builder/column.dart';
 import 'package:sqflite_generator/src/annotation_builder/property.dart';
 
 import 'annotation_builder/entity.dart';
-
-const _analyzerIgnores = '// ignore_for_file: lines_longer_than_80_chars, '
-    'prefer_relative_imports, directives_ordering, require_trailing_commas';
 
 class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
   final _parsedElementCheckSet = <ClassElement>{};
@@ -24,104 +22,91 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
 
     final entity = AEntity.of(element)!;
 
-    final classSelectBuilder = Class(
-      (c) => c
-        ..name = entity.selectClassName
-        ..fields.addAll(entity.selectFields)
-        ..constructors.add(
-          Constructor((c) => c
-            ..constant = true
-            ..optionalParameters.addAll(entity.fieldOptionalArgs)),
-        )
-        ..methods.add(
-          Method((m) => m
-            ..name = '\$check'
-            ..returns = refer('bool')
-            ..lambda = true
-            ..body = Code(entity.$check.join('||'))
-            ..type = MethodType.getter),
-        ),
-    );
-    final classWhereBuilder = Class(
-      (c) => c
-        ..name = entity.whereClassName
-        ..fields.addAll(entity.whereFields)
-        ..constructors.add(
-          Constructor((c) => c
-            ..constant = true
-            ..optionalParameters.addAll(entity.fieldOptionalArgs)),
-        ),
-    );
+    final classSetBuilder = Class((c) => c
+      ..name = entity.setClassName
+      ..types.add(refer('T'))
+      ..extend = refer('WhereModel<T>')
+      ..fields.addAll(entity.setFields)
+      ..constructors.add(
+        Constructor((c) => c
+          ..constant = true
+          ..initializers.add(Code('super(field: \'\$model.\$name\')'))
+          // ..body = Code('super(field: \'\$model.\$name\')')
+          ..optionalParameters.addAll(entity.setOptionalArgs)),
+      ));
 
     final extensionBuilder = ExtensionBuilder()
       ..name = entity.extensionName
-      ..on = refer(entity.className)
+      ..on = refer(entity.classType)
       ..fields.addAll([
         Field(
           (f) => f
             ..name = 'createTable'
             ..type = refer('String')
-            ..assignment = Code("""'''${entity.rawCreateTable}'''""")
+            ..assignment = Code("""'''${entity.rawCreateTable()}'''""")
+            ..modifier = FieldModifier.constant
             ..static = true,
         ),
         Field(
           (f) => f
+            ..name = 'alter'
+            ..type = refer('Map<int,List<String>>')
+            ..assignment = Code("""${entity.rawAlterTable}""")
+            ..modifier = FieldModifier.constant
+            ..static = true,
+        ),
+        for (final item in entity.aPsAll)
+          Field(
+            (f) => f
+              ..name = item.name
+              ..type = refer(
+                  '${entity.setClassName}<${item.p.dartType.isDartCoreInt ? 'int' : 'String'}>')
+              ..docs.addAll([
+                if (item.p is AColumn &&
+                    item.p.alters.any((e) => e.type == AlterTypeGen.drop))
+                  '@Deprecated(\'no such column\')'
+              ])
+              ..assignment = Code('''${entity.setClassName}(
+              name: '${item.p.nameDefault}',
+              nameCast: '${item.p.nameFromDB}',
+              model: '${[
+                if (item.field != null) item.field,
+                item.p.className.$rm
+              ].join('_').toSnakeCase()}',
+              )''')
+              ..modifier = FieldModifier.constant
+              ..static = true,
+          ),
+        Field(
+          (f) => f
             ..name = entity.defaultSelectClass
-            ..type = refer(entity.selectClassName)
-            ..assignment = Code('''${entity.selectClassName}(${[
-              for (final e in entity.aPs)
-                if (e is AForeignKey)
-                  '${e.nameDefault}: ${e.entityParent?.className}Query.${entity.defaultSelectClass}'
-                else
-                  '${e.nameDefault}: true'
-            ].join(',')})''')
-            ..modifier = entity.aPs.any(
-                    (e) => e.dartType.toString().contains(entity.className))
-                ? FieldModifier.final$
-                : FieldModifier.constant
+            ..type = refer('Set<${entity.setClassName}>')
+            ..assignment = Code('''{${[
+              for (final e in entity.aPsAll)
+                if (!(e.p is AColumn &&
+                    e.p.alters.any((e) => e.type == AlterTypeGen.drop)))
+                  '${entity.extensionName}.${e.name}'
+            ].join(',')},}''')
             ..static = true,
         ),
       ])
       ..methods.addAll([
-        Method((m) => m
-          ..name = '\$createSelect'
-          ..lambda = true
-          ..static = true
-          ..body = Code('''select?.\$check ==true?
-                  ${[
-            for (final e in entity.aPs)
-              if (e is AForeignKey)
-                '${e.entityParent?.className}Query.\$createSelect(select?.${e.nameDefault}, ${e.subSelect})'
-              else
-                'if(select?.${e.nameDefault}??false) ${e.selectField()}'
-          ]}
-                .join(','):\$createSelect(${entity.defaultSelectClass})''')
-          ..requiredParameters.addAll([
-            entity.selectArgs,
-          ])
-          ..optionalParameters.add(entity.selectChildArgs)
-          ..returns = refer('String')),
-        Method((m) => m
-          ..name = '\$createWhere'
-          ..lambda = true
-          ..static = true
-          ..body = Code('''
-                  ${[
-            for (final e in entity.aPs)
-              if (e is AForeignKey)
-                '${e.entityParent?.className}Query.\$createWhere(where?.${e.nameDefault}, ${e.subSelect})'
-              else
-                'if(where?.${e.nameDefault}!=null) ${e.whereField}'
-          ]}
-                .join(' AND ').whereStr''')
-          ..requiredParameters.addAll([
-            entity.whereArgs,
-          ])
-          ..optionalParameters.add(entity.selectChildArgs)
-          ..returns = refer('String')),
+        Method(
+          (m) => m
+            ..name = '\$createSelect'
+            ..lambda = true
+            ..static = true
+            ..body = Code('''((select??{}).isEmpty ? \$default : select!)
+            .map((e)=>'\$childName\${e.model}.\${e.name} as \${e.nameCast}')
+            .join(',')''')
+            ..requiredParameters.addAll([
+              entity.selectArgs,
+            ])
+            ..optionalParameters.add(entity.selectChildArgs)
+            ..returns = refer('String'),
+        ),
         Method((m) => m
           ..name = 'getAll'
-          ..lambda = true
           ..static = true
           ..modifier = MethodModifier.async
           ..body = Code(entity.rawGetAll)
@@ -129,8 +114,9 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..optionalParameters.addAll([
             entity.selectArgs,
             entity.whereArgs,
+            entity.whereOrArgs,
           ])
-          ..returns = refer('Future<List<${entity.className}>>')),
+          ..returns = refer('Future<List<${entity.classType}>>')),
         Method((m) => m
           ..name = 'insert'
           ..modifier = MethodModifier.async
@@ -151,7 +137,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..requiredParameters
               .addAll([entity.databaseArgs, ...entity.keysRequiredArgs])
           ..optionalParameters.addAll([entity.selectArgs])
-          ..returns = refer('Future<${entity.className}?>')),
+          ..returns = refer('Future<${entity.classType}?>')),
         Method((m) => m
           ..name = 'delete'
           ..modifier = MethodModifier.async
@@ -181,10 +167,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..name = '\$fromDB'
           ..lambda = true
           ..static = true
-          ..body = Code('${entity.className}(${entity.rawFromDB})')
-          ..requiredParameters.add(entity.fromArgs)
+          ..body = Code('${entity.classType}(${entity.rawFromDB})')
+          ..requiredParameters.addAll([entity.fromArgs, entity.fromArgsList])
           ..optionalParameters.add(entity.selectChildArgs)
-          ..returns = refer(entity.className)),
+          ..returns = refer(entity.classType)),
         Method((m) => m
           ..name = '\$toDB'
           ..lambda = true
@@ -194,10 +180,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
 
     final emitter = DartEmitter(useNullSafetySyntax: true);
     return DartFormatter().format([
-      _analyzerIgnores,
       extensionBuilder.build().accept(emitter),
-      classSelectBuilder.accept(emitter),
-      classWhereBuilder.accept(emitter),
+      classSetBuilder.accept(emitter),
     ].join('\n\n'));
   }
 }
