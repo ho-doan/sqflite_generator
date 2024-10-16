@@ -1,4 +1,5 @@
 import 'package:example/db/models/client.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 
@@ -7,7 +8,7 @@ import 'product.dart';
 part 'bill.g.dart';
 
 @entity
-class Bill {
+class Bill extends EntityQuery {
   @primaryKey
   @ForeignKey(name: 'productId')
   final Product? product;

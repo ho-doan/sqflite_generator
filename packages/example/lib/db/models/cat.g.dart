@@ -75,6 +75,9 @@ extension CatQuery on Cat {
     Set<$CatSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$CatSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -89,17 +92,46 @@ extension CatQuery on Cat {
       whereStr = where.whereSql;
     }
 
-    final mapList =
-        (await database.rawQuery('''SELECT ${$createSelect(select)} FROM Cat cat
+    final sql = '''SELECT ${$createSelect(select)} FROM Cat cat
  LEFT JOIN Cat parent_cat ON parent_cat.id = cat.parent_id
  LEFT JOIN Cat child_cat ON child_cat.id = cat.child_id
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all Cat $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[CatQuery.id.nameCast]))
         .values
         .map((e) => Cat.fromDB(e.first, e))
         .toList();
+  }
+
+  static Future<List<Cat>> top(
+    Database database, {
+    Set<$CatSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$CatSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM Cat
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
   }
 
   Future<int> insert(Database database) async {
@@ -122,7 +154,7 @@ birth)
     await parent?.update(database);
     await child?.update(database);
     return await database
-        .update('Cat', toDB(), where: "cat.id = ?", whereArgs: [this.id]);
+        .update('Cat', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
   static Future<Cat?> getById(

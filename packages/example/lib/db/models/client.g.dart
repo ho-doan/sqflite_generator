@@ -31,36 +31,36 @@ extension ClientQuery on Client {
   );
 
   static const $ClientSetArgs<String> productLastName = $ClientSetArgs(
-    name: 'lastName',
+    name: 'last_name',
     nameCast: 'product_last_name',
     model: 'product_product',
   );
 
   static const $ClientSetArgs<String> productFirstName = $ClientSetArgs(
-    name: 'firstName',
+    name: 'first_name',
     nameCast: 'product_first_name',
     model: 'product_product',
   );
 
-  static const $ClientSetArgs<String> productBlocked = $ClientSetArgs(
+  static const $ClientSetArgs<bool> productBlocked = $ClientSetArgs(
     name: 'blocked',
     nameCast: 'product_blocked',
     model: 'product_product',
   );
 
   static const $ClientSetArgs<String> firstName = $ClientSetArgs(
-    name: 'firstName',
+    name: 'first_name',
     nameCast: 'client_first_name',
     model: 'client',
   );
 
   static const $ClientSetArgs<String> lastName = $ClientSetArgs(
-    name: 'lastName',
+    name: 'last_name',
     nameCast: 'client_last_name',
     model: 'client',
   );
 
-  static const $ClientSetArgs<String> blocked = $ClientSetArgs(
+  static const $ClientSetArgs<bool> blocked = $ClientSetArgs(
     name: 'blocked',
     nameCast: 'client_blocked',
     model: 'client',
@@ -89,6 +89,9 @@ extension ClientQuery on Client {
     Set<$ClientSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$ClientSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -103,16 +106,45 @@ extension ClientQuery on Client {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM Client client
+    final sql = '''SELECT ${$createSelect(select)} FROM Client client
  LEFT JOIN Product product ON product.id = client.product_id
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all Client $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[ClientQuery.id.nameCast]))
         .values
         .map((e) => Client.fromDB(e.first, e))
         .toList();
+  }
+
+  static Future<List<Client>> top(
+    Database database, {
+    Set<$ClientSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$ClientSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM Client
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
   }
 
   Future<int> insert(Database database) async {
@@ -135,7 +167,7 @@ blocked)
   Future<int> update(Database database) async {
     await product.update(database);
     return await database
-        .update('Client', toDB(), where: "client.id = ?", whereArgs: [this.id]);
+        .update('Client', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
   static Future<Client?> getById(
@@ -187,7 +219,7 @@ WHERE client.id = ?
         'product_id': product.id,
         'first_name': this.firstName,
         'last_name': this.lastName,
-        'blocked': this.blocked,
+        'blocked': (this.blocked ?? false) ? 1 : 0,
       };
 }
 

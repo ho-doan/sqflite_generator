@@ -23,18 +23,18 @@ extension ProductQuery on Product {
   );
 
   static const $ProductSetArgs<String> lastName = $ProductSetArgs(
-    name: 'lastName',
+    name: 'last_name',
     nameCast: 'product_last_name',
     model: 'product',
   );
 
   static const $ProductSetArgs<String> firstName = $ProductSetArgs(
-    name: 'firstName',
+    name: 'first_name',
     nameCast: 'product_first_name',
     model: 'product',
   );
 
-  static const $ProductSetArgs<String> blocked = $ProductSetArgs(
+  static const $ProductSetArgs<bool> blocked = $ProductSetArgs(
     name: 'blocked',
     nameCast: 'product_blocked',
     model: 'product',
@@ -59,6 +59,9 @@ extension ProductQuery on Product {
     Set<$ProductSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$ProductSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -73,15 +76,44 @@ extension ProductQuery on Product {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM Product product
+    final sql = '''SELECT ${$createSelect(select)} FROM Product product
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all Product $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[ProductQuery.id.nameCast]))
         .values
         .map((e) => Product.fromDB(e.first, e))
         .toList();
+  }
+
+  static Future<List<Product>> top(
+    Database database, {
+    Set<$ProductSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$ProductSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM Product
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
   }
 
   Future<int> insert(Database database) async {
@@ -99,8 +131,8 @@ blocked)
   }
 
   Future<int> update(Database database) async {
-    return await database.update('Product', toDB(),
-        where: "product.id = ?", whereArgs: [this.id]);
+    return await database
+        .update('Product', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
   static Future<Product?> getById(
@@ -149,7 +181,7 @@ WHERE product.id = ?
         'id': this.id,
         'last_name': this.lastName,
         'first_name': this.firstName,
-        'blocked': this.blocked,
+        'blocked': (this.blocked ?? false) ? 1 : 0,
       };
 }
 

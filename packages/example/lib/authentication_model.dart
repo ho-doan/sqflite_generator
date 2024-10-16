@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
@@ -18,25 +19,25 @@ Future<Database> configSql([
     $configSql(token, migrations);
 
 @entity
-class Bill {
+class BillM extends EntityQuery {
   final String name;
 
   @ForeignKey(name: 'BillDetail')
   final List<BillDetail> details;
 
-  const Bill({
+  const BillM({
     this.key,
     required this.name,
     this.details = const [],
     this.memos = const [],
   });
 
-  factory Bill.fromDB(
+  factory BillM.fromDB(
     Map<dynamic, dynamic> json,
     List<Map<dynamic, dynamic>> lst, [
     String childName = '',
   ]) =>
-      BillQuery.$fromDB(json, lst, childName);
+      BillMQuery.$fromDB(json, lst, childName);
 
   @primaryKey
   final int? key;
@@ -61,11 +62,11 @@ class StringListConverter extends ColumnDBConverter<List<String>> {
 }
 
 @entity
-class BillDetail {
+class BillDetail extends EntityQuery {
   final String name;
 
   @ForeignKey(name: 'Bill')
-  final Bill? parent;
+  final BillM? parent;
 
   const BillDetail({
     this.key,

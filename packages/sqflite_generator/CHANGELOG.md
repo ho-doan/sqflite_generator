@@ -1,3 +1,9 @@
+## 0.1.3
+
+* fix primary key
+* fix foreign key
+* fix method convert toDB
+
 ## 0.1.2
 
 * gen alter table

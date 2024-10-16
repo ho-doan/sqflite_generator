@@ -38,7 +38,7 @@ final List<String> _schemas = [
   i2.CategoryQuery.createTable,
   i3.CatQuery.createTable,
   i4.BillQuery.createTable,
-  i5.BillQuery.createTable,
+  i5.BillMQuery.createTable,
   i6.BillDetailQuery.createTable
 ];
 
@@ -48,7 +48,7 @@ final List<Map<int, List<String>>> _alters = [
   i2.CategoryQuery.alter,
   i3.CatQuery.alter,
   i4.BillQuery.alter,
-  i5.BillQuery.alter,
+  i5.BillMQuery.alter,
   i6.BillDetailQuery.alter
 ];
 
@@ -132,6 +132,6 @@ Future<void> $clearDatabase(Database db) => Future.wait([
       i2.CategoryQuery.deleteAll(db),
       i3.CatQuery.deleteAll(db),
       i4.BillQuery.deleteAll(db),
-      i5.BillQuery.deleteAll(db),
+      i5.BillMQuery.deleteAll(db),
       i6.BillDetailQuery.deleteAll(db),
     ]);

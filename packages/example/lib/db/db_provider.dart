@@ -27,8 +27,7 @@ class DBProvider {
       _database,
       where: {
         ClientQuery.lastName.equal('k'),
-        // TODO(hodoan): where boolean
-        ClientQuery.productBlocked.equal('true')
+        ClientQuery.productBlocked.equal(true)
       },
     );
   }
@@ -62,7 +61,7 @@ class DBProvider {
 
     // var res = await db.rawQuery("SELECT * FROM Client WHERE blocked=1");
     var res = await ClientQuery.getAll(db, where: {
-      ClientQuery.blocked.equal('1'),
+      ClientQuery.blocked.equal(true),
     });
 
     List<Client> list = res;
@@ -82,8 +81,7 @@ class DBProvider {
       },
       where: {
         ClientQuery.lastName.equal('k'),
-        // TODO(hodoan): where boolean
-        ClientQuery.productBlocked.equal('true')
+        ClientQuery.productBlocked.equal(true)
       },
     );
   }

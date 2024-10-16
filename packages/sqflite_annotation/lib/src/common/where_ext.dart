@@ -5,6 +5,24 @@ extension StringWhere on String? {
   }
 }
 
+enum OrderByType { asc, desc }
+
+extension $OrderByType on OrderByType? {
+  OrderBy<T>? of<T extends WhereModel>(T field) => switch (this) {
+        OrderByType.asc => OrderBy.asc(field),
+        OrderByType.desc => OrderBy.desc(field),
+        _ => null,
+      };
+}
+
+class OrderBy<T extends WhereModel> {
+  const OrderBy._(this.field, this.type);
+  final T field;
+  final String type;
+  factory OrderBy.asc(T field) => OrderBy._(field, 'ASC');
+  factory OrderBy.desc(T field) => OrderBy._(field, 'DESC');
+}
+
 abstract class WhereModel<T> {
   final String field;
 
@@ -13,7 +31,9 @@ abstract class WhereModel<T> {
   });
 }
 
-abstract class EntityQuery {}
+abstract class EntityQuery {
+  const EntityQuery();
+}
 
 extension $EntityQuery on EntityQuery {
   /// EXISTS
@@ -48,6 +68,8 @@ extension $WhereResult on Set<WhereResult>? {
                 if (e.value is String &&
                     !['IN', 'LIKE', 'EXISTS'].contains(e.compare))
                   "'${e.value}'"
+                else if (e.value is bool)
+                  e.value ? 1 : 0
                 else
                   e.value,
                 if (e.value2 != null) 'AND ${e.value2}',
@@ -73,8 +95,8 @@ extension $WhereExt<T> on WhereModel<T> {
   WhereResult<T> equal(T value) => WhereResult(field, '=', value);
 
   /// v IN (1,2,3)
-  WhereResult<String> in$(List<T> value) =>
-      WhereResult(field, 'IN', '(${value.join(',')})');
+  WhereResult<String> in$(List<T> value) => WhereResult(
+      field, 'IN', '(${value.map((e) => e is int ? e : "'$e'").join(',')})');
 
   /// v NOT IN (1,2,3)
   WhereResult<String> notIn(List<T> value) =>

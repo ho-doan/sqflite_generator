@@ -52,6 +52,12 @@ class AProperty {
     required this.className,
     this.rawFromDB = false,
   });
+  String get typeSelect {
+    if (dartType.isDartCoreInt) return 'int';
+    if (dartType.isDartCoreBool) return 'bool';
+    return 'String';
+  }
+
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
   String get _isNull => _isQues ? '' : 'NOT NULL';
   String get _sqlType => dartType.typeSql(step)?.str ?? 'NONE';
@@ -102,7 +108,7 @@ class AProperty {
     return {
       for (final item in alters.groupBy((e) => e.version).entries)
         item.key: [
-          // TODO(hodoan): for rename, drop
+          // TODO(hodoan): for rename
           for (final sql in item.value)
             if (sql.type == AlterTypeGen.add)
               '\'ALTER TABLE $className ADD $nameToDB $_sqlType;\''
@@ -118,6 +124,7 @@ extension on DartType {
 
 extension StringXm on String {
   String get $rm => replaceFirst('\$', '');
+  String get $rq => replaceFirst('?', '');
 }
 
 extension Aps on AProperty {
@@ -140,9 +147,10 @@ extension APropertyX on List<AProperty> {
     final keys = [
       for (final item in this)
         if (fores.any((e) => e.nameDefault == item.nameDefault))
-          '${item.nameDefault}_id'
+          fores.firstWhere((e) => e.nameDefault == item.nameDefault).nameToDB
+        // '${fores.firstWhere((e) => e.nameDefault == item.nameDefault).entityParent?.primaryKeys.firstWhere((e) => e.name == item.name).nameToDB}'
         else
-          item.name ?? item.nameDefault
+          item.name ?? item.nameDefault.toSnakeCase()
     ].join(', ');
     return 'PRIMARY KEY($keys)';
   }

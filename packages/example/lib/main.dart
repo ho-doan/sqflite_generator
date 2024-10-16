@@ -14,7 +14,7 @@ void main() {
       [
         const MigrationModel(
           uidKey: 'uidV1',
-          sqlInsert: '''INSERT INTO Bill(name) VALUES('bill 1'),('bill 2');''',
+          sqlInsert: '''INSERT INTO BillM(name) VALUES('bill 1'),('bill 2');''',
         ),
         const MigrationModel(
           uidKey: 'uidV1-detail',
@@ -57,21 +57,21 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Database database;
 
-  List<Bill> bills = [];
+  List<BillM> bills = [];
 
   @override
   void initState() {
     configSql().then((db) {
-      BillQuery.getAll(
+      BillMQuery.getAll(
         db,
         where: {
-          BillQuery.key.equal(1),
+          BillMQuery.key.equal(1),
         },
         whereOr: [
           {
-            BillQuery.key.equal(0),
-            BillQuery.name.equal('1'),
-            BillQuery.key.lessThan(1),
+            BillMQuery.key.equal(0),
+            BillMQuery.name.equal('1'),
+            BillMQuery.key.lessThan(1),
           },
         ],
       ).then(

@@ -91,7 +91,7 @@ extension AForeignKeyX on AForeignKey {
   String? get rawCreateForeign => dartType.isDartCoreList
       ? null
       : 'FOREIGN KEY ($nameToDB) REFERENCES $typeNotSuffix '
-          '(${entityParent?.primaryKeys.first.name ?? entityParent?.primaryKeys.first.nameDefault})'
+          '(${entityParent?.primaryKeys.first.name ?? entityParent?.primaryKeys.first.nameDefault.toSnakeCase()})'
           ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(
     int step,

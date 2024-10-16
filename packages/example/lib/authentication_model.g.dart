@@ -6,14 +6,14 @@ part of 'authentication_model.dart';
 // SqfliteModelGenerator
 // **************************************************************************
 
-extension BillQuery on Bill {
-  static const String createTable = '''CREATE TABLE IF NOT EXISTS Bill(
+extension BillMQuery on BillM {
+  static const String createTable = '''CREATE TABLE IF NOT EXISTS BillM(
 		key INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL
 	)''';
 
   static const Map<int, List<String>> alter = {
-    2: ['ALTER TABLE Bill ADD memos TEXT;'],
+    2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
 		key INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,69 +22,72 @@ extension BillQuery on Bill {
 	)''',
       'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
       'DROP TABLE BillDetail;',
-      '''CREATE TABLE IF NOT EXISTS Bill_new(
+      '''CREATE TABLE IF NOT EXISTS BillM_new(
 		key INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL
 	)''',
-      'INSERT INTO Bill_new(key,name)SELECT key,name FROM Bill;',
-      'DROP TABLE Bill;',
-      'ALTER TABLE Bill_new RENAME TO Bill;',
+      'INSERT INTO BillM_new(key,name)SELECT key,name FROM BillM;',
+      'DROP TABLE BillM;',
+      'ALTER TABLE BillM_new RENAME TO BillM;',
       BillDetailQuery.createTable,
       'INSERT INTO BillDetail(key,name,bill)SELECT key,name,bill FROM BillDetail_new;',
       'DROP TABLE BillDetail_new;'
     ]
   };
 
-  static const $BillSetArgs<int> key = $BillSetArgs(
+  static const $BillMSetArgs<int> key = $BillMSetArgs(
     name: 'key',
-    nameCast: 'bill_key',
-    model: 'bill',
+    nameCast: 'bill_m_key',
+    model: 'bill_m',
   );
 
-  static const $BillSetArgs<int> billDetailDetailsKey = $BillSetArgs(
+  static const $BillMSetArgs<int> billDetailDetailsKey = $BillMSetArgs(
     name: 'key',
     nameCast: 'bill_detail_key',
     model: 'details_bill_detail',
   );
 
-  static const $BillSetArgs<String> billDetailDetailsName = $BillSetArgs(
+  static const $BillMSetArgs<String> billDetailDetailsName = $BillMSetArgs(
     name: 'name',
     nameCast: 'bill_detail_name',
     model: 'details_bill_detail',
   );
 
-  static const $BillSetArgs<String> name = $BillSetArgs(
+  static const $BillMSetArgs<String> name = $BillMSetArgs(
     name: 'name',
-    nameCast: 'bill_name',
-    model: 'bill',
+    nameCast: 'bill_m_name',
+    model: 'bill_m',
   );
 
   @Deprecated('no such column')
-  static const $BillSetArgs<String> memos = $BillSetArgs(
+  static const $BillMSetArgs<String> memos = $BillMSetArgs(
     name: 'memos',
-    nameCast: 'bill_memos',
-    model: 'bill',
+    nameCast: 'bill_m_memos',
+    model: 'bill_m',
   );
 
-  static Set<$BillSetArgs> $default = {
-    BillQuery.key,
-    BillQuery.billDetailDetailsKey,
-    BillQuery.billDetailDetailsName,
-    BillQuery.name,
+  static Set<$BillMSetArgs> $default = {
+    BillMQuery.key,
+    BillMQuery.billDetailDetailsKey,
+    BillMQuery.billDetailDetailsName,
+    BillMQuery.name,
   };
 
   static String $createSelect(
-    Set<$BillSetArgs>? select, [
+    Set<$BillMSetArgs>? select, [
     String childName = '',
   ]) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
           .join(',');
-  static Future<List<Bill>> getAll(
+  static Future<List<BillM>> getAll(
     Database database, {
-    Set<$BillSetArgs>? select,
+    Set<$BillMSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillMSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -99,20 +102,49 @@ extension BillQuery on Bill {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM Bill bill
- LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill.key
+    final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
+ LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill_m.key
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all BillM $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[BillQuery.key.nameCast]))
+        .groupBy(((m) => m[BillMQuery.key.nameCast]))
         .values
-        .map((e) => Bill.fromDB(e.first, e))
+        .map((e) => BillM.fromDB(e.first, e))
         .toList();
   }
 
+  static Future<List<BillM>> top(
+    Database database, {
+    Set<$BillMSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillMSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM BillM
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
+  }
+
   Future<int> insert(Database database) async {
-    final $id = await database.rawInsert('''INSERT OR REPLACE INTO Bill (key,
+    final $id = await database.rawInsert('''INSERT OR REPLACE INTO BillM (key,
 name,
 memos) 
        VALUES(?, ?, ?)''', [
@@ -125,27 +157,27 @@ memos)
 
   Future<int> update(Database database) async {
     return await database
-        .update('Bill', toDB(), where: "bill.key = ?", whereArgs: [this.key]);
+        .update('BillM', toDB(), where: "key = ?", whereArgs: [this.key]);
   }
 
-  static Future<Bill?> getById(
+  static Future<BillM?> getById(
     Database database,
     int? key, {
-    Set<$BillSetArgs>? select,
+    Set<$BillMSetArgs>? select,
   }) async {
     final res = (await database.rawQuery('''
 SELECT 
 ${$createSelect(select)}
- FROM Bill bill
- LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill.key
-WHERE bill.key = ?
+ FROM BillM bill_m
+ LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill_m.key
+WHERE bill_m.key = ?
 ''', [key]) as List<Map>);
-    return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
+    return res.isNotEmpty ? BillM.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
-    await database
-        .rawQuery('''DELETE FROM Bill bill WHERE bill.key = ?''', [this.key]);
+    await database.rawQuery(
+        '''DELETE FROM BillM bill_m WHERE bill_m.key = ?''', [this.key]);
   }
 
   static Future<void> deleteById(
@@ -153,24 +185,24 @@ WHERE bill.key = ?
     int? key,
   ) async {
     await database
-        .rawQuery('''DELETE FROM Bill bill WHERE bill.key = ?''', [key]);
+        .rawQuery('''DELETE FROM BillM bill_m WHERE bill_m.key = ?''', [key]);
   }
 
   static Future<void> deleteAll(Database database) async {
-    await database.rawDelete('''DELETE * FROM Bill''');
+    await database.rawDelete('''DELETE * FROM BillM''');
   }
 
-  static Bill $fromDB(
+  static BillM $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Bill(
-        key: json['${childName}bill_key'] as int?,
+      BillM(
+        key: json['${childName}bill_m_key'] as int?,
         details: lst.map((e) => BillDetail.fromDB(e, [])).toList(),
-        name: json['${childName}bill_name'] as String,
+        name: json['${childName}bill_m_name'] as String,
         memos: const StringListConverter()
-            .fromJson(json['${childName}bill_memos'] as String?),
+            .fromJson(json['${childName}bill_m_memos'] as String?),
       );
   Map<String, dynamic> $toDB() => {
         'key': this.key,
@@ -179,8 +211,8 @@ WHERE bill.key = ?
       };
 }
 
-class $BillSetArgs<T> extends WhereModel<T> {
-  const $BillSetArgs({
+class $BillMSetArgs<T> extends WhereModel<T> {
+  const $BillMSetArgs({
     required this.name,
     required this.nameCast,
     required this.model,
@@ -198,7 +230,7 @@ extension BillDetailQuery on BillDetail {
 		key INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
 			bill INTEGER,
-			FOREIGN KEY (bill) REFERENCES Bill (key) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (bill) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const Map<int, List<String>> alter = {};
@@ -209,23 +241,23 @@ extension BillDetailQuery on BillDetail {
     model: 'bill_detail',
   );
 
-  static const $BillDetailSetArgs<int> billParentKey = $BillDetailSetArgs(
+  static const $BillDetailSetArgs<int> billMParentKey = $BillDetailSetArgs(
     name: 'key',
-    nameCast: 'bill_key',
-    model: 'parent_bill',
+    nameCast: 'bill_m_key',
+    model: 'parent_bill_m',
   );
 
-  static const $BillDetailSetArgs<String> billParentName = $BillDetailSetArgs(
+  static const $BillDetailSetArgs<String> billMParentName = $BillDetailSetArgs(
     name: 'name',
-    nameCast: 'bill_name',
-    model: 'parent_bill',
+    nameCast: 'bill_m_name',
+    model: 'parent_bill_m',
   );
 
   @Deprecated('no such column')
-  static const $BillDetailSetArgs<String> billParentMemos = $BillDetailSetArgs(
+  static const $BillDetailSetArgs<String> billMParentMemos = $BillDetailSetArgs(
     name: 'memos',
-    nameCast: 'bill_memos',
-    model: 'parent_bill',
+    nameCast: 'bill_m_memos',
+    model: 'parent_bill_m',
   );
 
   static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
@@ -236,8 +268,8 @@ extension BillDetailQuery on BillDetail {
 
   static Set<$BillDetailSetArgs> $default = {
     BillDetailQuery.key,
-    BillDetailQuery.billParentKey,
-    BillDetailQuery.billParentName,
+    BillDetailQuery.billMParentKey,
+    BillDetailQuery.billMParentName,
     BillDetailQuery.name,
   };
 
@@ -253,6 +285,9 @@ extension BillDetailQuery on BillDetail {
     Set<$BillDetailSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillDetailSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -267,11 +302,17 @@ extension BillDetailQuery on BillDetail {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
- LEFT JOIN Bill bill ON bill.key = bill_detail.bill
+    final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
+ LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all BillDetail $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[BillDetailQuery.key.nameCast]))
         .values
@@ -279,15 +320,38 @@ ${whereStr.isNotEmpty ? whereStr : ''}
         .toList();
   }
 
+  static Future<List<BillDetail>> top(
+    Database database, {
+    Set<$BillDetailSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillDetailSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM BillDetail
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
+  }
+
   Future<int> insert(Database database) async {
-    final $billIdParent = await parent?.insert(database);
+    final $billMIdParent = await parent?.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO BillDetail (key,
 bill,
 name) 
        VALUES(?, ?, ?)''', [
       this.key,
-      $billIdParent,
+      $billMIdParent,
       this.name,
     ]);
     return $id;
@@ -295,8 +359,8 @@ name)
 
   Future<int> update(Database database) async {
     await parent?.update(database);
-    return await database.update('BillDetail', toDB(),
-        where: "bill_detail.key = ?", whereArgs: [this.key]);
+    return await database
+        .update('BillDetail', toDB(), where: "key = ?", whereArgs: [this.key]);
   }
 
   static Future<BillDetail?> getById(
@@ -308,7 +372,7 @@ name)
 SELECT 
 ${$createSelect(select)}
  FROM BillDetail bill_detail
- LEFT JOIN Bill bill ON bill.key = bill_detail.bill
+ LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill
 WHERE bill_detail.key = ?
 ''', [key]) as List<Map>);
     return res.isNotEmpty ? BillDetail.fromDB(res.first, res) : null;
@@ -340,7 +404,7 @@ WHERE bill_detail.key = ?
   ]) =>
       BillDetail(
         key: json['${childName}bill_detail_key'] as int?,
-        parent: Bill.fromDB(json, []),
+        parent: BillM.fromDB(json, []),
         name: json['${childName}bill_detail_name'] as String,
       );
   Map<String, dynamic> $toDB() => {
