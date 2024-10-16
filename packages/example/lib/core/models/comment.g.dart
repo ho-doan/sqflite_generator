@@ -9,7 +9,6 @@ part of 'comment.dart';
 extension CommentModelQuery on CommentModel {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS CommentModel(
 		comment_id INTEGER PRIMARY KEY NOT NULL,
-			talk_id INTEGER NOT NULL,
 			delete_flag INTEGER NOT NULL,
 			status_code INTEGER NOT NULL,
 			value TEXT NOT NULL,
@@ -21,7 +20,9 @@ extension CommentModelQuery on CommentModel {
 			stamp_time INTEGER NOT NULL,
 			hospital_code INTEGER NOT NULL,
 			patient_index INTEGER NOT NULL,
-			order_index INTEGER NOT NULL
+			order_index INTEGER NOT NULL,
+			talk_id INTEGER NOT NULL,
+			FOREIGN KEY (talk_id) REFERENCES TalkModel (talk_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const Map<int, List<String>> alter = {};
@@ -32,10 +33,81 @@ extension CommentModelQuery on CommentModel {
     model: 'comment_model',
   );
 
-  static const $CommentModelSetArgs<int> talkId = $CommentModelSetArgs(
+  static const $CommentModelSetArgs<int> talkModelTalkIdTalkId =
+      $CommentModelSetArgs(
     name: 'talk_id',
-    nameCast: 'comment_model_talk_id',
-    model: 'comment_model',
+    nameCast: 'talk_model_talk_id',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<String> talkModelTalkIdOwnerId =
+      $CommentModelSetArgs(
+    name: 'owner_id',
+    nameCast: 'talk_model_owner_id',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdDeleteFlag =
+      $CommentModelSetArgs(
+    name: 'delete_flag',
+    nameCast: 'talk_model_delete_flag',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdTalkType =
+      $CommentModelSetArgs(
+    name: 'talk_type',
+    nameCast: 'talk_model_talk_type',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdTypeCode =
+      $CommentModelSetArgs(
+    name: 'type_code',
+    nameCast: 'talk_model_type_code',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<String> talkModelTalkIdTitle =
+      $CommentModelSetArgs(
+    name: 'title',
+    nameCast: 'talk_model_title',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdCreateDate =
+      $CommentModelSetArgs(
+    name: 'create_date',
+    nameCast: 'talk_model_create_date',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdCreateTime =
+      $CommentModelSetArgs(
+    name: 'create_time',
+    nameCast: 'talk_model_create_time',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdStampDate =
+      $CommentModelSetArgs(
+    name: 'stamp_date',
+    nameCast: 'talk_model_stamp_date',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdStampTime =
+      $CommentModelSetArgs(
+    name: 'stamp_time',
+    nameCast: 'talk_model_stamp_time',
+    model: 'talk_id_talk_model',
+  );
+
+  static const $CommentModelSetArgs<int> talkModelTalkIdHospitalCode =
+      $CommentModelSetArgs(
+    name: 'hospital_code',
+    nameCast: 'talk_model_hospital_code',
+    model: 'talk_id_talk_model',
   );
 
   static const $CommentModelSetArgs<int> deleteFlag = $CommentModelSetArgs(
@@ -113,7 +185,17 @@ extension CommentModelQuery on CommentModel {
 
   static Set<$CommentModelSetArgs> $default = {
     CommentModelQuery.commentId,
-    CommentModelQuery.talkId,
+    CommentModelQuery.talkModelTalkIdTalkId,
+    CommentModelQuery.talkModelTalkIdOwnerId,
+    CommentModelQuery.talkModelTalkIdDeleteFlag,
+    CommentModelQuery.talkModelTalkIdTalkType,
+    CommentModelQuery.talkModelTalkIdTypeCode,
+    CommentModelQuery.talkModelTalkIdTitle,
+    CommentModelQuery.talkModelTalkIdCreateDate,
+    CommentModelQuery.talkModelTalkIdCreateTime,
+    CommentModelQuery.talkModelTalkIdStampDate,
+    CommentModelQuery.talkModelTalkIdStampTime,
+    CommentModelQuery.talkModelTalkIdHospitalCode,
     CommentModelQuery.deleteFlag,
     CommentModelQuery.statusCode,
     CommentModelQuery.value,
@@ -159,6 +241,7 @@ extension CommentModelQuery on CommentModel {
 
     final sql =
         '''SELECT ${$createSelect(select)} FROM CommentModel comment_model
+ LEFT JOIN TalkModel talk_model ON talk_model.talk_id = comment_model.talk_id
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -199,6 +282,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
   }
 
   Future<int> insert(Database database) async {
+    final $talkModelIdTalkId = await talkId.insert(database);
     final $id = await database
         .rawInsert('''INSERT OR REPLACE INTO CommentModel (comment_id,
 talk_id,
@@ -216,7 +300,7 @@ patient_index,
 order_index) 
        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', [
       this.commentId,
-      this.talkId,
+      $talkModelIdTalkId,
       this.deleteFlag,
       this.statusCode,
       this.value,
@@ -234,6 +318,7 @@ order_index)
   }
 
   Future<int> update(Database database) async {
+    await talkId.update(database);
     return await database.update('CommentModel', toDB(),
         where: "comment_id = ?", whereArgs: [this.commentId]);
   }
@@ -247,6 +332,7 @@ order_index)
 SELECT 
 ${$createSelect(select)}
  FROM CommentModel comment_model
+ LEFT JOIN TalkModel talk_model ON talk_model.talk_id = comment_model.talk_id
 WHERE comment_model.comment_id = ?
 ''', [commentId]) as List<Map>);
     return res.isNotEmpty ? CommentModel.fromDB(res.first, res) : null;
@@ -278,7 +364,7 @@ WHERE comment_model.comment_id = ?
   ]) =>
       CommentModel(
         commentId: json['${childName}comment_model_comment_id'] as int,
-        talkId: json['${childName}comment_model_talk_id'] as int,
+        talkId: TalkModel.fromDB(json, []),
         deleteFlag: json['${childName}comment_model_delete_flag'] as int,
         statusCode: json['${childName}comment_model_status_code'] as int,
         value: json['${childName}comment_model_value'] as String,
@@ -295,7 +381,7 @@ WHERE comment_model.comment_id = ?
       );
   Map<String, dynamic> $toDB() => {
         'comment_id': this.commentId,
-        'talk_id': this.talkId,
+        'talk_id': talkId.talkId,
         'delete_flag': this.deleteFlag,
         'status_code': this.statusCode,
         'value': this.value,

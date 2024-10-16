@@ -19,25 +19,25 @@ Future<Database> configSql([
     $configSql(token, migrations);
 
 @entity
-class Bill extends EntityQuery {
+class BillM extends EntityQuery {
   final String name;
 
   @ForeignKey(name: 'BillDetail')
   final List<BillDetail> details;
 
-  const Bill({
+  const BillM({
     this.key,
     required this.name,
     this.details = const [],
     this.memos = const [],
   });
 
-  factory Bill.fromDB(
+  factory BillM.fromDB(
     Map<dynamic, dynamic> json,
     List<Map<dynamic, dynamic>> lst, [
     String childName = '',
   ]) =>
-      BillQuery.$fromDB(json, lst, childName);
+      BillMQuery.$fromDB(json, lst, childName);
 
   @primaryKey
   final int? key;
@@ -66,7 +66,7 @@ class BillDetail extends EntityQuery {
   final String name;
 
   @ForeignKey(name: 'Bill')
-  final Bill? parent;
+  final BillM? parent;
 
   const BillDetail({
     this.key,

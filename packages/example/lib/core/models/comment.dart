@@ -1,3 +1,4 @@
+import 'package:example/core/models/talk_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
@@ -6,7 +7,8 @@ part 'comment.g.dart';
 
 @entity
 class CommentModel extends EntityQuery {
-  final int talkId; // トークUID
+  @ForeignKey(name: 'talkId')
+  final TalkModel talkId; // トークUID
   @primaryKeyNoIncrement
   final int commentId; // コメントUID
   final int deleteFlag; // 削除フラグ

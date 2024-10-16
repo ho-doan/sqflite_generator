@@ -381,11 +381,11 @@ extension AQuery on AEntity {
       for (final e in foreignKeys)
         if (e.dartType.isDartCoreList)
           () {
-            final property = e.entityParent?.aPs
-                .firstWhereOrNull((e) => e.name == className);
+            final property = e.entityParent?.aPs.firstWhereOrNull(
+                (e) => e.dartType.toString().$rq == className);
             return property != null
-                ? ' LEFT JOIN ${e.entityParent?.name} ${e.joinAsStr(foreignKeys.duplicated(e))}'
-                    ' ON ${e.joinAsStr(foreignKeys.duplicated(e))}.${property.nameToDB}'
+                ? ' LEFT JOIN ${e.entityParent?.name} ${'${e.nameDefault}_${e.joinAsStr(foreignKeys.duplicated(e)).toSnakeCase()}'}'
+                    ' ON ${'${e.nameDefault}_${e.joinAsStr(foreignKeys.duplicated(e)).toSnakeCase()}'}.${property.nameToDB}'
                     ' = ${className.toSnakeCase()}.${primaryKeys.first.nameToDB}'
                 : '';
           }()
@@ -510,7 +510,7 @@ extension AParam on AEntity {
                   ..type = refer(k.dartType.toString()))
           else
             Parameter((p) => p
-              ..name = key.nameDefault
+              ..name = key.nameDefault.toCamelCase()
               ..type = refer(key.dartType.toString()))
       ];
   List<Parameter> get setOptionalArgs => [

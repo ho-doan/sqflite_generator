@@ -19,7 +19,7 @@ extension CommentLinkModelQuery on CommentLinkModel {
 			link_text TEXT NOT NULL,
 			stamp_date INTEGER NOT NULL,
 			stamp_time INTEGER NOT NULL,
-			PRIMARY KEY(commentId, subNo)
+			PRIMARY KEY(comment_id, sub_no)
 	)''';
 
   static const Map<int, List<String>> alter = {};

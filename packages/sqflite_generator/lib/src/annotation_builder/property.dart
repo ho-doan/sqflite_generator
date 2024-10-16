@@ -108,7 +108,7 @@ class AProperty {
     return {
       for (final item in alters.groupBy((e) => e.version).entries)
         item.key: [
-          // TODO(hodoan): for rename, drop
+          // TODO(hodoan): for rename
           for (final sql in item.value)
             if (sql.type == AlterTypeGen.add)
               '\'ALTER TABLE $className ADD $nameToDB $_sqlType;\''
@@ -124,6 +124,7 @@ extension on DartType {
 
 extension StringXm on String {
   String get $rm => replaceFirst('\$', '');
+  String get $rq => replaceFirst('?', '');
 }
 
 extension Aps on AProperty {
@@ -148,7 +149,7 @@ extension APropertyX on List<AProperty> {
         if (fores.any((e) => e.nameDefault == item.nameDefault))
           '${item.nameDefault}_id'
         else
-          item.name ?? item.nameDefault
+          item.name ?? item.nameDefault.toSnakeCase()
     ].join(', ');
     return 'PRIMARY KEY($keys)';
   }
