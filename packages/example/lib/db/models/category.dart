@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 
@@ -18,7 +19,7 @@ class ICategory {
 }
 
 @entity
-class Category extends ICategory {
+class Category extends ICategory implements EntityQuery {
   @primaryKey
   final int? key;
 
@@ -34,5 +35,7 @@ class Category extends ICategory {
           [String childName = '']) =>
       CategoryQuery.$fromDB(json, lst, childName);
 
-  Map<String, dynamic> toDB() => $toDB();
+  Map<String, dynamic> toDB() {
+    return $toDB();
+  }
 }

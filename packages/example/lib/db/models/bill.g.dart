@@ -25,18 +25,18 @@ extension BillQuery on Bill {
   );
 
   static const $BillSetArgs<String> productLastName = $BillSetArgs(
-    name: 'lastName',
+    name: 'last_name',
     nameCast: 'product_last_name',
     model: 'product_product',
   );
 
   static const $BillSetArgs<String> productFirstName = $BillSetArgs(
-    name: 'firstName',
+    name: 'first_name',
     nameCast: 'product_first_name',
     model: 'product_product',
   );
 
-  static const $BillSetArgs<String> productBlocked = $BillSetArgs(
+  static const $BillSetArgs<bool> productBlocked = $BillSetArgs(
     name: 'blocked',
     nameCast: 'product_blocked',
     model: 'product_product',
@@ -55,18 +55,18 @@ extension BillQuery on Bill {
   );
 
   static const $BillSetArgs<String> clientFirstName = $BillSetArgs(
-    name: 'firstName',
+    name: 'first_name',
     nameCast: 'client_first_name',
     model: 'client_client',
   );
 
   static const $BillSetArgs<String> clientLastName = $BillSetArgs(
-    name: 'lastName',
+    name: 'last_name',
     nameCast: 'client_last_name',
     model: 'client_client',
   );
 
-  static const $BillSetArgs<String> clientBlocked = $BillSetArgs(
+  static const $BillSetArgs<bool> clientBlocked = $BillSetArgs(
     name: 'blocked',
     nameCast: 'client_blocked',
     model: 'client_client',
@@ -103,6 +103,9 @@ extension BillQuery on Bill {
     Set<$BillSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -117,17 +120,46 @@ extension BillQuery on Bill {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM Bill bill
+    final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
  LEFT JOIN Product product ON product.id = bill.product_id
  LEFT JOIN Client client ON client.id = bill.client_id
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all Bill $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[BillQuery.productId.nameCast]))
         .values
         .map((e) => Bill.fromDB(e.first, e))
         .toList();
+  }
+
+  static Future<List<Bill>> top(
+    Database database, {
+    Set<$BillSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM Bill
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
   }
 
   Future<int> insert(Database database) async {
@@ -149,7 +181,7 @@ time)
     await product?.update(database);
     await client?.update(database);
     return await database.update('Bill', toDB(),
-        where: "bill.product_id = ? AND bill.client_id = ?",
+        where: "product_id = ? AND client_id = ?",
         whereArgs: [product?.id, client?.id]);
   }
 

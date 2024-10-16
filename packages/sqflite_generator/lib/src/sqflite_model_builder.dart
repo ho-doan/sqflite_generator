@@ -59,15 +59,14 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           Field(
             (f) => f
               ..name = item.name
-              ..type = refer(
-                  '${entity.setClassName}<${item.p.dartType.isDartCoreInt ? 'int' : 'String'}>')
+              ..type = refer('${entity.setClassName}<${item.p.typeSelect}>')
               ..docs.addAll([
                 if (item.p is AColumn &&
                     item.p.alters.any((e) => e.type == AlterTypeGen.drop))
                   '@Deprecated(\'no such column\')'
               ])
               ..assignment = Code('''${entity.setClassName}(
-              name: '${item.p.nameDefault}',
+              name: '${item.p.nameDefault.toSnakeCase()}',
               nameCast: '${item.p.nameFromDB}',
               model: '${[
                 if (item.field != null) item.field,
@@ -115,8 +114,32 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             entity.selectArgs,
             entity.whereArgs,
             entity.whereOrArgs,
+            entity.orderByArgs,
+            entity.limitArgs,
+            entity.offsetArgs,
           ])
           ..returns = refer('Future<List<${entity.classType}>>')),
+        Method((m) => m
+          ..name = 'top'
+          ..static = true
+          ..lambda = true
+          ..body = Code(entity.topSelect)
+          ..requiredParameters.add(entity.databaseArgs)
+          ..optionalParameters.addAll([
+            entity.selectArgs,
+            entity.whereArgs,
+            entity.whereOrArgs,
+            entity.orderByArgs,
+            entity.topArgs,
+          ])
+          ..returns = refer('Future<List<${entity.classType}>>')),
+        Method((m) => m
+          ..name = 'count'
+          ..static = true
+          ..modifier = MethodModifier.async
+          ..body = Code(entity.countSelect)
+          ..requiredParameters.add(entity.databaseArgs)
+          ..returns = refer('Future<int>')),
         Method((m) => m
           ..name = 'insert'
           ..modifier = MethodModifier.async

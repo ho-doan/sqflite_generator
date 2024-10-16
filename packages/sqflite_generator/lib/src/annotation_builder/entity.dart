@@ -148,6 +148,9 @@ class AEntity {
               if (e.dartType.toString().contains('DateTime')) {
                 return '\'${e.nameToDB}\': this.${e.defaultSuffix}.millisecondsSinceEpoch';
               }
+              if (e.dartType.isDartCoreBool) {
+                return '\'${e.nameDefault}\': (this.${e.nameDefault} ?? false) ? 1 : 0';
+              }
               if (e is AColumn && e.converter != null) {
                 return '\'${e.nameToDB}\': const ${e.converter}().toJson(this.${e.nameDefault})';
               }
@@ -176,14 +179,31 @@ class AEntity {
           whereStr = where.whereSql;
         }
       ''',
-      'final mapList = (await database.rawQuery(',
-      '\'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
+      'final sql = \'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
       ...aFores,
       '\${whereStr.isNotEmpty ? whereStr : \'\'}',
-      '\'\'\') as List<Map>);',
+      "\${(orderBy ?? {}).map((e) => '\${e.field.field} \${e.type}').join(',')}",
+      "\${limit != null ? 'LIMIT \$limit' : ''}",
+      "\${offset != null ? 'OFFSET \$offset' : ''}",
+      "''';",
+      "if (kDebugMode) { print('get all $className \$sql'); }",
+      'final mapList = (await database.rawQuery(sql) as List<Map>);',
       'return mapList.groupBy(((m) => m[$extensionName.${aPsAll.first.name}.nameCast]))'
           '.values.map((e)=>$classType.fromDB(e.first,e)).toList();',
     ].join('\n');
+  }
+
+  String get countSelect {
+    return [
+      'final mapList = (await database.rawQuery(',
+      '\'\'\'SELECT count(*) as ns_count FROM $className',
+      '\'\'\') as List<Map>);',
+      'return mapList.first[\'ns_count\'] as int;',
+    ].join('\n');
+  }
+
+  String get topSelect {
+    return 'getAll(database,select: select,where: where,whereOr: whereOr,orderBy: orderBy,limit: top,)';
   }
 
   String get rawFindOne {
@@ -285,7 +305,7 @@ extension AUpdate on AEntity {
       for (final fore in foreignKeys)
         ...fore.entityParent?.rawUpdate(fore) ?? <String>[],
       'return await database.update(\'$className\',toDB(), '
-          'where: "${_whereDB.join(' AND ')}",'
+          'where: "${_whereDBUpdate.join(' AND ')}",'
           ' whereArgs: [${_whereArgs.join(' , ')}]);',
     }.toList();
   }
@@ -440,6 +460,26 @@ extension AParam on AEntity {
     ..type = refer('List<Set<WhereResult>>?')
     ..named = true
     ..required = false);
+  Parameter get orderByArgs => Parameter((p) => p
+    ..name = 'orderBy'
+    ..type = refer('Set<OrderBy<$setClassName>>?')
+    ..named = true
+    ..required = false);
+  Parameter get limitArgs => Parameter((p) => p
+    ..name = 'limit'
+    ..type = refer('int?')
+    ..named = true
+    ..required = false);
+  Parameter get topArgs => Parameter((p) => p
+    ..name = 'top'
+    ..type = refer('int')
+    ..named = true
+    ..required = true);
+  Parameter get offsetArgs => Parameter((p) => p
+    ..name = 'offset'
+    ..type = refer('int?')
+    ..named = true
+    ..required = false);
   Parameter get selectChildArgs => Parameter((p) => p
     ..name = 'childName'
     ..type = refer('String')
@@ -572,10 +612,10 @@ extension AFields on AEntity {
     return [
       for (final key in keys)
         if (key is AForeignKey)
-          for (final item in key.entityParent?.keys ?? [])
-            '${key.defaultSuffix}.${item.nameToDB}'
+          for (final item in key.entityParent?.keys ?? <AProperty>[])
+            '${key.defaultSuffix}.${item.nameDefault}'
         else
-          'this.${key.nameToDB}'
+          'this.${key.nameDefault}'
     ];
   }
 
@@ -586,5 +626,9 @@ extension AFields on AEntity {
     return [
       for (final key in keys) '${className.toSnakeCase()}.${key.nameToDB} = ?'
     ];
+  }
+
+  List<String> get _whereDBUpdate {
+    return [for (final key in keys) '${key.nameToDB} = ?'];
   }
 }

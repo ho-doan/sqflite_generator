@@ -547,7 +547,7 @@ packages:
       path: "../sqflite_annotation"
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.2"
   sqflite_common:
     dependency: transitive
     description:
@@ -570,7 +570,7 @@ packages:
       path: "../sqflite_generator"
       relative: true
     source: path
-    version: "0.1.1"
+    version: "0.1.2"
   sqflite_platform_interface:
     dependency: transitive
     description:

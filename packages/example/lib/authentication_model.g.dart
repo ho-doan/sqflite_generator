@@ -85,6 +85,9 @@ extension BillQuery on Bill {
     Set<$BillSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -99,16 +102,45 @@ extension BillQuery on Bill {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM Bill bill
+    final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
  LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill.key
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all Bill $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[BillQuery.key.nameCast]))
         .values
         .map((e) => Bill.fromDB(e.first, e))
         .toList();
+  }
+
+  static Future<List<Bill>> top(
+    Database database, {
+    Set<$BillSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM Bill
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
   }
 
   Future<int> insert(Database database) async {
@@ -125,7 +157,7 @@ memos)
 
   Future<int> update(Database database) async {
     return await database
-        .update('Bill', toDB(), where: "bill.key = ?", whereArgs: [this.key]);
+        .update('Bill', toDB(), where: "key = ?", whereArgs: [this.key]);
   }
 
   static Future<Bill?> getById(
@@ -253,6 +285,9 @@ extension BillDetailQuery on BillDetail {
     Set<$BillDetailSetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillDetailSetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -267,16 +302,45 @@ extension BillDetailQuery on BillDetail {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
+    final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
  LEFT JOIN Bill bill ON bill.key = bill_detail.bill
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all BillDetail $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[BillDetailQuery.key.nameCast]))
         .values
         .map((e) => BillDetail.fromDB(e.first, e))
         .toList();
+  }
+
+  static Future<List<BillDetail>> top(
+    Database database, {
+    Set<$BillDetailSetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$BillDetailSetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM BillDetail
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
   }
 
   Future<int> insert(Database database) async {
@@ -295,8 +359,8 @@ name)
 
   Future<int> update(Database database) async {
     await parent?.update(database);
-    return await database.update('BillDetail', toDB(),
-        where: "bill_detail.key = ?", whereArgs: [this.key]);
+    return await database
+        .update('BillDetail', toDB(), where: "key = ?", whereArgs: [this.key]);
   }
 
   static Future<BillDetail?> getById(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
@@ -18,7 +19,7 @@ Future<Database> configSql([
     $configSql(token, migrations);
 
 @entity
-class Bill {
+class Bill extends EntityQuery {
   final String name;
 
   @ForeignKey(name: 'BillDetail')
@@ -61,7 +62,7 @@ class StringListConverter extends ColumnDBConverter<List<String>> {
 }
 
 @entity
-class BillDetail {
+class BillDetail extends EntityQuery {
   final String name;
 
   @ForeignKey(name: 'Bill')

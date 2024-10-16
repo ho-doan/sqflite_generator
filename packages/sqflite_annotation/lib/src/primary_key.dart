@@ -12,3 +12,4 @@ class PrimaryKey extends Property {
 }
 
 const primaryKey = PrimaryKey(version: 1);
+const primaryKeyNoIncrement = PrimaryKey(version: 1, auto: false);

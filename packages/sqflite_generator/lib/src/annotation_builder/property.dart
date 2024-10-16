@@ -52,6 +52,12 @@ class AProperty {
     required this.className,
     this.rawFromDB = false,
   });
+  String get typeSelect {
+    if (dartType.isDartCoreInt) return 'int';
+    if (dartType.isDartCoreBool) return 'bool';
+    return 'String';
+  }
+
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
   String get _isNull => _isQues ? '' : 'NOT NULL';
   String get _sqlType => dartType.typeSql(step)?.str ?? 'NONE';

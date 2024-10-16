@@ -11,19 +11,25 @@ import 'package:path/path.dart';
 import 'dart:developer';
 import 'package:flutter/services.dart';
 
-import 'package:example/db/models/product.dart' as i0;
+import 'package:example/core/models/comment_link.dart' as i0;
 
-import 'package:example/db/models/client.dart' as i1;
+import 'package:example/core/models/comment.dart' as i1;
 
-import 'package:example/db/models/category.dart' as i2;
+import 'package:example/core/models/hospital_model.dart' as i2;
 
-import 'package:example/db/models/cat.dart' as i3;
+import 'package:example/db/models/product.dart' as i3;
 
-import 'package:example/db/models/bill.dart' as i4;
+import 'package:example/db/models/client.dart' as i4;
 
-import 'package:example/authentication_model.dart' as i5;
+import 'package:example/db/models/category.dart' as i5;
 
-import 'package:example/authentication_model.dart' as i6;
+import 'package:example/db/models/cat.dart' as i6;
+
+import 'package:example/db/models/bill.dart' as i7;
+
+import 'package:example/authentication_model.dart' as i8;
+
+import 'package:example/authentication_model.dart' as i9;
 
 import 'dart:io';
 
@@ -33,23 +39,29 @@ import 'package:path_provider/path_provider.dart';
 
 final List<String> _schemas = [
   'CREATE TABLE IF NOT EXISTS Migrations(key TEXT PRIMARY KEY)',
-  i0.ProductQuery.createTable,
-  i1.ClientQuery.createTable,
-  i2.CategoryQuery.createTable,
-  i3.CatQuery.createTable,
-  i4.BillQuery.createTable,
-  i5.BillQuery.createTable,
-  i6.BillDetailQuery.createTable
+  i0.CommentLinkModelQuery.createTable,
+  i1.CommentModelQuery.createTable,
+  i2.HospitalModelQuery.createTable,
+  i3.ProductQuery.createTable,
+  i4.ClientQuery.createTable,
+  i5.CategoryQuery.createTable,
+  i6.CatQuery.createTable,
+  i7.BillQuery.createTable,
+  i8.BillQuery.createTable,
+  i9.BillDetailQuery.createTable
 ];
 
 final List<Map<int, List<String>>> _alters = [
-  i0.ProductQuery.alter,
-  i1.ClientQuery.alter,
-  i2.CategoryQuery.alter,
-  i3.CatQuery.alter,
-  i4.BillQuery.alter,
-  i5.BillQuery.alter,
-  i6.BillDetailQuery.alter
+  i0.CommentLinkModelQuery.alter,
+  i1.CommentModelQuery.alter,
+  i2.HospitalModelQuery.alter,
+  i3.ProductQuery.alter,
+  i4.ClientQuery.alter,
+  i5.CategoryQuery.alter,
+  i6.CatQuery.alter,
+  i7.BillQuery.alter,
+  i8.BillQuery.alter,
+  i9.BillDetailQuery.alter
 ];
 
 Future<Database> $configSql([
@@ -127,11 +139,14 @@ Future<Database> $configSql([
 
 Future<void> $clearDatabase(Database db) => Future.wait([
       db.execute('DELETE * FROM Migrations'),
-      i0.ProductQuery.deleteAll(db),
-      i1.ClientQuery.deleteAll(db),
-      i2.CategoryQuery.deleteAll(db),
-      i3.CatQuery.deleteAll(db),
-      i4.BillQuery.deleteAll(db),
-      i5.BillQuery.deleteAll(db),
-      i6.BillDetailQuery.deleteAll(db),
+      i0.CommentLinkModelQuery.deleteAll(db),
+      i1.CommentModelQuery.deleteAll(db),
+      i2.HospitalModelQuery.deleteAll(db),
+      i3.ProductQuery.deleteAll(db),
+      i4.ClientQuery.deleteAll(db),
+      i5.CategoryQuery.deleteAll(db),
+      i6.CatQuery.deleteAll(db),
+      i7.BillQuery.deleteAll(db),
+      i8.BillQuery.deleteAll(db),
+      i9.BillDetailQuery.deleteAll(db),
     ]);

@@ -30,18 +30,18 @@ extension CategoryQuery on Category {
   );
 
   static const $CategorySetArgs<String> productLastName = $CategorySetArgs(
-    name: 'lastName',
+    name: 'last_name',
     nameCast: 'product_last_name',
     model: 'product_product',
   );
 
   static const $CategorySetArgs<String> productFirstName = $CategorySetArgs(
-    name: 'firstName',
+    name: 'first_name',
     nameCast: 'product_first_name',
     model: 'product_product',
   );
 
-  static const $CategorySetArgs<String> productBlocked = $CategorySetArgs(
+  static const $CategorySetArgs<bool> productBlocked = $CategorySetArgs(
     name: 'blocked',
     nameCast: 'product_blocked',
     model: 'product_product',
@@ -81,6 +81,9 @@ extension CategoryQuery on Category {
     Set<$CategorySetArgs>? select,
     Set<WhereResult>? where,
     List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$CategorySetArgs>>? orderBy,
+    int? limit,
+    int? offset,
   }) async {
     String whereStr = '';
     if (where != null &&
@@ -95,16 +98,45 @@ extension CategoryQuery on Category {
       whereStr = where.whereSql;
     }
 
-    final mapList = (await database
-        .rawQuery('''SELECT ${$createSelect(select)} FROM Category category
+    final sql = '''SELECT ${$createSelect(select)} FROM Category category
  LEFT JOIN Product product ON product.id = category.product_id
 ${whereStr.isNotEmpty ? whereStr : ''}
-''') as List<Map>);
+${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${limit != null ? 'LIMIT $limit' : ''}
+${offset != null ? 'OFFSET $offset' : ''}
+''';
+    if (kDebugMode) {
+      print('get all Category $sql');
+    }
+    final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
         .groupBy(((m) => m[CategoryQuery.key.nameCast]))
         .values
         .map((e) => Category.fromDB(e.first, e))
         .toList();
+  }
+
+  static Future<List<Category>> top(
+    Database database, {
+    Set<$CategorySetArgs>? select,
+    Set<WhereResult>? where,
+    List<Set<WhereResult>>? whereOr,
+    Set<OrderBy<$CategorySetArgs>>? orderBy,
+    required int top,
+  }) =>
+      getAll(
+        database,
+        select: select,
+        where: where,
+        whereOr: whereOr,
+        orderBy: orderBy,
+        limit: top,
+      );
+  static Future<int> count(Database database) async {
+    final mapList =
+        (await database.rawQuery('''SELECT count(*) as ns_count FROM Category
+''') as List<Map>);
+    return mapList.first['ns_count'] as int;
   }
 
   Future<int> insert(Database database) async {
@@ -125,8 +157,8 @@ name)
 
   Future<int> update(Database database) async {
     await product.update(database);
-    return await database.update('Category', toDB(),
-        where: "category.key = ?", whereArgs: [this.key]);
+    return await database
+        .update('Category', toDB(), where: "key = ?", whereArgs: [this.key]);
   }
 
   static Future<Category?> getById(

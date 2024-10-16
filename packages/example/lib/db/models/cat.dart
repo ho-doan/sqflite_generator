@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 
 part 'cat.g.dart';
 
 @entity
-class Cat {
+class Cat extends EntityQuery {
   @primaryKey
   final int? id;
 

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:example/authentication_model.dart';
+import 'package:example/core/models/hospital_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'models/client.dart';
@@ -27,8 +28,7 @@ class DBProvider {
       _database,
       where: {
         ClientQuery.lastName.equal('k'),
-        // TODO(hodoan): where boolean
-        ClientQuery.productBlocked.equal('true')
+        ClientQuery.productBlocked.equal(true)
       },
     );
   }
@@ -62,7 +62,7 @@ class DBProvider {
 
     // var res = await db.rawQuery("SELECT * FROM Client WHERE blocked=1");
     var res = await ClientQuery.getAll(db, where: {
-      ClientQuery.blocked.equal('1'),
+      ClientQuery.blocked.equal(true),
     });
 
     List<Client> list = res;
@@ -82,8 +82,7 @@ class DBProvider {
       },
       where: {
         ClientQuery.lastName.equal('k'),
-        // TODO(hodoan): where boolean
-        ClientQuery.productBlocked.equal('true')
+        ClientQuery.productBlocked.equal(true)
       },
     );
   }
@@ -97,4 +96,88 @@ class DBProvider {
     final db = _database;
     return await ClientQuery.deleteAll(db);
   }
+
+  //#region talk func
+
+  /// URL : /api/MstFacility/hospital-master
+  Future<
+      ({
+        int count,
+        int? updateDate,
+        int? updateTime,
+        List<HospitalModel> hospitals
+      })> hospitalMaster({
+    Conditions? conditions,
+    SortHospital? sorts,
+
+    /// limit
+    int? length,
+
+    /// offset
+    int? from,
+  }) async {
+    final count = await HospitalModelQuery.count(_database);
+    final hospitalModel = (await HospitalModelQuery.top(
+      _database,
+      top: 1,
+      orderBy: {
+        OrderBy.desc(HospitalModelQuery.updateDate),
+        OrderBy.desc(HospitalModelQuery.updateTime),
+      },
+    ))
+        .firstOrNull;
+
+    final updateDate = hospitalModel?.updateDate;
+    final updateTime = hospitalModel?.updateTime;
+
+    final hospitals = await HospitalModelQuery.getAll(
+      _database,
+      where: {
+        if (conditions?.searchKeyword != null)
+          HospitalModelQuery.name.likeContain(conditions!.searchKeyword!),
+        if (conditions?.hospitalNos != null &&
+            conditions!.hospitalNos!.isNotEmpty)
+          HospitalModelQuery.hospitalNo.in$(conditions.hospitalNos!),
+      },
+      orderBy: {
+        if (sorts?.name != null) sorts!.name!,
+      },
+      limit: length,
+      offset: from,
+    );
+
+    return (
+      count: count,
+      updateTime: updateTime,
+      updateDate: updateDate,
+      hospitals: hospitals,
+    );
+  }
+  //#endregion
+}
+
+class Conditions {
+  final String? searchKeyword;
+  final List<int>? hospitalNos;
+
+  Conditions({
+    this.searchKeyword,
+    this.hospitalNos,
+  });
+}
+
+class SortHospital {
+  final OrderBy<$HospitalModelSetArgs>? name;
+
+  const SortHospital._({
+    required this.name,
+  });
+
+  factory SortHospital.of({
+    OrderByType? name,
+    OrderByType? order,
+  }) =>
+      SortHospital._(
+        name: name.of(HospitalModelQuery.name),
+      );
 }
