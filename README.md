@@ -14,7 +14,7 @@
 * Create foreign key
 * Create index key (doing)
 * Create column
-* Create converter (doing)
+* Create converter
 
 ## Getting Started
 
