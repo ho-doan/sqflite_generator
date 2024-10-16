@@ -147,7 +147,8 @@ extension APropertyX on List<AProperty> {
     final keys = [
       for (final item in this)
         if (fores.any((e) => e.nameDefault == item.nameDefault))
-          '${item.nameDefault}_id'
+          fores.firstWhere((e) => e.nameDefault == item.nameDefault).nameToDB
+        // '${fores.firstWhere((e) => e.nameDefault == item.nameDefault).entityParent?.primaryKeys.firstWhere((e) => e.name == item.name).nameToDB}'
         else
           item.name ?? item.nameDefault.toSnakeCase()
     ].join(', ');

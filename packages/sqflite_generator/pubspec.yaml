@@ -1,6 +1,6 @@
 name: sqflite_generator
 description: Sqflite annotation for Sqflite
-version: 0.1.2
+version: 0.1.3
 # publish_to: https://github.com/ho-doan/sqflite_generator
 homepage: https://github.com/ho-doan/sqflite_generator
 repository: https://github.com/ho-doan/sqflite_generator/tree/master/packages/sqflite_generator
@@ -18,7 +18,7 @@ dependencies:
   collection: ^1.17.2
   path: ^1.8.3
   glob: ^2.1.2
-  sqflite_annotation: ^0.1.2
+  sqflite_annotation: ^0.1.3
     # path: ../sqflite_annotation
   change_case: ^2.0.1
 
