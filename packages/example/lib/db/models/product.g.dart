@@ -78,7 +78,7 @@ extension ProductQuery on Product {
 
     final sql = '''SELECT ${$createSelect(select)} FROM Product product
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : null}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
