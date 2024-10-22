@@ -1,3 +1,7 @@
+## 0.1.4
+
+* fix query order by
+
 ## 0.1.3
 
 * fix primary key

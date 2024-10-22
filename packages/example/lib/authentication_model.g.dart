@@ -105,7 +105,7 @@ extension BillMQuery on BillM {
     final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
  LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill_m.key
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : null}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -305,7 +305,7 @@ extension BillDetailQuery on BillDetail {
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
  LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : null}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';

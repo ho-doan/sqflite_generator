@@ -96,7 +96,7 @@ extension CatQuery on Cat {
  LEFT JOIN Cat parent_cat ON parent_cat.id = cat.parent_id
  LEFT JOIN Cat child_cat ON child_cat.id = cat.child_id
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : null}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';

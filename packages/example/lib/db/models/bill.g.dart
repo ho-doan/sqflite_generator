@@ -124,7 +124,7 @@ extension BillQuery on Bill {
  LEFT JOIN Product product ON product.id = bill.product_id
  LEFT JOIN Client client ON client.id = bill.client_id
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : null}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
