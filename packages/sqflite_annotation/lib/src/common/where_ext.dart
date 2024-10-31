@@ -66,7 +66,7 @@ extension $WhereResult on Set<WhereResult>? {
                 e.key,
                 e.compare,
                 if (e.value is String &&
-                    !['IN', 'LIKE', 'EXISTS'].contains(e.compare))
+                    !['IN', 'NOT IN', 'LIKE', 'EXISTS'].contains(e.compare))
                   "'${e.value}'"
                 else if (e.value is bool)
                   e.value ? 1 : 0

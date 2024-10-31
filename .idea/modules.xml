@@ -5,7 +5,8 @@
       <module fileurl="file://$PROJECT_DIR$/packages/example/melos_example.iml" filepath="$PROJECT_DIR$/packages/example/melos_example.iml" />
       <module fileurl="file://$PROJECT_DIR$/packages/sqflite_annotation/melos_sqflite_annotation.iml" filepath="$PROJECT_DIR$/packages/sqflite_annotation/melos_sqflite_annotation.iml" />
       <module fileurl="file://$PROJECT_DIR$/packages/sqflite_generator/melos_sqflite_generator.iml" filepath="$PROJECT_DIR$/packages/sqflite_generator/melos_sqflite_generator.iml" />
-      <module fileurl="file://$PROJECT_DIR$/packages/sqflite_query/melos_sqflite_query.iml" filepath="$PROJECT_DIR$/packages/sqflite_query/melos_sqflite_query.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/sql_external_db/melos_sql_external_db.iml" filepath="$PROJECT_DIR$/packages/sql_external_db/melos_sql_external_db.iml" />
+      <module fileurl="file://$PROJECT_DIR$/packages/sql_external_db/example/melos_sql_external_db_example.iml" filepath="$PROJECT_DIR$/packages/sql_external_db/example/melos_sql_external_db_example.iml" />
       <module fileurl="file://$PROJECT_DIR$/melos_app.iml" filepath="$PROJECT_DIR$/melos_app.iml" />
     </modules>
   </component>

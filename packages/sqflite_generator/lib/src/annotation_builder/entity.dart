@@ -417,7 +417,7 @@ extension AQuery on AEntity {
                       item.nameDefault.toLowerCase()) {
                     return sItem.className;
                   }
-                  return '${sItem.className}_${item.nameDefault}';
+                  return '${sItem.className}_${item.nameFromDB}';
                 }()}_${sItem.nameDefault}'
                     .toCamelCase(),
                 p: sItem,

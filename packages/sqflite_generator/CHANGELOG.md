@@ -1,3 +1,11 @@
+## 0.1.7
+
+* fix gen select foreign key
+
+## 0.1.6
+
+* fix gen select foreign key
+
 ## 0.1.5
 
 * fix query order by
