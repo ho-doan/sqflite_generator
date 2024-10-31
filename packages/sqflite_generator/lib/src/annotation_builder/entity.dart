@@ -614,6 +614,7 @@ extension AEntityBase on AEntity {
     ];
   }
 
+  // TODO(hodoan): doing
   String rawDebug([AColumn? ps, String? newName]) {
     final all = [...aMPall].map((e) =>
         '${e.nameSelfGen ?? ''} ${e.children?.expanded().map((e) => e.name).join(',') ?? e.property.nameFromDB}');
