@@ -101,7 +101,7 @@ extension CategoryQuery on Category {
     final sql = '''SELECT ${$createSelect(select)} FROM Category category
  LEFT JOIN Product product ON product.id = category.product_id
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : null}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
