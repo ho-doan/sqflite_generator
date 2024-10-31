@@ -1,6 +1,6 @@
 name: sqflite_annotation
 description: Sqflite annotation for Sqflite
-version: 0.1.3
+version: 0.1.4
 homepage: https://github.com/ho-doan/sqflite_generator
 
 environment:
