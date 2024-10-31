@@ -20,7 +20,7 @@ class Client extends EntityQuery {
   @column
   final bool blocked;
 
-  @ForeignKey(name: 'productId')
+  @ForeignKey(name: 'Product')
   final Product product;
 
   const Client({

@@ -10,12 +10,15 @@ part 'bill.g.dart';
 @entity
 class Bill extends EntityQuery {
   @primaryKey
-  @ForeignKey(name: 'productId')
+  @ForeignKey(name: 'Product')
   final Product? product;
 
   @primaryKey
-  @ForeignKey(name: 'clientId')
+  @ForeignKey(name: 'Client')
   final Client? client;
+
+  @ForeignKey(name: 'Bill')
+  final Bill? parent;
 
   @column
   final DateTime? time;
@@ -23,6 +26,7 @@ class Bill extends EntityQuery {
   const Bill({
     this.client,
     this.time,
+    this.parent,
     required this.product,
   });
 

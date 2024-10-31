@@ -49,6 +49,14 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         ),
         Field(
           (f) => f
+            ..name = 'debug'
+            ..type = refer('String')
+            ..assignment = Code("""'''${entity.rawDebug()}'''""")
+            ..modifier = FieldModifier.constant
+            ..static = true,
+        ),
+        Field(
+          (f) => f
             ..name = 'alter'
             ..type = refer('Map<int,List<String>>')
             ..assignment = Code("""${entity.rawAlterTable}""")
@@ -66,10 +74,11 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   '@Deprecated(\'no such column\')'
               ])
               ..assignment = Code('''${entity.setClassName}(
-              name: '${item.p.nameDefault.toSnakeCase()}',
-              nameCast: '${item.p.nameFromDB}',
+              name: '${item.p.nameToDB.toSnakeCase()}',
+              ${item.field != null ? 'self: \'${item.field}\',' : ''}
+              nameCast: '${item.nameCast}',
               model: '${[
-                if (item.field != null) item.field,
+                // if (item.field != null) item.field,
                 item.p.className.$rm
               ].join('_').toSnakeCase()}',
               )''')

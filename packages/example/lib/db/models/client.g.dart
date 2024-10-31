@@ -8,13 +8,19 @@ part of 'client.dart';
 
 extension ClientQuery on Client {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Client(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			first_name TEXT,
 			last_name TEXT,
 			blocked BIT NOT NULL,
-			product_id INTEGER NOT NULL,
+			product_id INTEGER,
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
+
+  static const String debug = ''' client_id,
+ client_first_name,
+ client_last_name,
+ client_blocked,
+ product_id''';
 
   static const Map<int, List<String>> alter = {};
 
@@ -27,25 +33,25 @@ extension ClientQuery on Client {
   static const $ClientSetArgs<int> productId = $ClientSetArgs(
     name: 'id',
     nameCast: 'product_id',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $ClientSetArgs<String> productLastName = $ClientSetArgs(
     name: 'last_name',
     nameCast: 'product_last_name',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $ClientSetArgs<String> productFirstName = $ClientSetArgs(
     name: 'first_name',
     nameCast: 'product_first_name',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $ClientSetArgs<bool> productBlocked = $ClientSetArgs(
     name: 'blocked',
     nameCast: 'product_blocked',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $ClientSetArgs<String> firstName = $ClientSetArgs(
@@ -107,7 +113,7 @@ extension ClientQuery on Client {
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Client client
- LEFT JOIN Product product ON product.id = client.product_id
+ LEFT JOIN Product product ON product.id = client.product
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -150,7 +156,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
   Future<int> insert(Database database) async {
     final $productIdProduct = await product.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
-product_id,
+product,
 first_name,
 last_name,
 blocked) 
@@ -179,7 +185,7 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Client client
- LEFT JOIN Product product ON product.id = client.product_id
+ LEFT JOIN Product product ON product.id = client.product
 WHERE client.id = ?
 ''', [id]) as List<Map>);
     return res.isNotEmpty ? Client.fromDB(res.first, res) : null;
@@ -216,7 +222,7 @@ WHERE client.id = ?
       );
   Map<String, dynamic> $toDB() => {
         'id': this.id,
-        'product_id': product.id,
+        'product': product.id,
         'first_name': this.firstName,
         'last_name': this.lastName,
         'blocked': (this.blocked ?? false) ? 1 : 0,
@@ -225,10 +231,13 @@ WHERE client.id = ?
 
 class $ClientSetArgs<T> extends WhereModel<T> {
   const $ClientSetArgs({
+    this.self = '',
     required this.name,
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
+
+  final String self;
 
   final String name;
 

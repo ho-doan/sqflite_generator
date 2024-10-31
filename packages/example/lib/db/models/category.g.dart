@@ -8,12 +8,17 @@ part of 'category.dart';
 
 extension CategoryQuery on Category {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Category(
-		key INTEGER PRIMARY KEY AUTOINCREMENT,
+			key INTEGER PRIMARY KEY AUTOINCREMENT,
 			id TEXT NOT NULL,
 			name TEXT NOT NULL,
-			product_id INTEGER NOT NULL,
+			product_id INTEGER,
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
+
+  static const String debug = ''' category_key,
+ category_id,
+ category_name,
+ product_id''';
 
   static const Map<int, List<String>> alter = {};
 
@@ -26,25 +31,25 @@ extension CategoryQuery on Category {
   static const $CategorySetArgs<int> productId = $CategorySetArgs(
     name: 'id',
     nameCast: 'product_id',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $CategorySetArgs<String> productLastName = $CategorySetArgs(
     name: 'last_name',
     nameCast: 'product_last_name',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $CategorySetArgs<String> productFirstName = $CategorySetArgs(
     name: 'first_name',
     nameCast: 'product_first_name',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $CategorySetArgs<bool> productBlocked = $CategorySetArgs(
     name: 'blocked',
     nameCast: 'product_blocked',
-    model: 'product_product',
+    model: 'product',
   );
 
   static const $CategorySetArgs<String> id = $CategorySetArgs(
@@ -99,7 +104,7 @@ extension CategoryQuery on Category {
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Category category
- LEFT JOIN Product product ON product.id = category.product_id
+ LEFT JOIN Product product ON product.id = category.product
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -143,7 +148,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     final $productIdProduct = await product.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Category (key,
-product_id,
+product,
 id,
 name) 
        VALUES(?, ?, ?, ?)''', [
@@ -170,7 +175,7 @@ name)
 SELECT 
 ${$createSelect(select)}
  FROM Category category
- LEFT JOIN Product product ON product.id = category.product_id
+ LEFT JOIN Product product ON product.id = category.product
 WHERE category.key = ?
 ''', [key]) as List<Map>);
     return res.isNotEmpty ? Category.fromDB(res.first, res) : null;
@@ -206,7 +211,7 @@ WHERE category.key = ?
       );
   Map<String, dynamic> $toDB() => {
         'key': this.key,
-        'product_id': product.id,
+        'product': product.id,
         'id': this.id,
         'name': this.name,
       };
@@ -214,10 +219,13 @@ WHERE category.key = ?
 
 class $CategorySetArgs<T> extends WhereModel<T> {
   const $CategorySetArgs({
+    this.self = '',
     required this.name,
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
+
+  final String self;
 
   final String name;
 

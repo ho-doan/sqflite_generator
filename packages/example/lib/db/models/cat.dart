@@ -9,10 +9,10 @@ class Cat extends EntityQuery {
   @primaryKey
   final int? id;
 
-  @ForeignKey(name: 'parentId')
+  @ForeignKey(name: 'Cat')
   final Cat? parent;
 
-  @ForeignKey(name: 'childId')
+  @ForeignKey(name: 'Cat')
   final Cat? child;
 
   @column

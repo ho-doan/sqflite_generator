@@ -8,13 +8,19 @@ part of 'cat.dart';
 
 extension CatQuery on Cat {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Cat(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			birth INTEGER,
 			parent_id INTEGER,
 			child_id INTEGER,
-			FOREIGN KEY (parent_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (child_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (parent_id) REFERENCES Cat (cat_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (child_id) REFERENCES Cat (cat_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
+
+  static const String debug = ''' cat_id,
+ cat_birth,
+ parent_id,
+parent parent_id,
+child child_id''';
 
   static const Map<int, List<String>> alter = {};
 
@@ -26,26 +32,30 @@ extension CatQuery on Cat {
 
   static const $CatSetArgs<int> catParentId = $CatSetArgs(
     name: 'id',
+    self: 'parent',
     nameCast: 'cat_id',
-    model: 'parent_cat',
+    model: 'cat',
   );
 
   static const $CatSetArgs<String> catParentBirth = $CatSetArgs(
     name: 'birth',
+    self: 'parent',
     nameCast: 'cat_birth',
-    model: 'parent_cat',
+    model: 'cat',
   );
 
   static const $CatSetArgs<int> catChildId = $CatSetArgs(
     name: 'id',
+    self: 'child',
     nameCast: 'cat_id',
-    model: 'child_cat',
+    model: 'cat',
   );
 
   static const $CatSetArgs<String> catChildBirth = $CatSetArgs(
     name: 'birth',
+    self: 'child',
     nameCast: 'cat_birth',
-    model: 'child_cat',
+    model: 'cat',
   );
 
   static const $CatSetArgs<String> birth = $CatSetArgs(
@@ -93,8 +103,8 @@ extension CatQuery on Cat {
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Cat cat
- LEFT JOIN Cat parent_cat ON parent_cat.id = cat.parent_id
- LEFT JOIN Cat child_cat ON child_cat.id = cat.child_id
+ LEFT JOIN Cat parent_cat ON parent_cat.id = cat.cat
+ LEFT JOIN Cat child_cat ON child_cat.id = cat.cat
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -138,8 +148,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
     final $catIdParent = await parent?.insert(database);
     final $catIdChild = await child?.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Cat (id,
-parent_id,
-child_id,
+cat,
+cat,
 birth) 
        VALUES(?, ?, ?, ?)''', [
       this.id,
@@ -166,8 +176,8 @@ birth)
 SELECT 
 ${$createSelect(select)}
  FROM Cat cat
- LEFT JOIN Cat parent_cat ON parent_cat.id = cat.parent_id
- LEFT JOIN Cat child_cat ON child_cat.id = cat.child_id
+ LEFT JOIN Cat parent_cat ON parent_cat.id = cat.cat
+ LEFT JOIN Cat child_cat ON child_cat.id = cat.cat
 WHERE cat.id = ?
 ''', [id]) as List<Map>);
     return res.isNotEmpty ? Cat.fromDB(res.first, res) : null;
@@ -204,18 +214,21 @@ WHERE cat.id = ?
       );
   Map<String, dynamic> $toDB() => {
         'id': this.id,
-        'parent_id': parent?.id,
-        'child_id': child?.id,
+        'cat': parent?.id,
+        'cat': child?.id,
         'birth': this.birth?.millisecondsSinceEpoch,
       };
 }
 
 class $CatSetArgs<T> extends WhereModel<T> {
   const $CatSetArgs({
+    this.self = '',
     required this.name,
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
+
+  final String self;
 
   final String name;
 

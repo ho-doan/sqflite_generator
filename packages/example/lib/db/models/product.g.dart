@@ -8,11 +8,16 @@ part of 'product.dart';
 
 extension ProductQuery on Product {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Product(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			last_name TEXT,
 			first_name TEXT,
 			blocked BIT NOT NULL
 	)''';
+
+  static const String debug = ''' product_id,
+ product_last_name,
+ product_first_name,
+ product_blocked''';
 
   static const Map<int, List<String>> alter = {};
 
@@ -187,10 +192,13 @@ WHERE product.id = ?
 
 class $ProductSetArgs<T> extends WhereModel<T> {
   const $ProductSetArgs({
+    this.self = '',
     required this.name,
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
+
+  final String self;
 
   final String name;
 

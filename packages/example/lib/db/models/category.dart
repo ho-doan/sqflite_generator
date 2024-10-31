@@ -27,7 +27,7 @@ class Category extends ICategory implements EntityQuery {
     required this.key,
     required super.id,
     required super.name,
-    @ForeignKey(name: 'productId') required super.product,
+    @ForeignKey(name: 'Product') required super.product,
   });
 
   factory Category.fromDB(

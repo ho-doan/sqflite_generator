@@ -8,23 +8,29 @@ part of 'authentication_model.dart';
 
 extension BillMQuery on BillM {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillM(
-		key INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL
+			key INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			details_key INTEGER
 	)''';
+
+  static const String debug = ''' bill_m_key,
+ bill_m_name,
+ bill_m_memos,
+ details_key''';
 
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
-		key INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			bill NONE
+			key INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL
 	)''',
       'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
       'DROP TABLE BillDetail;',
       '''CREATE TABLE IF NOT EXISTS BillM_new(
-		key INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL
+			key INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			details_key INTEGER
 	)''',
       'INSERT INTO BillM_new(key,name)SELECT key,name FROM BillM;',
       'DROP TABLE BillM;',
@@ -44,13 +50,13 @@ extension BillMQuery on BillM {
   static const $BillMSetArgs<int> billDetailDetailsKey = $BillMSetArgs(
     name: 'key',
     nameCast: 'bill_detail_key',
-    model: 'details_bill_detail',
+    model: 'bill_detail',
   );
 
   static const $BillMSetArgs<String> billDetailDetailsName = $BillMSetArgs(
     name: 'name',
     nameCast: 'bill_detail_name',
-    model: 'details_bill_detail',
+    model: 'bill_detail',
   );
 
   static const $BillMSetArgs<String> name = $BillMSetArgs(
@@ -213,10 +219,13 @@ WHERE bill_m.key = ?
 
 class $BillMSetArgs<T> extends WhereModel<T> {
   const $BillMSetArgs({
+    this.self = '',
     required this.name,
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
+
+  final String self;
 
   final String name;
 
@@ -227,11 +236,15 @@ class $BillMSetArgs<T> extends WhereModel<T> {
 
 extension BillDetailQuery on BillDetail {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillDetail(
-		key INTEGER PRIMARY KEY AUTOINCREMENT,
+			key INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
-			bill INTEGER,
-			FOREIGN KEY (bill) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
+			parent_key INTEGER,
+			FOREIGN KEY (parent_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
+
+  static const String debug = ''' bill_detail_key,
+ bill_detail_name,
+ parent_key''';
 
   static const Map<int, List<String>> alter = {};
 
@@ -244,20 +257,20 @@ extension BillDetailQuery on BillDetail {
   static const $BillDetailSetArgs<int> billMParentKey = $BillDetailSetArgs(
     name: 'key',
     nameCast: 'bill_m_key',
-    model: 'parent_bill_m',
+    model: 'bill_m',
   );
 
   static const $BillDetailSetArgs<String> billMParentName = $BillDetailSetArgs(
     name: 'name',
     nameCast: 'bill_m_name',
-    model: 'parent_bill_m',
+    model: 'bill_m',
   );
 
   @Deprecated('no such column')
   static const $BillDetailSetArgs<String> billMParentMemos = $BillDetailSetArgs(
     name: 'memos',
     nameCast: 'bill_m_memos',
-    model: 'parent_bill_m',
+    model: 'bill_m',
   );
 
   static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
@@ -416,10 +429,13 @@ WHERE bill_detail.key = ?
 
 class $BillDetailSetArgs<T> extends WhereModel<T> {
   const $BillDetailSetArgs({
+    this.self = '',
     required this.name,
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
+
+  final String self;
 
   final String name;
 

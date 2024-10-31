@@ -4,8 +4,6 @@ import 'package:change_case/change_case.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'package:sqflite_generator/src/extensions/sql_type.dart';
 
-import 'foreign_key.dart';
-
 enum AlterTypeGen {
   add,
   @Deprecated('not support')
@@ -67,16 +65,11 @@ class AProperty {
   String get nameToDB => (name ?? nameDefault).toSnakeCase();
   String get nameFromDB => '${className.$rm}_$nameToDB'.toSnakeCase();
 
-  /// ```
-  /// @primaryKey
-  /// @ForeignKey(name: 'productId')
-  /// final Product? product;
-  /// ```
-  /// * [isFore] = true
-  /// ```
-  /// @primaryKey
-  /// @ForeignKey(name: 'productId')
-  /// final Product? product;
+  @override
+  toString() =>
+      'nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
+      ' _sqlType: $_sqlType, _isNull: $_isNull'
+      'rawFromDB: $rawFromDB';
 
   /// @primaryKey
   /// @ForeignKey(name: 'clientId')
@@ -88,21 +81,20 @@ class AProperty {
   /// @ForeignKey(name: 'clientId')
   /// ```
   /// * [autoId] = true
-  String rawCreate({
+  String rawCreate(
+    String? name, {
     bool isId = false,
     bool autoId = false,
     bool isIds = false,
-    bool isFore = false,
-  }) =>
-      isFore
-          ? ''
-          : [
-              nameToDB,
-              _sqlType,
-              if (isId && !isIds) 'PRIMARY KEY',
-              if (autoId && !isIds) 'AUTOINCREMENT',
-              _isNull,
-            ].where((e) => e.isNotEmpty).join(' ');
+  }) {
+    return [
+      name ?? nameToDB.toSnakeCase(),
+      _sqlType,
+      if (isId && !isIds) 'PRIMARY KEY',
+      if (autoId && !isIds) 'AUTOINCREMENT',
+      _isNull,
+    ].where((e) => e.isNotEmpty).join(' ');
+  }
 
   Map<int, List<String>> rawUpdate() {
     return {
@@ -133,25 +125,4 @@ extension Aps on AProperty {
 
   String selectField([String? child]) =>
       '\'\${childName}${className.$rm.toSnakeCase()}.$nameToDB as \${childName}$nameFromDB\'';
-}
-
-extension APropertyX on List<AProperty> {
-  /// ```
-  /// @primaryKey
-  /// @ForeignKey(name: 'productId')
-  /// final Product? product;
-  /// ```
-  /// * [isFore] = true
-  String rawCreate(List<AForeignKey> fores) {
-    if (length < 2) return '';
-    final keys = [
-      for (final item in this)
-        if (fores.any((e) => e.nameDefault == item.nameDefault))
-          fores.firstWhere((e) => e.nameDefault == item.nameDefault).nameToDB
-        // '${fores.firstWhere((e) => e.nameDefault == item.nameDefault).entityParent?.primaryKeys.firstWhere((e) => e.name == item.name).nameToDB}'
-        else
-          item.name ?? item.nameDefault.toSnakeCase()
-    ].join(', ');
-    return 'PRIMARY KEY($keys)';
-  }
 }

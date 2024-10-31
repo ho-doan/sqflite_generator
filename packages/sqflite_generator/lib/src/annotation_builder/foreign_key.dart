@@ -29,11 +29,12 @@ class AForeignKey extends AProperty {
     required super.className,
     required super.step,
   });
-  factory AForeignKey.fromElement(
-      FieldElement element, String className, int step) {
+
+  factory AForeignKey.fromElement(FieldElement element,
+      FieldElement? parentElement, String className, int step) {
     AEntity? aEntity;
     if (element.type.isDartCoreList) {
-      final pElement = element.library.children
+      Element? pElement = element.library.children
           .whereType<CompilationUnitElement>()
           .expand((e) => e.children)
           .firstWhereOrNull(
@@ -41,6 +42,9 @@ class AForeignKey extends AProperty {
                 e is ClassElement &&
                 e.displayName == AForeignKeyX._name(element),
           );
+      if (pElement == null && parentElement != null) {
+        pElement = parentElement;
+      }
       if (pElement != null) {
         aEntity = AEntity.of(pElement as ClassElement, step + 1);
       }
@@ -85,13 +89,18 @@ class AForeignKey extends AProperty {
   }
 }
 
+extension AForeignKeyXL on List<AForeignKey> {
+  AEntity? of(String fieldName) =>
+      firstWhereOrNull((e) => e.nameDefault == fieldName)?.entityParent;
+}
+
 extension AForeignKeyX on AForeignKey {
   String get typeNotSuffix =>
       dartType.toString().replaceFirst('?', '').replaceFirst('\$', '');
-  String? get rawCreateForeign => dartType.isDartCoreList
+  String? rawCreateForeign(String self, String goal) => dartType.isDartCoreList
       ? null
-      : 'FOREIGN KEY ($nameToDB) REFERENCES $typeNotSuffix '
-          '(${entityParent?.primaryKeys.first.name ?? entityParent?.primaryKeys.first.nameDefault.toSnakeCase()})'
+      : 'FOREIGN KEY ($self) REFERENCES $typeNotSuffix '
+          '($goal)'
           ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(
     int step,
@@ -106,7 +115,7 @@ extension AForeignKeyX on AForeignKey {
           .toList(),
       ...fields
           .where((e) => _checker.hasAnnotationOfExact(e))
-          .map((e) => AForeignKey.fromElement(e, className, step + 1))
+          .map((e) => AForeignKey.fromElement(e, e, className, step + 1))
           .toList()
     ];
   }
