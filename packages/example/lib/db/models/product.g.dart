@@ -9,17 +9,44 @@ part of 'product.dart';
 extension ProductQuery on Product {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Product(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			last_name TEXT,
-			first_name TEXT,
-			blocked BIT NOT NULL
+			product_last_name TEXT,
+			product_first_name TEXT,
+			product_blocked BIT NOT NULL
 	)''';
 
-  static const String debug = ''' product_id,
- product_last_name,
- product_first_name,
- product_blocked''';
+  static const String debug =
+      '''nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: null,
+nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: null,
+nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: null''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: null
+// name: product_last_name, children: [null] self: null, selfIs: true modelParent: null
+  static const $ProductSetArgs<String> $lastName = $ProductSetArgs(
+    name: 'last_name',
+    self: 'Product',
+    nameCast: 'last_name',
+    model: 'lastName',
+  );
+
+// nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: null
+// name: product_first_name, children: [null] self: null, selfIs: true modelParent: null
+  static const $ProductSetArgs<String> $firstName = $ProductSetArgs(
+    name: 'first_name',
+    self: 'Product',
+    nameCast: 'first_name',
+    model: 'firstName',
+  );
+
+// nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: null
+// name: product_blocked, children: [null] self: null, selfIs: true modelParent: null
+  static const $ProductSetArgs<bool> $blocked = $ProductSetArgs(
+    name: 'blocked',
+    self: 'Product',
+    nameCast: 'blocked',
+    model: 'blocked',
+  );
 
   static const $ProductSetArgs<int> id = $ProductSetArgs(
     name: 'id',

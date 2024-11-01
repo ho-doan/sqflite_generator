@@ -9,20 +9,46 @@ part of 'cat.dart';
 extension CatQuery on Cat {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Cat(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			birth INTEGER,
+			cat_birth INTEGER,
 			parent_id INTEGER,
 			child_id INTEGER,
 			FOREIGN KEY (parent_id) REFERENCES Cat (cat_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
 			FOREIGN KEY (child_id) REFERENCES Cat (cat_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug = ''' cat_id,
- cat_birth,
- parent_id,
-parent parent_id,
-child child_id''';
+  static const String debug =
+      '''nameCast: birth, name: birth, model: Cat, self: birth modelParent: null,
+nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat,
+nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: birth, name: birth, model: Cat, self: birth modelParent: null
+// name: cat_birth, children: [null] self: null, selfIs: true modelParent: null
+  static const $CatSetArgs<String> $birth = $CatSetArgs(
+    name: 'birth',
+    self: 'Cat',
+    nameCast: 'birth',
+    model: 'birth',
+  );
+
+// nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat
+// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat
+  static const $CatSetArgs<String> $catBirth = $CatSetArgs(
+    name: 'birth',
+    self: 'Cat',
+    nameCast: 'Cat_birth',
+    model: 'birth',
+  );
+
+// nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat
+// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat
+  static const $CatSetArgs<String> $catBirth = $CatSetArgs(
+    name: 'birth',
+    self: 'Cat',
+    nameCast: 'Cat_birth',
+    model: 'birth',
+  );
 
   static const $CatSetArgs<int> id = $CatSetArgs(
     name: 'id',

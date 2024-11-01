@@ -9,18 +9,67 @@ part of 'category.dart';
 extension CategoryQuery on Category {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Category(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			id TEXT NOT NULL,
-			name TEXT NOT NULL,
+			category_id TEXT NOT NULL,
+			category_name TEXT NOT NULL,
 			product_id INTEGER,
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug = ''' category_key,
- category_id,
- category_name,
- product_id''';
+  static const String debug =
+      '''nameCast: id, name: id, model: Category, self: id modelParent: null,
+nameCast: name, name: name, model: Category, self: name modelParent: null,
+nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Category,
+nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Category,
+nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Category''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: id, name: id, model: Category, self: id modelParent: null
+// name: category_id, children: [null] self: null, selfIs: true modelParent: null
+  static const $CategorySetArgs<String> $id = $CategorySetArgs(
+    name: 'id',
+    self: 'Category',
+    nameCast: 'id',
+    model: 'id',
+  );
+
+// nameCast: name, name: name, model: Category, self: name modelParent: null
+// name: category_name, children: [null] self: null, selfIs: true modelParent: null
+  static const $CategorySetArgs<String> $name = $CategorySetArgs(
+    name: 'name',
+    self: 'Category',
+    nameCast: 'name',
+    model: 'name',
+  );
+
+// nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Category
+// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Category
+  static const $CategorySetArgs<String> $productProductLastName =
+      $CategorySetArgs(
+    name: 'last_name',
+    self: 'Product',
+    nameCast: 'Product_last_name',
+    model: 'lastName',
+  );
+
+// nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Category
+// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Category
+  static const $CategorySetArgs<String> $productProductFirstName =
+      $CategorySetArgs(
+    name: 'first_name',
+    self: 'Product',
+    nameCast: 'Product_first_name',
+    model: 'firstName',
+  );
+
+// nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Category
+// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Category
+  static const $CategorySetArgs<bool> $productProductBlocked = $CategorySetArgs(
+    name: 'blocked',
+    self: 'Product',
+    nameCast: 'Product_blocked',
+    model: 'blocked',
+  );
 
   static const $CategorySetArgs<int> key = $CategorySetArgs(
     name: 'key',

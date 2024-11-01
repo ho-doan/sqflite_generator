@@ -10,7 +10,7 @@ extension BillQuery on Bill {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Bill(
 			product_id INTEGER,
 			client_id INTEGER,
-			time INTEGER,
+			bill_time INTEGER,
 			parent_product_id INTEGER,
 			parent_client_id INTEGER,
 			PRIMARY KEY(product_id, client_id),
@@ -19,15 +19,89 @@ extension BillQuery on Bill {
 			FOREIGN KEY (parent_product_id,parent_client_id) REFERENCES Bill (product_id,client_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug = ''' product_id,
- client_id,
- bill_time,
- parent_product_id,parent_client_id,
- product_id,
- client_id,
-parent parent_product_id,parent_client_id''';
+  static const String debug =
+      '''nameCast: time, name: time, model: Bill, self: time modelParent: null,
+nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Bill,
+nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Bill,
+nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Bill,
+nameCast: first_name, name: first_name, model: Client, self: firstName modelParent: Bill,
+nameCast: last_name, name: last_name, model: Client, self: lastName modelParent: Bill,
+nameCast: blocked, name: blocked, model: Client, self: blocked modelParent: Bill,
+nameCast: time, name: time, model: Bill, self: time modelParent: Bill''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: time, name: time, model: Bill, self: time modelParent: null
+// name: bill_time, children: [null] self: null, selfIs: true modelParent: null
+  static const $BillSetArgs<String> $time = $BillSetArgs(
+    name: 'time',
+    self: 'Bill',
+    nameCast: 'time',
+    model: 'time',
+  );
+
+// nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Bill
+// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Bill
+  static const $BillSetArgs<String> $productProductLastName = $BillSetArgs(
+    name: 'last_name',
+    self: 'Product',
+    nameCast: 'Product_last_name',
+    model: 'lastName',
+  );
+
+// nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Bill
+// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Bill
+  static const $BillSetArgs<String> $productProductFirstName = $BillSetArgs(
+    name: 'first_name',
+    self: 'Product',
+    nameCast: 'Product_first_name',
+    model: 'firstName',
+  );
+
+// nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Bill
+// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Bill
+  static const $BillSetArgs<bool> $productProductBlocked = $BillSetArgs(
+    name: 'blocked',
+    self: 'Product',
+    nameCast: 'Product_blocked',
+    model: 'blocked',
+  );
+
+// nameCast: first_name, name: first_name, model: Client, self: firstName modelParent: Bill
+// name: client_first_name, children: [null] self: null, selfIs: false modelParent: Bill
+  static const $BillSetArgs<String> $clientClientFirstName = $BillSetArgs(
+    name: 'first_name',
+    self: 'Client',
+    nameCast: 'Client_first_name',
+    model: 'firstName',
+  );
+
+// nameCast: last_name, name: last_name, model: Client, self: lastName modelParent: Bill
+// name: client_last_name, children: [null] self: null, selfIs: false modelParent: Bill
+  static const $BillSetArgs<String> $clientClientLastName = $BillSetArgs(
+    name: 'last_name',
+    self: 'Client',
+    nameCast: 'Client_last_name',
+    model: 'lastName',
+  );
+
+// nameCast: blocked, name: blocked, model: Client, self: blocked modelParent: Bill
+// name: client_blocked, children: [null] self: null, selfIs: false modelParent: Bill
+  static const $BillSetArgs<bool> $clientClientBlocked = $BillSetArgs(
+    name: 'blocked',
+    self: 'Client',
+    nameCast: 'Client_blocked',
+    model: 'blocked',
+  );
+
+// nameCast: time, name: time, model: Bill, self: time modelParent: Bill
+// name: bill_time, children: [null] self: null, selfIs: true modelParent: Bill
+  static const $BillSetArgs<String> $billTime = $BillSetArgs(
+    name: 'time',
+    self: 'Bill',
+    nameCast: 'Bill_time',
+    model: 'time',
+  );
 
   static const $BillSetArgs<int> productId = $BillSetArgs(
     name: 'id',

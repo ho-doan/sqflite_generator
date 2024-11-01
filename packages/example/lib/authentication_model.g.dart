@@ -9,27 +9,27 @@ part of 'authentication_model.dart';
 extension BillMQuery on BillM {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillM(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
+			bill_m_name TEXT NOT NULL,
 			details_key INTEGER
 	)''';
 
-  static const String debug = ''' bill_m_key,
- bill_m_name,
- bill_m_memos,
- details_key''';
+  static const String debug =
+      '''nameCast: name, name: name, model: BillM, self: name modelParent: null,
+nameCast: memos, name: memos, model: BillM, self: memos modelParent: null,
+nameCast: name, name: name, model: BillDetail, self: name modelParent: BillM''';
 
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL
+			bill_detail_name TEXT NOT NULL
 	)''',
       'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
       'DROP TABLE BillDetail;',
       '''CREATE TABLE IF NOT EXISTS BillM_new(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
+			bill_m_name TEXT NOT NULL,
 			details_key INTEGER
 	)''',
       'INSERT INTO BillM_new(key,name)SELECT key,name FROM BillM;',
@@ -40,6 +40,33 @@ extension BillMQuery on BillM {
       'DROP TABLE BillDetail_new;'
     ]
   };
+
+// nameCast: name, name: name, model: BillM, self: name modelParent: null
+// name: bill_m_name, children: [null] self: null, selfIs: true modelParent: null
+  static const $BillMSetArgs<String> $name = $BillMSetArgs(
+    name: 'name',
+    self: 'BillM',
+    nameCast: 'name',
+    model: 'name',
+  );
+
+// nameCast: memos, name: memos, model: BillM, self: memos modelParent: null
+// name: bill_m_memos, children: [null] self: null, selfIs: true modelParent: null
+  static const $BillMSetArgs<String> $memos = $BillMSetArgs(
+    name: 'memos',
+    self: 'BillM',
+    nameCast: 'memos',
+    model: 'memos',
+  );
+
+// nameCast: name, name: name, model: BillDetail, self: name modelParent: BillM
+// name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM
+  static const $BillMSetArgs<String> $billDetailBillDetailName = $BillMSetArgs(
+    name: 'name',
+    self: 'BillDetail',
+    nameCast: 'BillDetail_name',
+    model: 'name',
+  );
 
   static const $BillMSetArgs<int> key = $BillMSetArgs(
     name: 'key',
@@ -237,16 +264,44 @@ class $BillMSetArgs<T> extends WhereModel<T> {
 extension BillDetailQuery on BillDetail {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillDetail(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
+			bill_detail_name TEXT NOT NULL,
 			parent_key INTEGER,
 			FOREIGN KEY (parent_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug = ''' bill_detail_key,
- bill_detail_name,
- parent_key''';
+  static const String debug =
+      '''nameCast: name, name: name, model: BillDetail, self: name modelParent: null,
+nameCast: name, name: name, model: BillM, self: name modelParent: BillDetail,
+nameCast: memos, name: memos, model: BillM, self: memos modelParent: BillDetail''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: name, name: name, model: BillDetail, self: name modelParent: null
+// name: bill_detail_name, children: [null] self: null, selfIs: true modelParent: null
+  static const $BillDetailSetArgs<String> $name = $BillDetailSetArgs(
+    name: 'name',
+    self: 'BillDetail',
+    nameCast: 'name',
+    model: 'name',
+  );
+
+// nameCast: name, name: name, model: BillM, self: name modelParent: BillDetail
+// name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail
+  static const $BillDetailSetArgs<String> $billMBillMName = $BillDetailSetArgs(
+    name: 'name',
+    self: 'BillM',
+    nameCast: 'BillM_name',
+    model: 'name',
+  );
+
+// nameCast: memos, name: memos, model: BillM, self: memos modelParent: BillDetail
+// name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail
+  static const $BillDetailSetArgs<String> $billMBillMMemos = $BillDetailSetArgs(
+    name: 'memos',
+    self: 'BillM',
+    nameCast: 'BillM_memos',
+    model: 'memos',
+  );
 
   static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
     name: 'key',

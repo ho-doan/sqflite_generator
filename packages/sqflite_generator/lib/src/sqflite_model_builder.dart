@@ -63,6 +63,34 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..modifier = FieldModifier.constant
             ..static = true,
         ),
+        for (final item in entity.aMPallSet)
+          Field(
+            (f) => f
+              ..name = '\$${[
+                if (entity.className != item.model) item.model,
+                if (entity.className == item.modelParent) item.model,
+                item.name,
+              ].join('_').toCamelCase()}'
+              ..type =
+                  refer('${entity.setClassName}<${item.property.typeSelect}>')
+              // ..docs.addAll([
+              //   if (item.p is AColumn &&
+              //       item.p.alters.any((e) => e.type == AlterTypeGen.drop))
+              //     '@Deprecated(\'no such column\')'
+              // ])
+              ..docs.addAll([
+                '// $item',
+                '// ${item.keyModel}',
+              ])
+              ..assignment = Code('''${entity.setClassName}(
+              name: '${item.name}',
+              ${item.self != null && item.model != null ? 'self: \'${item.model}\',' : ''}
+              nameCast: '${item.modelParent != null ? '${item.model}_' : ''}${item.nameCast}',
+              model: '${item.self ?? item.model}',
+              )''')
+              ..modifier = FieldModifier.constant
+              ..static = true,
+          ),
         for (final item in entity.aPsAll)
           Field(
             (f) => f

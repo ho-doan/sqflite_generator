@@ -9,20 +9,76 @@ part of 'client.dart';
 extension ClientQuery on Client {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Client(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			first_name TEXT,
-			last_name TEXT,
-			blocked BIT NOT NULL,
+			client_first_name TEXT,
+			client_last_name TEXT,
+			client_blocked BIT NOT NULL,
 			product_id INTEGER,
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug = ''' client_id,
- client_first_name,
- client_last_name,
- client_blocked,
- product_id''';
+  static const String debug =
+      '''nameCast: first_name, name: first_name, model: Client, self: firstName modelParent: null,
+nameCast: last_name, name: last_name, model: Client, self: lastName modelParent: null,
+nameCast: blocked, name: blocked, model: Client, self: blocked modelParent: null,
+nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Client,
+nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Client,
+nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Client''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: first_name, name: first_name, model: Client, self: firstName modelParent: null
+// name: client_first_name, children: [null] self: null, selfIs: true modelParent: null
+  static const $ClientSetArgs<String> $firstName = $ClientSetArgs(
+    name: 'first_name',
+    self: 'Client',
+    nameCast: 'first_name',
+    model: 'firstName',
+  );
+
+// nameCast: last_name, name: last_name, model: Client, self: lastName modelParent: null
+// name: client_last_name, children: [null] self: null, selfIs: true modelParent: null
+  static const $ClientSetArgs<String> $lastName = $ClientSetArgs(
+    name: 'last_name',
+    self: 'Client',
+    nameCast: 'last_name',
+    model: 'lastName',
+  );
+
+// nameCast: blocked, name: blocked, model: Client, self: blocked modelParent: null
+// name: client_blocked, children: [null] self: null, selfIs: true modelParent: null
+  static const $ClientSetArgs<bool> $blocked = $ClientSetArgs(
+    name: 'blocked',
+    self: 'Client',
+    nameCast: 'blocked',
+    model: 'blocked',
+  );
+
+// nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Client
+// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Client
+  static const $ClientSetArgs<String> $productProductLastName = $ClientSetArgs(
+    name: 'last_name',
+    self: 'Product',
+    nameCast: 'Product_last_name',
+    model: 'lastName',
+  );
+
+// nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Client
+// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Client
+  static const $ClientSetArgs<String> $productProductFirstName = $ClientSetArgs(
+    name: 'first_name',
+    self: 'Product',
+    nameCast: 'Product_first_name',
+    model: 'firstName',
+  );
+
+// nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Client
+// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Client
+  static const $ClientSetArgs<bool> $productProductBlocked = $ClientSetArgs(
+    name: 'blocked',
+    self: 'Product',
+    nameCast: 'Product_blocked',
+    model: 'blocked',
+  );
 
   static const $ClientSetArgs<int> id = $ClientSetArgs(
     name: 'id',
