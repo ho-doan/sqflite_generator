@@ -15,37 +15,34 @@ extension ProductQuery on Product {
 	)''';
 
   static const String debug =
-      '''nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: null,
-nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: null,
-nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: null''';
+      '''nameCast: last_name, name: last_name, model: product, self: null modelParent: null,
+nameCast: first_name, name: first_name, model: product, self: null modelParent: null,
+nameCast: blocked, name: blocked, model: product, self: null modelParent: null''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: null
-// name: product_last_name, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: last_name, name: last_name, model: product, self: null modelParent: null
+// name: product_last_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
   static const $ProductSetArgs<String> $lastName = $ProductSetArgs(
     name: 'last_name',
-    self: 'Product',
     nameCast: 'last_name',
-    model: 'lastName',
+    model: 'product',
   );
 
-// nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: null
-// name: product_first_name, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: first_name, name: first_name, model: product, self: null modelParent: null
+// name: product_first_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
   static const $ProductSetArgs<String> $firstName = $ProductSetArgs(
     name: 'first_name',
-    self: 'Product',
     nameCast: 'first_name',
-    model: 'firstName',
+    model: 'product',
   );
 
-// nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: null
-// name: product_blocked, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: blocked, name: blocked, model: product, self: null modelParent: null
+// name: product_blocked, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
   static const $ProductSetArgs<bool> $blocked = $ProductSetArgs(
     name: 'blocked',
-    self: 'Product',
     nameCast: 'blocked',
-    model: 'blocked',
+    model: 'product',
   );
 
   static const $ProductSetArgs<int> id = $ProductSetArgs(

@@ -8,76 +8,74 @@ part of 'client.dart';
 
 extension ClientQuery on Client {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Client(
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			id INTEGER,
+			product_id INTEGER,
 			client_first_name TEXT,
 			client_last_name TEXT,
 			client_blocked BIT NOT NULL,
-			product_id INTEGER,
+			PRIMARY KEY(id, product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
-      '''nameCast: first_name, name: first_name, model: Client, self: firstName modelParent: null,
-nameCast: last_name, name: last_name, model: Client, self: lastName modelParent: null,
-nameCast: blocked, name: blocked, model: Client, self: blocked modelParent: null,
-nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Client,
-nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Client,
-nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Client''';
+      '''nameCast: first_name, name: first_name, model: client, self: null modelParent: null,
+nameCast: last_name, name: last_name, model: client, self: null modelParent: null,
+nameCast: blocked, name: blocked, model: client, self: null modelParent: null,
+nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Client,
+nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Client,
+nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Client''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: first_name, name: first_name, model: Client, self: firstName modelParent: null
-// name: client_first_name, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: first_name, name: first_name, model: client, self: null modelParent: null
+// name: client_first_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
   static const $ClientSetArgs<String> $firstName = $ClientSetArgs(
     name: 'first_name',
-    self: 'Client',
     nameCast: 'first_name',
-    model: 'firstName',
+    model: 'client',
   );
 
-// nameCast: last_name, name: last_name, model: Client, self: lastName modelParent: null
-// name: client_last_name, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: last_name, name: last_name, model: client, self: null modelParent: null
+// name: client_last_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
   static const $ClientSetArgs<String> $lastName = $ClientSetArgs(
     name: 'last_name',
-    self: 'Client',
     nameCast: 'last_name',
-    model: 'lastName',
+    model: 'client',
   );
 
-// nameCast: blocked, name: blocked, model: Client, self: blocked modelParent: null
-// name: client_blocked, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: blocked, name: blocked, model: client, self: null modelParent: null
+// name: client_blocked, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
   static const $ClientSetArgs<bool> $blocked = $ClientSetArgs(
     name: 'blocked',
-    self: 'Client',
     nameCast: 'blocked',
-    model: 'blocked',
+    model: 'client',
   );
 
-// nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Client
-// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Client
-  static const $ClientSetArgs<String> $productProductLastName = $ClientSetArgs(
+// nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Client
+// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+  static const $ClientSetArgs<String> $productLastName = $ClientSetArgs(
     name: 'last_name',
-    self: 'Product',
-    nameCast: 'Product_last_name',
-    model: 'lastName',
+    self: 'product',
+    nameCast: 'product_last_name',
+    model: 'product',
   );
 
-// nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Client
-// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Client
-  static const $ClientSetArgs<String> $productProductFirstName = $ClientSetArgs(
+// nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Client
+// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+  static const $ClientSetArgs<String> $productFirstName = $ClientSetArgs(
     name: 'first_name',
-    self: 'Product',
-    nameCast: 'Product_first_name',
-    model: 'firstName',
+    self: 'product',
+    nameCast: 'product_first_name',
+    model: 'product',
   );
 
-// nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Client
-// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Client
-  static const $ClientSetArgs<bool> $productProductBlocked = $ClientSetArgs(
+// nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Client
+// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
+  static const $ClientSetArgs<bool> $productBlocked = $ClientSetArgs(
     name: 'blocked',
-    self: 'Product',
-    nameCast: 'Product_blocked',
-    model: 'blocked',
+    self: 'product',
+    nameCast: 'product_blocked',
+    model: 'product',
   );
 
   static const $ClientSetArgs<int> id = $ClientSetArgs(
@@ -228,13 +226,14 @@ blocked)
 
   Future<int> update(Database database) async {
     await product.update(database);
-    return await database
-        .update('Client', toDB(), where: "id = ?", whereArgs: [this.id]);
+    return await database.update('Client', toDB(),
+        where: "id = ? AND product = ?", whereArgs: [this.id, product.id]);
   }
 
   static Future<Client?> getById(
     Database database,
-    int? id, {
+    int? id,
+    int? productId, {
     Set<$ClientSetArgs>? select,
   }) async {
     final res = (await database.rawQuery('''
@@ -242,22 +241,25 @@ SELECT
 ${$createSelect(select)}
  FROM Client client
  LEFT JOIN Product product ON product.id = client.product
-WHERE client.id = ?
-''', [id]) as List<Map>);
+WHERE client.id = ? AND client.product = ?
+''', [id, productId]) as List<Map>);
     return res.isNotEmpty ? Client.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Client client WHERE client.id = ?''', [this.id]);
+        '''DELETE FROM Client client WHERE client.id = ? AND client.product = ?''',
+        [this.id, product.id]);
   }
 
   static Future<void> deleteById(
     Database database,
     int? id,
+    int? productId,
   ) async {
-    await database
-        .rawQuery('''DELETE FROM Client client WHERE client.id = ?''', [id]);
+    await database.rawQuery(
+        '''DELETE FROM Client client WHERE client.id = ? AND client.product = ?''',
+        [id, productId]);
   }
 
   static Future<void> deleteAll(Database database) async {

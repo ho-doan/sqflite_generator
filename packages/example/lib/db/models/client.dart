@@ -20,6 +20,7 @@ class Client extends EntityQuery {
   @column
   final bool blocked;
 
+  @primaryKey
   @ForeignKey(name: 'Product')
   final Product product;
 

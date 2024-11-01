@@ -221,7 +221,7 @@ class AEntity {
   });
 
   static AEntity? of(ClassElement element, [int step = 0]) {
-    if (step > 5) return null;
+    if (step > 6) return null;
     return AEntity._fromElement(element, step);
   }
 
@@ -362,13 +362,14 @@ extension AEntityBase on AEntity {
   /// }
   /// ```
   /// result [id]
-  List<KeyModel> _expandedColumns([String? className]) {
+  List<KeyModel> _expandedColumns([AProperty? propertyParent]) {
     final lst = <KeyModel>[];
     for (final item in columns) {
       lst.add(KeyModel._columnOrIndex(
         item,
-        isParent: className == null,
-        className: className ?? this.className,
+        isParent: propertyParent == null,
+        className: propertyParent?.className ?? className,
+        propertyParent: propertyParent,
       ));
     }
     return lst;
@@ -382,13 +383,14 @@ extension AEntityBase on AEntity {
   /// }
   /// ```
   /// result [id]
-  List<KeyModel> _expandedIndices([String? className]) {
+  List<KeyModel> _expandedIndices([AProperty? propertyParent]) {
     final lst = <KeyModel>[];
     for (final item in indices) {
       lst.add(KeyModel._columnOrIndex(
         item,
-        isParent: className == null,
-        className: className ?? this.className,
+        isParent: propertyParent == null,
+        className: propertyParent?.className ?? className,
+        propertyParent: propertyParent,
       ));
     }
     return lst;
@@ -507,16 +509,18 @@ extension AEntityBase on AEntity {
     return 'PRIMARY KEY($keys)';
   }
 
-  List<KeyModel> aMPall([String? parent]) => [
-        // ...expandedPrimaryKeysWithoutFore(),
-        ..._expandedColumns(parent),
-        ..._expandedIndices(parent),
-        for (final item in foreignKeys)
-          if (item.entityParent != null)
-            ...item.entityParent!.aMPall(item.className),
+  List<KeyModel> aMPall([AProperty? parent, int step = 0]) => step > 2
+      ? []
+      : [
+          // ...expandedPrimaryKeysWithoutFore(),
+          ..._expandedColumns(parent),
+          ..._expandedIndices(parent),
+          for (final item in foreignKeys)
+            if (item.entityParent != null)
+              ...item.entityParent!.aMPall(item, step + 1),
 
-        // ...expandedForeignKeysAllForSelect(),
-      ];
+          // ...expandedForeignKeysAllForSelect(),
+        ];
 
   List<KeyModelSet> get aMPallSet {
     final lst = [
@@ -533,7 +537,7 @@ extension AEntityBase on AEntity {
               modelParent: 'me may',
             )
         ] else
-          KeyModelSet._ofColumnOrIndex(e, className),
+          KeyModelSet._ofColumnOrIndex(e),
       // for (final e in aMPall)
       //   if (e.children?.expanded() != null) ...[
       //     for (final f in e.children!.expanded())
@@ -560,12 +564,11 @@ extension AEntityBase on AEntity {
     //   (e) => !(e.model == null && e.name == e.nameCast),
     // )
     // .toList();
-    // final set = <String, KeyModelSet>{};
-    // for (final e in lst) {
-    //   set[e.name] = e;
-    // }
-    // return set.values.toList();
-    return lst;
+    final set = <String, KeyModelSet>{};
+    for (final e in lst) {
+      set[e.fieldName] = e;
+    }
+    return set.values.toList();
   }
 
   /// [newName] is for rename table
@@ -638,7 +641,7 @@ extension AEntityBase on AEntity {
               modelParent: 'me may',
             )
         ] else
-          KeyModelSet._ofColumnOrIndex(e, className),
+          KeyModelSet._ofColumnOrIndex(e),
     ];
     return all.join(',\n');
   }
@@ -686,7 +689,6 @@ extension AInsert on AEntity {
       }
       if (ps != null) return '$ps.${e.nameDefault}';
       if (e is AColumn && e.converter != null) {
-        print('======= ${e.converter} ${e.nameDefault} ${e.className}');
         if (e.dartType.toString().contains('DateTime')) {
           return 'this.${e.defaultSuffix}.millisecondsSinceEpoch';
         }
@@ -1038,10 +1040,12 @@ class KeyModel {
   final String? name;
   final List<KeyModel>? children;
   final AProperty property;
+  final AProperty? propertyParent;
   final APrimaryKey? self;
   final bool selfIs;
 
   KeyModel._({
+    this.propertyParent,
     this.modelParent,
     required this.model,
     String? nameSelf,
@@ -1084,6 +1088,7 @@ class KeyModel {
           ),
         ],
         property: item,
+        propertyParent: item,
       );
     }
     return KeyModel._(
@@ -1092,6 +1097,7 @@ class KeyModel {
       nameSelf: '${self}_${item.nameToDB}'.replaceFirst(RegExp('^_'), ''),
       property: item,
       modelParent: 'me may',
+      propertyParent: item,
     );
   }
 
@@ -1124,6 +1130,7 @@ class KeyModel {
         nameSelf: item.nameDefault,
         children: children,
         selfIs: true,
+        propertyParent: item,
       );
     }
 
@@ -1136,6 +1143,7 @@ class KeyModel {
         null,
         item.nameDefault,
       ),
+      propertyParent: item,
     );
   }
 
@@ -1143,6 +1151,7 @@ class KeyModel {
     AProperty item, {
     String? className,
     bool isParent = false,
+    required AProperty? propertyParent,
   }) {
     return KeyModel._(
       model: item.className,
@@ -1150,12 +1159,13 @@ class KeyModel {
       property: item,
       nameSelf: className == null ? item.nameToDB : item.nameFromDB,
       selfIs: item.className == className,
+      propertyParent: propertyParent,
     );
   }
 
   @override
   String toString() => 'name: $name, children: [$children] self: $self,'
-      ' selfIs: $selfIs modelParent: $modelParent';
+      ' selfIs: $selfIs modelParent: $modelParent property: $property';
 }
 
 typedef KeyModelChildren = List<KeyModel> Function(
@@ -1167,9 +1177,10 @@ class KeyModelSet {
   final String name;
   final String model;
   final String? modelParent;
-  final String self;
+  final String? self;
   final AProperty property;
   final KeyModel keyModel;
+  final String fieldName;
 
   /// [nameCast] is name without [model] or [self] prefix
   KeyModelSet._({
@@ -1180,18 +1191,26 @@ class KeyModelSet {
     required this.property,
     required this.model,
     required this.nameCast,
+    this.fieldName = 'ba me may',
   });
 
-  factory KeyModelSet._ofColumnOrIndex(KeyModel model, String className) {
+  factory KeyModelSet._ofColumnOrIndex(KeyModel model) {
     final name = model.property.nameToDB;
+    final fieldName = [
+      // if (model.modelParent != null && model.modelParent != model.model)
+      //   model.model,
+      if (model.propertyParent != null) model.propertyParent!.nameToDB,
+      name,
+    ].join('_').toCamelCase();
     return KeyModelSet._(
+      fieldName: fieldName,
       keyModel: model,
       modelParent: model.modelParent,
       name: name,
-      self: model.property.nameDefault,
+      self: model.propertyParent?.nameToDB,
       property: model.property,
-      model: model.model,
-      nameCast: name,
+      model: model.model.toSnakeCase(),
+      nameCast: fieldName.toSnakeCase(),
     );
   }
 

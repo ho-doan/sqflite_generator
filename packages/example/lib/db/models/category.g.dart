@@ -16,59 +16,55 @@ extension CategoryQuery on Category {
 	)''';
 
   static const String debug =
-      '''nameCast: id, name: id, model: Category, self: id modelParent: null,
-nameCast: name, name: name, model: Category, self: name modelParent: null,
-nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Category,
-nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Category,
-nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Category''';
+      '''nameCast: id, name: id, model: category, self: null modelParent: null,
+nameCast: name, name: name, model: category, self: null modelParent: null,
+nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Category,
+nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Category,
+nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Category''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: id, name: id, model: Category, self: id modelParent: null
-// name: category_id, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: id, name: id, model: category, self: null modelParent: null
+// name: category_id, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: category_id, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
   static const $CategorySetArgs<String> $id = $CategorySetArgs(
     name: 'id',
-    self: 'Category',
     nameCast: 'id',
-    model: 'id',
+    model: 'category',
   );
 
-// nameCast: name, name: name, model: Category, self: name modelParent: null
-// name: category_name, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: name, name: name, model: category, self: null modelParent: null
+// name: category_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: category_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
   static const $CategorySetArgs<String> $name = $CategorySetArgs(
     name: 'name',
-    self: 'Category',
     nameCast: 'name',
-    model: 'name',
+    model: 'category',
   );
 
-// nameCast: last_name, name: last_name, model: Product, self: lastName modelParent: Category
-// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Category
-  static const $CategorySetArgs<String> $productProductLastName =
-      $CategorySetArgs(
+// nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Category
+// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Category property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+  static const $CategorySetArgs<String> $productLastName = $CategorySetArgs(
     name: 'last_name',
-    self: 'Product',
-    nameCast: 'Product_last_name',
-    model: 'lastName',
+    self: 'product',
+    nameCast: 'product_last_name',
+    model: 'product',
   );
 
-// nameCast: first_name, name: first_name, model: Product, self: firstName modelParent: Category
-// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Category
-  static const $CategorySetArgs<String> $productProductFirstName =
-      $CategorySetArgs(
+// nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Category
+// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Category property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+  static const $CategorySetArgs<String> $productFirstName = $CategorySetArgs(
     name: 'first_name',
-    self: 'Product',
-    nameCast: 'Product_first_name',
-    model: 'firstName',
+    self: 'product',
+    nameCast: 'product_first_name',
+    model: 'product',
   );
 
-// nameCast: blocked, name: blocked, model: Product, self: blocked modelParent: Category
-// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Category
-  static const $CategorySetArgs<bool> $productProductBlocked = $CategorySetArgs(
+// nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Category
+// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Category property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
+  static const $CategorySetArgs<bool> $productBlocked = $CategorySetArgs(
     name: 'blocked',
-    self: 'Product',
-    nameCast: 'Product_blocked',
-    model: 'blocked',
+    self: 'product',
+    nameCast: 'product_blocked',
+    model: 'product',
   );
 
   static const $CategorySetArgs<int> key = $CategorySetArgs(

@@ -66,11 +66,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         for (final item in entity.aMPallSet)
           Field(
             (f) => f
-              ..name = '\$${[
-                if (entity.className != item.model) item.model,
-                if (entity.className == item.modelParent) item.model,
-                item.name,
-              ].join('_').toCamelCase()}'
+              ..name = '\$${item.fieldName}'
               ..type =
                   refer('${entity.setClassName}<${item.property.typeSelect}>')
               // ..docs.addAll([
@@ -84,9 +80,9 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
               ])
               ..assignment = Code('''${entity.setClassName}(
               name: '${item.name}',
-              ${item.self != null && item.model != null ? 'self: \'${item.model}\',' : ''}
-              nameCast: '${item.modelParent != null ? '${item.model}_' : ''}${item.nameCast}',
-              model: '${item.self ?? item.model}',
+              ${item.self != null ? 'self: \'${item.self}\',' : ''}
+              nameCast: '${item.nameCast}',
+              model: '${item.model}',
               )''')
               ..modifier = FieldModifier.constant
               ..static = true,

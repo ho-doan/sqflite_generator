@@ -34,14 +34,14 @@ class AForeignKey extends AProperty {
       FieldElement? parentElement, String className, int step) {
     AEntity? aEntity;
     if (element.type.isDartCoreList) {
-      Element? pElement = element.library.children
-          .whereType<CompilationUnitElement>()
-          .expand((e) => e.children)
-          .firstWhereOrNull(
-            (e) =>
-                e is ClassElement &&
-                e.displayName == AForeignKeyX._name(element),
-          );
+      final es = [
+        ...element.library.children.expand((e) => e.classes()),
+        ...element.children.expand((e) => e.children),
+      ];
+      Element? pElement = es.firstWhereOrNull(
+        (e) =>
+            e is ClassElement && e.displayName == AForeignKeyX._name(element),
+      );
       if (pElement == null && parentElement != null) {
         pElement = parentElement;
       }
@@ -89,9 +89,44 @@ class AForeignKey extends AProperty {
   }
 }
 
+extension on FieldElement {
+  List<ClassElement> classes([int step = 0]) {
+    final es = [
+      ...library.children.expand((e) => e.children),
+    ];
+    final lst = [
+      ...es.whereType<ClassElement>(),
+      if (step < 4) ...es.expand((e) => e.classes(step + 1)),
+    ];
+
+    return lst;
+  }
+}
+
+extension on Element {
+  List<ClassElement> classes([int step = 0]) {
+    final es = [
+      ...library?.children.expand((e) => e.children) ?? <Element>[],
+    ];
+    final lst = [
+      ...es.whereType<ClassElement>(),
+      if (step < 4) ...es.expand((e) => e.classes(step + 1)),
+    ];
+
+    return lst;
+  }
+}
+
 extension AForeignKeyXL on List<AForeignKey> {
-  AEntity? of(String fieldName) =>
-      firstWhereOrNull((e) => e.nameDefault == fieldName)?.entityParent;
+  AEntity? of(String fieldName) {
+    final entity =
+        firstWhereOrNull((e) => e.nameDefault == fieldName)?.entityParent;
+    if (entity == null) {
+      print(
+          '=========== fieldName: $fieldName ${map((e) => e.nameDefault).toList()}');
+    }
+    return entity;
+  }
 }
 
 extension AForeignKeyX on AForeignKey {

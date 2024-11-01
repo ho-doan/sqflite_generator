@@ -17,37 +17,31 @@ extension CatQuery on Cat {
 	)''';
 
   static const String debug =
-      '''nameCast: birth, name: birth, model: Cat, self: birth modelParent: null,
-nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat,
-nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat''';
+      '''nameCast: birth, name: birth, model: cat, self: null modelParent: null,
+nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
+nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
+nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
+nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
+nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
+nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: birth, name: birth, model: Cat, self: birth modelParent: null
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: birth, name: birth, model: cat, self: null modelParent: null
+// name: cat_birth, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
   static const $CatSetArgs<String> $birth = $CatSetArgs(
     name: 'birth',
-    self: 'Cat',
     nameCast: 'birth',
-    model: 'birth',
+    model: 'cat',
   );
 
-// nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat
+// nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
+// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
   static const $CatSetArgs<String> $catBirth = $CatSetArgs(
     name: 'birth',
-    self: 'Cat',
-    nameCast: 'Cat_birth',
-    model: 'birth',
-  );
-
-// nameCast: birth, name: birth, model: Cat, self: birth modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat
-  static const $CatSetArgs<String> $catBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'Cat',
-    nameCast: 'Cat_birth',
-    model: 'birth',
+    self: 'cat',
+    nameCast: 'cat_birth',
+    model: 'cat',
   );
 
   static const $CatSetArgs<int> id = $CatSetArgs(

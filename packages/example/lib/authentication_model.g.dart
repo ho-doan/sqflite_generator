@@ -14,16 +14,19 @@ extension BillMQuery on BillM {
 	)''';
 
   static const String debug =
-      '''nameCast: name, name: name, model: BillM, self: name modelParent: null,
-nameCast: memos, name: memos, model: BillM, self: memos modelParent: null,
-nameCast: name, name: name, model: BillDetail, self: name modelParent: BillM''';
+      '''nameCast: name, name: name, model: bill_m, self: null modelParent: null,
+nameCast: memos, name: memos, model: bill_m, self: null modelParent: null,
+nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM,
+nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail,
+nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail''';
 
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			bill_detail_name TEXT NOT NULL
+			bill_detail_name TEXT NOT NULL,
+			parent_key INTEGER
 	)''',
       'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
       'DROP TABLE BillDetail;',
@@ -41,31 +44,47 @@ nameCast: name, name: name, model: BillDetail, self: name modelParent: BillM''';
     ]
   };
 
-// nameCast: name, name: name, model: BillM, self: name modelParent: null
-// name: bill_m_name, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: name, name: name, model: bill_m, self: null modelParent: null
+// name: bill_m_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
   static const $BillMSetArgs<String> $name = $BillMSetArgs(
     name: 'name',
-    self: 'BillM',
     nameCast: 'name',
-    model: 'name',
+    model: 'bill_m',
   );
 
-// nameCast: memos, name: memos, model: BillM, self: memos modelParent: null
-// name: bill_m_memos, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: memos, name: memos, model: bill_m, self: null modelParent: null
+// name: bill_m_memos, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
   static const $BillMSetArgs<String> $memos = $BillMSetArgs(
     name: 'memos',
-    self: 'BillM',
     nameCast: 'memos',
-    model: 'memos',
+    model: 'bill_m',
   );
 
-// nameCast: name, name: name, model: BillDetail, self: name modelParent: BillM
-// name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM
-  static const $BillMSetArgs<String> $billDetailBillDetailName = $BillMSetArgs(
+// nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM
+// name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
+  static const $BillMSetArgs<String> $billDetailName = $BillMSetArgs(
     name: 'name',
-    self: 'BillDetail',
-    nameCast: 'BillDetail_name',
-    model: 'name',
+    self: 'bill_detail',
+    nameCast: 'bill_detail_name',
+    model: 'bill_detail',
+  );
+
+// nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
+// name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
+  static const $BillMSetArgs<String> $billName = $BillMSetArgs(
+    name: 'name',
+    self: 'bill',
+    nameCast: 'bill_name',
+    model: 'bill_m',
+  );
+
+// nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail
+// name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
+  static const $BillMSetArgs<String> $billMemos = $BillMSetArgs(
+    name: 'memos',
+    self: 'bill',
+    nameCast: 'bill_memos',
+    model: 'bill_m',
   );
 
   static const $BillMSetArgs<int> key = $BillMSetArgs(
@@ -270,37 +289,46 @@ extension BillDetailQuery on BillDetail {
 	)''';
 
   static const String debug =
-      '''nameCast: name, name: name, model: BillDetail, self: name modelParent: null,
-nameCast: name, name: name, model: BillM, self: name modelParent: BillDetail,
-nameCast: memos, name: memos, model: BillM, self: memos modelParent: BillDetail''';
+      '''nameCast: name, name: name, model: bill_detail, self: null modelParent: null,
+nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail,
+nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail,
+nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: name, name: name, model: BillDetail, self: name modelParent: null
-// name: bill_detail_name, children: [null] self: null, selfIs: true modelParent: null
+// nameCast: name, name: name, model: bill_detail, self: null modelParent: null
+// name: bill_detail_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
   static const $BillDetailSetArgs<String> $name = $BillDetailSetArgs(
     name: 'name',
-    self: 'BillDetail',
     nameCast: 'name',
-    model: 'name',
+    model: 'bill_detail',
   );
 
-// nameCast: name, name: name, model: BillM, self: name modelParent: BillDetail
-// name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail
-  static const $BillDetailSetArgs<String> $billMBillMName = $BillDetailSetArgs(
+// nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
+// name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
+  static const $BillDetailSetArgs<String> $billName = $BillDetailSetArgs(
     name: 'name',
-    self: 'BillM',
-    nameCast: 'BillM_name',
-    model: 'name',
+    self: 'bill',
+    nameCast: 'bill_name',
+    model: 'bill_m',
   );
 
-// nameCast: memos, name: memos, model: BillM, self: memos modelParent: BillDetail
-// name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail
-  static const $BillDetailSetArgs<String> $billMBillMMemos = $BillDetailSetArgs(
+// nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail
+// name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
+  static const $BillDetailSetArgs<String> $billMemos = $BillDetailSetArgs(
     name: 'memos',
-    self: 'BillM',
-    nameCast: 'BillM_memos',
-    model: 'memos',
+    self: 'bill',
+    nameCast: 'bill_memos',
+    model: 'bill_m',
+  );
+
+// nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM
+// name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
+  static const $BillDetailSetArgs<String> $billDetailName = $BillDetailSetArgs(
+    name: 'name',
+    self: 'bill_detail',
+    nameCast: 'bill_detail_name',
+    model: 'bill_detail',
   );
 
   static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
