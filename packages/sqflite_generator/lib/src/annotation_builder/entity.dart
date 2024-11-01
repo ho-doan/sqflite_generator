@@ -297,6 +297,8 @@ extension AEntityBase on AEntity {
           item,
           self: self,
           selfKey: selfKey,
+          isParent: self == '',
+          className: className,
         )
     ];
   }
@@ -342,17 +344,17 @@ extension AEntityBase on AEntity {
     return lst;
   }
 
-  // List<KeyModel> _expandedPrimaryKeysWithoutFore(
-  //     [List<KeyModel>? child, String self = '']) {
-  //   final lst = <KeyModel>[];
-  //   for (final item in child ?? _treePrimaryKeys(self: self)) {
-  //     if (item.name != null) lst.add(item);
-  //     if (item.children != null && item.children!.isNotEmpty) {
-  //       lst.addAll(_expandedPrimaryKeysWithoutFore(item.children));
-  //     }
-  //   }
-  //   return lst;
-  // }
+  List<KeyModel> _expandedPrimaryKeysWithoutFore() {
+    final lst = <KeyModel>[];
+    final items = _treePrimaryKeys();
+    for (final item in items) {
+      if (item.name == item.property.nameToDB) lst.add(item);
+      if (item.children != null && item.children!.isNotEmpty) {
+        //   lst.addAll(_expandedPrimaryKeysWithoutFore());
+      }
+    }
+    return lst;
+  }
 
   /// self columns
   /// ```dart
@@ -512,7 +514,7 @@ extension AEntityBase on AEntity {
   List<KeyModel> aMPall([AProperty? parent, int step = 0]) => step > 2
       ? []
       : [
-          // ...expandedPrimaryKeysWithoutFore(),
+          ..._expandedPrimaryKeysWithoutFore(),
           ..._expandedColumns(parent),
           ..._expandedIndices(parent),
           for (final item in foreignKeys)
@@ -523,19 +525,11 @@ extension AEntityBase on AEntity {
         ];
 
   List<KeyModelSet> get aMPallSet {
+    // TODO(hodoan): aMPallSet primary key
     final lst = [
       for (final e in aMPall())
         if (e.children?.expanded() != null) ...[
-          for (final f in e.children!.expanded())
-            KeyModelSet._(
-              keyModel: f,
-              name: f.name ?? '-------',
-              property: e.property,
-              model: e.model,
-              self: 'e.selfIs ? className.toSnakeCase() : null',
-              nameCast: 'me may',
-              modelParent: 'me may',
-            )
+          for (final f in e.children!.expanded()) KeyModelSet._ofPrimaryKey(f),
         ] else
           KeyModelSet._ofColumnOrIndex(e),
       // for (final e in aMPall)
@@ -564,11 +558,12 @@ extension AEntityBase on AEntity {
     //   (e) => !(e.model == null && e.name == e.nameCast),
     // )
     // .toList();
-    final set = <String, KeyModelSet>{};
-    for (final e in lst) {
-      set[e.fieldName] = e;
-    }
-    return set.values.toList();
+    // final set = <String, KeyModelSet>{};
+    // for (final e in lst) {
+    //   set[e.fieldName] = e;
+    // }
+    // return set.values.toList();
+    return lst;
   }
 
   /// [newName] is for rename table
@@ -630,16 +625,7 @@ extension AEntityBase on AEntity {
     final all = [
       for (final e in aMPall())
         if (e.children?.expanded() != null) ...[
-          for (final f in e.children!.expanded())
-            KeyModelSet._(
-              keyModel: f,
-              name: f.name ?? '-------',
-              property: e.property,
-              model: e.model,
-              self: 'e.selfIs ? className.toSnakeCase() : null',
-              nameCast: 'me may',
-              modelParent: 'me may',
-            )
+          for (final f in e.children!.expanded()) KeyModelSet._ofPrimaryKey(f)
         ] else
           KeyModelSet._ofColumnOrIndex(e),
     ];
@@ -770,7 +756,8 @@ extension AQuery on AEntity {
     }.values.toList();
   }
 
-  @Deprecated('using aMPallSet')
+  /// using [aMPallSet]
+  @Deprecated('using [aMPallSet]')
   List<({String name, String? field, AProperty p, String nameCast})>
       get aPsAll {
     return [
@@ -1072,12 +1059,15 @@ class KeyModel {
     String self = '',
     APrimaryKey? selfKey,
     bool withoutFore = false,
+    bool isParent = false,
+    String? className,
   }) {
     final entityParent = item.entityParent;
     if (entityParent != null) {
+      // TODO(hodoan): check bug
       return KeyModel._(
         model: item.className,
-        modelParent: entityParent.className,
+        modelParent: isParent ? null : (className ?? item.className),
         self: selfKey ?? item,
         children: [
           ...entityParent._treePrimaryKeys(
@@ -1092,12 +1082,13 @@ class KeyModel {
         propertyParent: item,
       );
     }
+    // TODO(hodoan): bug
     return KeyModel._(
       model: item.className,
       self: !withoutFore ? selfKey ?? item : null,
       nameSelf: '${self}_${item.nameToDB}'.replaceFirst(RegExp('^_'), ''),
       property: item,
-      modelParent: 'me may',
+      modelParent: isParent ? null : (className ?? item.className),
       propertyParent: item,
     );
   }
@@ -1192,15 +1183,18 @@ class KeyModelSet {
     required this.property,
     required this.model,
     required this.nameCast,
-    this.fieldName = 'ba me may',
+    required this.fieldName,
   });
 
   factory KeyModelSet._ofColumnOrIndex(KeyModel model) {
     final name = model.property.nameToDB;
     final fieldName = [
-      // if (model.modelParent != null && model.modelParent != model.model)
-      //   model.model,
-      if (model.propertyParent != null) model.propertyParent!.nameToDB,
+      /// for column vs index
+      if (model.propertyParent != null)
+
+        /// for primary key self
+        if (model.propertyParent?.nameToDB != name)
+          model.propertyParent!.nameToDB,
       name,
     ].join('_').toCamelCase();
     return KeyModelSet._(
@@ -1208,7 +1202,28 @@ class KeyModelSet {
       keyModel: model,
       modelParent: model.modelParent,
       name: name,
-      self: model.propertyParent?.nameToDB,
+      self: (model.propertyParent?.nameToDB == name)
+
+          /// for primary key
+          ? null
+
+          /// for column vs index
+          : model.propertyParent?.nameToDB,
+      property: model.property,
+      model: model.model.toSnakeCase(),
+      nameCast: fieldName.toSnakeCase(),
+    );
+  }
+  factory KeyModelSet._ofPrimaryKey(KeyModel model) {
+    final name = model.property.nameToDB;
+    // TODO(hodoan): for primary key
+    final fieldName = model.property.nameFromDB.toCamelCase();
+    return KeyModelSet._(
+      fieldName: fieldName,
+      keyModel: model,
+      modelParent: model.modelParent,
+      name: name,
+      self: null,
       property: model.property,
       model: model.model.toSnakeCase(),
       nameCast: fieldName.toSnakeCase(),

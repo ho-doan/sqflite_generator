@@ -15,11 +15,20 @@ extension ProductQuery on Product {
 	)''';
 
   static const String debug =
-      '''nameCast: last_name, name: last_name, model: product, self: null modelParent: null,
+      '''nameCast: id, name: id, model: product, self: null modelParent: null,
+nameCast: last_name, name: last_name, model: product, self: null modelParent: null,
 nameCast: first_name, name: first_name, model: product, self: null modelParent: null,
 nameCast: blocked, name: blocked, model: product, self: null modelParent: null''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: id, name: id, model: product, self: null modelParent: null
+// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $ProductSetArgs<int> id = $ProductSetArgs(
+    name: 'id',
+    nameCast: 'id',
+    model: 'product',
+  );
 
 // nameCast: last_name, name: last_name, model: product, self: null modelParent: null
 // name: product_last_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false

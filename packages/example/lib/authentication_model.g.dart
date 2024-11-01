@@ -14,9 +14,12 @@ extension BillMQuery on BillM {
 	)''';
 
   static const String debug =
-      '''nameCast: name, name: name, model: bill_m, self: null modelParent: null,
+      '''nameCast: key, name: key, model: bill_m, self: null modelParent: null,
+nameCast: name, name: name, model: bill_m, self: null modelParent: null,
 nameCast: memos, name: memos, model: bill_m, self: null modelParent: null,
+nameCast: key, name: key, model: bill_detail, self: null modelParent: null,
 nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM,
+nameCast: key, name: key, model: bill_m, self: null modelParent: null,
 nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail,
 nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail''';
 
@@ -44,6 +47,14 @@ nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDe
     ]
   };
 
+// nameCast: key, name: key, model: bill_m, self: null modelParent: null
+// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $BillMSetArgs<int> key = $BillMSetArgs(
+    name: 'key',
+    nameCast: 'key',
+    model: 'bill_m',
+  );
+
 // nameCast: name, name: name, model: bill_m, self: null modelParent: null
 // name: bill_m_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
   static const $BillMSetArgs<String> name = $BillMSetArgs(
@@ -61,6 +72,14 @@ nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDe
     model: 'bill_m',
   );
 
+// nameCast: key, name: key, model: bill_detail, self: null modelParent: null
+// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $BillMSetArgs<int> key = $BillMSetArgs(
+    name: 'key',
+    nameCast: 'key',
+    model: 'bill_detail',
+  );
+
 // nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM
 // name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
   static const $BillMSetArgs<String> billDetailName = $BillMSetArgs(
@@ -68,6 +87,14 @@ nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDe
     self: 'bill_detail',
     nameCast: 'bill_detail_name',
     model: 'bill_detail',
+  );
+
+// nameCast: key, name: key, model: bill_m, self: null modelParent: null
+// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $BillMSetArgs<int> key = $BillMSetArgs(
+    name: 'key',
+    nameCast: 'key',
+    model: 'bill_m',
   );
 
 // nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
@@ -260,12 +287,23 @@ extension BillDetailQuery on BillDetail {
 	)''';
 
   static const String debug =
-      '''nameCast: name, name: name, model: bill_detail, self: null modelParent: null,
+      '''nameCast: key, name: key, model: bill_detail, self: null modelParent: null,
+nameCast: name, name: name, model: bill_detail, self: null modelParent: null,
+nameCast: key, name: key, model: bill_m, self: null modelParent: null,
 nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail,
 nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail,
+nameCast: key, name: key, model: bill_detail, self: null modelParent: null,
 nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: key, name: key, model: bill_detail, self: null modelParent: null
+// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
+    name: 'key',
+    nameCast: 'key',
+    model: 'bill_detail',
+  );
 
 // nameCast: name, name: name, model: bill_detail, self: null modelParent: null
 // name: bill_detail_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
@@ -273,6 +311,14 @@ nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail mo
     name: 'name',
     nameCast: 'name',
     model: 'bill_detail',
+  );
+
+// nameCast: key, name: key, model: bill_m, self: null modelParent: null
+// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
+    name: 'key',
+    nameCast: 'key',
+    model: 'bill_m',
   );
 
 // nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
@@ -292,6 +338,14 @@ nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail mo
     self: 'bill',
     nameCast: 'bill_memos',
     model: 'bill_m',
+  );
+
+// nameCast: key, name: key, model: bill_detail, self: null modelParent: null
+// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
+    name: 'key',
+    nameCast: 'key',
+    model: 'bill_detail',
   );
 
 // nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM

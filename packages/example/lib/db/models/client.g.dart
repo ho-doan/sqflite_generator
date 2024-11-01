@@ -18,14 +18,24 @@ extension ClientQuery on Client {
 	)''';
 
   static const String debug =
-      '''nameCast: first_name, name: first_name, model: client, self: null modelParent: null,
+      '''nameCast: id, name: id, model: client, self: null modelParent: null,
+nameCast: first_name, name: first_name, model: client, self: null modelParent: null,
 nameCast: last_name, name: last_name, model: client, self: null modelParent: null,
 nameCast: blocked, name: blocked, model: client, self: null modelParent: null,
+nameCast: id, name: id, model: product, self: null modelParent: null,
 nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Client,
 nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Client,
 nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Client''';
 
   static const Map<int, List<String>> alter = {};
+
+// nameCast: id, name: id, model: client, self: null modelParent: null
+// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $ClientSetArgs<int> id = $ClientSetArgs(
+    name: 'id',
+    nameCast: 'id',
+    model: 'client',
+  );
 
 // nameCast: first_name, name: first_name, model: client, self: null modelParent: null
 // name: client_first_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
@@ -49,6 +59,14 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
     name: 'blocked',
     nameCast: 'blocked',
     model: 'client',
+  );
+
+// nameCast: id, name: id, model: product, self: null modelParent: null
+// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+  static const $ClientSetArgs<int> id = $ClientSetArgs(
+    name: 'id',
+    nameCast: 'id',
+    model: 'product',
   );
 
 // nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Client
