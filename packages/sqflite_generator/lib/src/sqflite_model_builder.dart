@@ -1,6 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:source_gen/source_gen.dart';
@@ -66,14 +65,15 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         for (final item in entity.aMPallSet)
           Field(
             (f) => f
-              ..name = '\$${item.fieldName}'
+              ..name = item.fieldName
               ..type =
                   refer('${entity.setClassName}<${item.property.typeSelect}>')
-              // ..docs.addAll([
-              //   if (item.p is AColumn &&
-              //       item.p.alters.any((e) => e.type == AlterTypeGen.drop))
-              //     '@Deprecated(\'no such column\')'
-              // ])
+              ..docs.addAll([
+                if (item.property is AColumn &&
+                    item.property.alters
+                        .any((e) => e.type == AlterTypeGen.drop))
+                  '@Deprecated(\'no such column\')'
+              ])
               ..docs.addAll([
                 '// $item',
                 '// ${item.keyModel}',
@@ -83,28 +83,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
               ${item.self != null ? 'self: \'${item.self}\',' : ''}
               nameCast: '${item.nameCast}',
               model: '${item.model}',
-              )''')
-              ..modifier = FieldModifier.constant
-              ..static = true,
-          ),
-        for (final item in entity.aPsAll)
-          Field(
-            (f) => f
-              ..name = item.name
-              ..type = refer('${entity.setClassName}<${item.p.typeSelect}>')
-              ..docs.addAll([
-                if (item.p is AColumn &&
-                    item.p.alters.any((e) => e.type == AlterTypeGen.drop))
-                  '@Deprecated(\'no such column\')'
-              ])
-              ..assignment = Code('''${entity.setClassName}(
-              name: '${item.p.nameToDB.toSnakeCase()}',
-              ${item.field != null ? 'self: \'${item.field}\',' : ''}
-              nameCast: '${item.nameCast}',
-              model: '${[
-                // if (item.field != null) item.field,
-                item.p.className.$rm
-              ].join('_').toSnakeCase()}',
               )''')
               ..modifier = FieldModifier.constant
               ..static = true,

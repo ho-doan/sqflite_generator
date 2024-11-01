@@ -23,7 +23,7 @@ nameCast: blocked, name: blocked, model: product, self: null modelParent: null''
 
 // nameCast: last_name, name: last_name, model: product, self: null modelParent: null
 // name: product_last_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $ProductSetArgs<String> $lastName = $ProductSetArgs(
+  static const $ProductSetArgs<String> lastName = $ProductSetArgs(
     name: 'last_name',
     nameCast: 'last_name',
     model: 'product',
@@ -31,7 +31,7 @@ nameCast: blocked, name: blocked, model: product, self: null modelParent: null''
 
 // nameCast: first_name, name: first_name, model: product, self: null modelParent: null
 // name: product_first_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $ProductSetArgs<String> $firstName = $ProductSetArgs(
+  static const $ProductSetArgs<String> firstName = $ProductSetArgs(
     name: 'first_name',
     nameCast: 'first_name',
     model: 'product',
@@ -39,33 +39,9 @@ nameCast: blocked, name: blocked, model: product, self: null modelParent: null''
 
 // nameCast: blocked, name: blocked, model: product, self: null modelParent: null
 // name: product_blocked, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $ProductSetArgs<bool> $blocked = $ProductSetArgs(
-    name: 'blocked',
-    nameCast: 'blocked',
-    model: 'product',
-  );
-
-  static const $ProductSetArgs<int> id = $ProductSetArgs(
-    name: 'id',
-    nameCast: 'product_id',
-    model: 'product',
-  );
-
-  static const $ProductSetArgs<String> lastName = $ProductSetArgs(
-    name: 'last_name',
-    nameCast: 'product_last_name',
-    model: 'product',
-  );
-
-  static const $ProductSetArgs<String> firstName = $ProductSetArgs(
-    name: 'first_name',
-    nameCast: 'product_first_name',
-    model: 'product',
-  );
-
   static const $ProductSetArgs<bool> blocked = $ProductSetArgs(
     name: 'blocked',
-    nameCast: 'product_blocked',
+    nameCast: 'blocked',
     model: 'product',
   );
 

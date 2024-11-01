@@ -26,7 +26,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: id, name: id, model: category, self: null modelParent: null
 // name: category_id, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: category_id, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $CategorySetArgs<String> $id = $CategorySetArgs(
+  static const $CategorySetArgs<String> id = $CategorySetArgs(
     name: 'id',
     nameCast: 'id',
     model: 'category',
@@ -34,7 +34,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: name, name: name, model: category, self: null modelParent: null
 // name: category_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: category_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $CategorySetArgs<String> $name = $CategorySetArgs(
+  static const $CategorySetArgs<String> name = $CategorySetArgs(
     name: 'name',
     nameCast: 'name',
     model: 'category',
@@ -42,7 +42,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Category
 // name: product_last_name, children: [null] self: null, selfIs: false modelParent: Category property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $CategorySetArgs<String> $productLastName = $CategorySetArgs(
+  static const $CategorySetArgs<String> productLastName = $CategorySetArgs(
     name: 'last_name',
     self: 'product',
     nameCast: 'product_last_name',
@@ -51,7 +51,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Category
 // name: product_first_name, children: [null] self: null, selfIs: false modelParent: Category property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $CategorySetArgs<String> $productFirstName = $CategorySetArgs(
+  static const $CategorySetArgs<String> productFirstName = $CategorySetArgs(
     name: 'first_name',
     self: 'product',
     nameCast: 'product_first_name',
@@ -60,53 +60,11 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Category
 // name: product_blocked, children: [null] self: null, selfIs: false modelParent: Category property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $CategorySetArgs<bool> $productBlocked = $CategorySetArgs(
+  static const $CategorySetArgs<bool> productBlocked = $CategorySetArgs(
     name: 'blocked',
     self: 'product',
     nameCast: 'product_blocked',
     model: 'product',
-  );
-
-  static const $CategorySetArgs<int> key = $CategorySetArgs(
-    name: 'key',
-    nameCast: 'category_key',
-    model: 'category',
-  );
-
-  static const $CategorySetArgs<int> productId = $CategorySetArgs(
-    name: 'id',
-    nameCast: 'product_id',
-    model: 'product',
-  );
-
-  static const $CategorySetArgs<String> productLastName = $CategorySetArgs(
-    name: 'last_name',
-    nameCast: 'product_last_name',
-    model: 'product',
-  );
-
-  static const $CategorySetArgs<String> productFirstName = $CategorySetArgs(
-    name: 'first_name',
-    nameCast: 'product_first_name',
-    model: 'product',
-  );
-
-  static const $CategorySetArgs<bool> productBlocked = $CategorySetArgs(
-    name: 'blocked',
-    nameCast: 'product_blocked',
-    model: 'product',
-  );
-
-  static const $CategorySetArgs<String> id = $CategorySetArgs(
-    name: 'id',
-    nameCast: 'category_id',
-    model: 'category',
-  );
-
-  static const $CategorySetArgs<String> name = $CategorySetArgs(
-    name: 'name',
-    nameCast: 'category_name',
-    model: 'category',
   );
 
   static Set<$CategorySetArgs> $default = {

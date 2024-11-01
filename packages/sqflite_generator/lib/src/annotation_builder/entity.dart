@@ -770,6 +770,7 @@ extension AQuery on AEntity {
     }.values.toList();
   }
 
+  @Deprecated('using aMPallSet')
   List<({String name, String? field, AProperty p, String nameCast})>
       get aPsAll {
     return [

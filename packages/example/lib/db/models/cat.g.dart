@@ -29,7 +29,7 @@ nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat''';
 
 // nameCast: birth, name: birth, model: cat, self: null modelParent: null
 // name: cat_birth, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> $birth = $CatSetArgs(
+  static const $CatSetArgs<String> birth = $CatSetArgs(
     name: 'birth',
     nameCast: 'birth',
     model: 'cat',
@@ -37,49 +37,9 @@ nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat''';
 
 // nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
 // name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> $catBirth = $CatSetArgs(
+  static const $CatSetArgs<String> catBirth = $CatSetArgs(
     name: 'birth',
     self: 'cat',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'cat_id',
-    model: 'cat',
-  );
-
-  static const $CatSetArgs<int> catParentId = $CatSetArgs(
-    name: 'id',
-    self: 'parent',
-    nameCast: 'cat_id',
-    model: 'cat',
-  );
-
-  static const $CatSetArgs<String> catParentBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'parent',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-  static const $CatSetArgs<int> catChildId = $CatSetArgs(
-    name: 'id',
-    self: 'child',
-    nameCast: 'cat_id',
-    model: 'cat',
-  );
-
-  static const $CatSetArgs<String> catChildBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'child',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-  static const $CatSetArgs<String> birth = $CatSetArgs(
-    name: 'birth',
     nameCast: 'cat_birth',
     model: 'cat',
   );

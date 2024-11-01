@@ -45,7 +45,7 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: time, name: time, model: bill, self: null modelParent: null
 // name: bill_time, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> $time = $BillSetArgs(
+  static const $BillSetArgs<String> time = $BillSetArgs(
     name: 'time',
     nameCast: 'time',
     model: 'bill',
@@ -53,7 +53,7 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Bill
 // name: product_last_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> $productLastName = $BillSetArgs(
+  static const $BillSetArgs<String> productLastName = $BillSetArgs(
     name: 'last_name',
     self: 'product',
     nameCast: 'product_last_name',
@@ -62,7 +62,7 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Bill
 // name: product_first_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> $productFirstName = $BillSetArgs(
+  static const $BillSetArgs<String> productFirstName = $BillSetArgs(
     name: 'first_name',
     self: 'product',
     nameCast: 'product_first_name',
@@ -71,7 +71,7 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Bill
 // name: product_blocked, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $BillSetArgs<bool> $productBlocked = $BillSetArgs(
+  static const $BillSetArgs<bool> productBlocked = $BillSetArgs(
     name: 'blocked',
     self: 'product',
     nameCast: 'product_blocked',
@@ -80,7 +80,7 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: client_first_name, name: first_name, model: client, self: client modelParent: Bill
 // name: client_first_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> $clientFirstName = $BillSetArgs(
+  static const $BillSetArgs<String> clientFirstName = $BillSetArgs(
     name: 'first_name',
     self: 'client',
     nameCast: 'client_first_name',
@@ -89,7 +89,7 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: client_last_name, name: last_name, model: client, self: client modelParent: Bill
 // name: client_last_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> $clientLastName = $BillSetArgs(
+  static const $BillSetArgs<String> clientLastName = $BillSetArgs(
     name: 'last_name',
     self: 'client',
     nameCast: 'client_last_name',
@@ -98,7 +98,7 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: client_blocked, name: blocked, model: client, self: client modelParent: Bill
 // name: client_blocked, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $BillSetArgs<bool> $clientBlocked = $BillSetArgs(
+  static const $BillSetArgs<bool> clientBlocked = $BillSetArgs(
     name: 'blocked',
     self: 'client',
     nameCast: 'client_blocked',
@@ -107,90 +107,9 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
 // nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill
 // name: bill_time, children: [null] self: null, selfIs: true modelParent: Bill property: nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> $billTime = $BillSetArgs(
+  static const $BillSetArgs<String> billTime = $BillSetArgs(
     name: 'time',
     self: 'bill',
-    nameCast: 'bill_time',
-    model: 'bill',
-  );
-
-  static const $BillSetArgs<int> productId = $BillSetArgs(
-    name: 'id',
-    nameCast: 'product_id',
-    model: 'product',
-  );
-
-  static const $BillSetArgs<String> productLastName = $BillSetArgs(
-    name: 'last_name',
-    nameCast: 'product_last_name',
-    model: 'product',
-  );
-
-  static const $BillSetArgs<String> productFirstName = $BillSetArgs(
-    name: 'first_name',
-    nameCast: 'product_first_name',
-    model: 'product',
-  );
-
-  static const $BillSetArgs<bool> productBlocked = $BillSetArgs(
-    name: 'blocked',
-    nameCast: 'product_blocked',
-    model: 'product',
-  );
-
-  static const $BillSetArgs<int> clientId = $BillSetArgs(
-    name: 'id',
-    nameCast: 'client_id',
-    model: 'client',
-  );
-
-  static const $BillSetArgs<String> clientProduct = $BillSetArgs(
-    name: 'product',
-    nameCast: 'client_product',
-    model: 'client',
-  );
-
-  static const $BillSetArgs<String> clientFirstName = $BillSetArgs(
-    name: 'first_name',
-    nameCast: 'client_first_name',
-    model: 'client',
-  );
-
-  static const $BillSetArgs<String> clientLastName = $BillSetArgs(
-    name: 'last_name',
-    nameCast: 'client_last_name',
-    model: 'client',
-  );
-
-  static const $BillSetArgs<bool> clientBlocked = $BillSetArgs(
-    name: 'blocked',
-    nameCast: 'client_blocked',
-    model: 'client',
-  );
-
-  static const $BillSetArgs<String> billParentProduct = $BillSetArgs(
-    name: 'product',
-    self: 'parent',
-    nameCast: 'bill_product',
-    model: 'bill',
-  );
-
-  static const $BillSetArgs<String> billParentClient = $BillSetArgs(
-    name: 'client',
-    self: 'parent',
-    nameCast: 'bill_client',
-    model: 'bill',
-  );
-
-  static const $BillSetArgs<String> billParentTime = $BillSetArgs(
-    name: 'time',
-    self: 'parent',
-    nameCast: 'bill_time',
-    model: 'bill',
-  );
-
-  static const $BillSetArgs<String> time = $BillSetArgs(
-    name: 'time',
     nameCast: 'bill_time',
     model: 'bill',
   );

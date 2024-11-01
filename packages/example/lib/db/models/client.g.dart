@@ -29,7 +29,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: first_name, name: first_name, model: client, self: null modelParent: null
 // name: client_first_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $ClientSetArgs<String> $firstName = $ClientSetArgs(
+  static const $ClientSetArgs<String> firstName = $ClientSetArgs(
     name: 'first_name',
     nameCast: 'first_name',
     model: 'client',
@@ -37,7 +37,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: last_name, name: last_name, model: client, self: null modelParent: null
 // name: client_last_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $ClientSetArgs<String> $lastName = $ClientSetArgs(
+  static const $ClientSetArgs<String> lastName = $ClientSetArgs(
     name: 'last_name',
     nameCast: 'last_name',
     model: 'client',
@@ -45,7 +45,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: blocked, name: blocked, model: client, self: null modelParent: null
 // name: client_blocked, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $ClientSetArgs<bool> $blocked = $ClientSetArgs(
+  static const $ClientSetArgs<bool> blocked = $ClientSetArgs(
     name: 'blocked',
     nameCast: 'blocked',
     model: 'client',
@@ -53,7 +53,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Client
 // name: product_last_name, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $ClientSetArgs<String> $productLastName = $ClientSetArgs(
+  static const $ClientSetArgs<String> productLastName = $ClientSetArgs(
     name: 'last_name',
     self: 'product',
     nameCast: 'product_last_name',
@@ -62,7 +62,7 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Client
 // name: product_first_name, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $ClientSetArgs<String> $productFirstName = $ClientSetArgs(
+  static const $ClientSetArgs<String> productFirstName = $ClientSetArgs(
     name: 'first_name',
     self: 'product',
     nameCast: 'product_first_name',
@@ -71,59 +71,11 @@ nameCast: product_blocked, name: blocked, model: product, self: product modelPar
 
 // nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Client
 // name: product_blocked, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $ClientSetArgs<bool> $productBlocked = $ClientSetArgs(
+  static const $ClientSetArgs<bool> productBlocked = $ClientSetArgs(
     name: 'blocked',
     self: 'product',
     nameCast: 'product_blocked',
     model: 'product',
-  );
-
-  static const $ClientSetArgs<int> id = $ClientSetArgs(
-    name: 'id',
-    nameCast: 'client_id',
-    model: 'client',
-  );
-
-  static const $ClientSetArgs<int> productId = $ClientSetArgs(
-    name: 'id',
-    nameCast: 'product_id',
-    model: 'product',
-  );
-
-  static const $ClientSetArgs<String> productLastName = $ClientSetArgs(
-    name: 'last_name',
-    nameCast: 'product_last_name',
-    model: 'product',
-  );
-
-  static const $ClientSetArgs<String> productFirstName = $ClientSetArgs(
-    name: 'first_name',
-    nameCast: 'product_first_name',
-    model: 'product',
-  );
-
-  static const $ClientSetArgs<bool> productBlocked = $ClientSetArgs(
-    name: 'blocked',
-    nameCast: 'product_blocked',
-    model: 'product',
-  );
-
-  static const $ClientSetArgs<String> firstName = $ClientSetArgs(
-    name: 'first_name',
-    nameCast: 'client_first_name',
-    model: 'client',
-  );
-
-  static const $ClientSetArgs<String> lastName = $ClientSetArgs(
-    name: 'last_name',
-    nameCast: 'client_last_name',
-    model: 'client',
-  );
-
-  static const $ClientSetArgs<bool> blocked = $ClientSetArgs(
-    name: 'blocked',
-    nameCast: 'client_blocked',
-    model: 'client',
   );
 
   static Set<$ClientSetArgs> $default = {

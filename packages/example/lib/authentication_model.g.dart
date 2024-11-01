@@ -46,15 +46,16 @@ nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDe
 
 // nameCast: name, name: name, model: bill_m, self: null modelParent: null
 // name: bill_m_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> $name = $BillMSetArgs(
+  static const $BillMSetArgs<String> name = $BillMSetArgs(
     name: 'name',
     nameCast: 'name',
     model: 'bill_m',
   );
 
+  @Deprecated('no such column')
 // nameCast: memos, name: memos, model: bill_m, self: null modelParent: null
 // name: bill_m_memos, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> $memos = $BillMSetArgs(
+  static const $BillMSetArgs<String> memos = $BillMSetArgs(
     name: 'memos',
     nameCast: 'memos',
     model: 'bill_m',
@@ -62,7 +63,7 @@ nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDe
 
 // nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM
 // name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> $billDetailName = $BillMSetArgs(
+  static const $BillMSetArgs<String> billDetailName = $BillMSetArgs(
     name: 'name',
     self: 'bill_detail',
     nameCast: 'bill_detail_name',
@@ -71,50 +72,20 @@ nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDe
 
 // nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
 // name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> $billName = $BillMSetArgs(
+  static const $BillMSetArgs<String> billName = $BillMSetArgs(
     name: 'name',
     self: 'bill',
     nameCast: 'bill_name',
     model: 'bill_m',
   );
 
+  @Deprecated('no such column')
 // nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail
 // name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> $billMemos = $BillMSetArgs(
+  static const $BillMSetArgs<String> billMemos = $BillMSetArgs(
     name: 'memos',
     self: 'bill',
     nameCast: 'bill_memos',
-    model: 'bill_m',
-  );
-
-  static const $BillMSetArgs<int> key = $BillMSetArgs(
-    name: 'key',
-    nameCast: 'bill_m_key',
-    model: 'bill_m',
-  );
-
-  static const $BillMSetArgs<int> billDetailDetailsKey = $BillMSetArgs(
-    name: 'key',
-    nameCast: 'bill_detail_key',
-    model: 'bill_detail',
-  );
-
-  static const $BillMSetArgs<String> billDetailDetailsName = $BillMSetArgs(
-    name: 'name',
-    nameCast: 'bill_detail_name',
-    model: 'bill_detail',
-  );
-
-  static const $BillMSetArgs<String> name = $BillMSetArgs(
-    name: 'name',
-    nameCast: 'bill_m_name',
-    model: 'bill_m',
-  );
-
-  @Deprecated('no such column')
-  static const $BillMSetArgs<String> memos = $BillMSetArgs(
-    name: 'memos',
-    nameCast: 'bill_m_memos',
     model: 'bill_m',
   );
 
@@ -298,7 +269,7 @@ nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail mo
 
 // nameCast: name, name: name, model: bill_detail, self: null modelParent: null
 // name: bill_detail_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> $name = $BillDetailSetArgs(
+  static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
     name: 'name',
     nameCast: 'name',
     model: 'bill_detail',
@@ -306,16 +277,17 @@ nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail mo
 
 // nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
 // name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> $billName = $BillDetailSetArgs(
+  static const $BillDetailSetArgs<String> billName = $BillDetailSetArgs(
     name: 'name',
     self: 'bill',
     nameCast: 'bill_name',
     model: 'bill_m',
   );
 
+  @Deprecated('no such column')
 // nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail
 // name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> $billMemos = $BillDetailSetArgs(
+  static const $BillDetailSetArgs<String> billMemos = $BillDetailSetArgs(
     name: 'memos',
     self: 'bill',
     nameCast: 'bill_memos',
@@ -324,40 +296,9 @@ nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail mo
 
 // nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM
 // name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> $billDetailName = $BillDetailSetArgs(
+  static const $BillDetailSetArgs<String> billDetailName = $BillDetailSetArgs(
     name: 'name',
     self: 'bill_detail',
-    nameCast: 'bill_detail_name',
-    model: 'bill_detail',
-  );
-
-  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
-    name: 'key',
-    nameCast: 'bill_detail_key',
-    model: 'bill_detail',
-  );
-
-  static const $BillDetailSetArgs<int> billMParentKey = $BillDetailSetArgs(
-    name: 'key',
-    nameCast: 'bill_m_key',
-    model: 'bill_m',
-  );
-
-  static const $BillDetailSetArgs<String> billMParentName = $BillDetailSetArgs(
-    name: 'name',
-    nameCast: 'bill_m_name',
-    model: 'bill_m',
-  );
-
-  @Deprecated('no such column')
-  static const $BillDetailSetArgs<String> billMParentMemos = $BillDetailSetArgs(
-    name: 'memos',
-    nameCast: 'bill_m_memos',
-    model: 'bill_m',
-  );
-
-  static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
-    name: 'name',
     nameCast: 'bill_detail_name',
     model: 'bill_detail',
   );
