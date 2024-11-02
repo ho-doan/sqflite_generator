@@ -17,51 +17,27 @@ extension CatQuery on Cat {
 	)''';
 
   static const String debug =
-      '''(id, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(cat_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(cat_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false)''';
+      '''([Cat, parent, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]),
+([Cat, child, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]),
+([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
 
-// APkEx(nameCast: cat_id, name: id, name2: null, model: Cat, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [], fk: null)
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'cat_id',
-    model: 'cat',
-  );
-
-// APkEx(nameCast: cat_id, name: id, name2: parent_id, model: Cat, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parent], fk: nameDefault: parent, name: Cat, nameToDB: cat, nameFromDB: cat_cat, dartType: Cat?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
-  static const $CatSetArgs<int> parentId = $CatSetArgs(
-    name: 'id',
-    nameCast: 'parent_id',
-    model: 'cat',
-  );
-
-// APkEx(nameCast: cat_birth, name: parent_birth, name2: null, model: Cat, children: [], property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [parent], fk: null)
+// ([Cat, parent, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
   static const $CatSetArgs<String> parentBirth = $CatSetArgs(
     name: 'birth',
-    nameCast: 'cat_birth',
-    model: 'cat',
+    nameCast: 'cat_parent_birth',
+    model: 'cat_parent',
   );
 
-// APkEx(nameCast: cat_id, name: id, name2: child_id, model: Cat, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [child], fk: nameDefault: child, name: Cat, nameToDB: cat, nameFromDB: cat_cat, dartType: Cat?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
-  static const $CatSetArgs<int> childId = $CatSetArgs(
-    name: 'id',
-    nameCast: 'child_id',
-    model: 'cat',
-  );
-
-// APkEx(nameCast: cat_birth, name: child_birth, name2: null, model: Cat, children: [], property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [child], fk: null)
+// ([Cat, child, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child])
   static const $CatSetArgs<String> childBirth = $CatSetArgs(
     name: 'birth',
-    nameCast: 'cat_birth',
-    model: 'cat',
+    nameCast: 'cat_child_birth',
+    model: 'cat_child',
   );
 
-// APkEx(nameCast: cat_birth, name: birth, name2: null, model: Cat, children: [], property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: birth, parentClassName: [], fk: null)
+// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
   static const $CatSetArgs<String> birth = $CatSetArgs(
     name: 'birth',
     nameCast: 'cat_birth',
@@ -69,10 +45,7 @@ extension CatQuery on Cat {
   );
 
   static Set<$CatSetArgs> $default = {
-    CatQuery.id,
-    CatQuery.parentId,
     CatQuery.parentBirth,
-    CatQuery.childId,
     CatQuery.childBirth,
     CatQuery.birth,
   };

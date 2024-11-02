@@ -78,7 +78,7 @@ class AProperty {
   toString() =>
       'nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
       ' _sqlType: $_sqlType, _isNull: $_isNull'
-      'rawFromDB: $rawFromDB';
+      'rawFromDB: $rawFromDB, parentClassName: $parentClassName';
 
   /// @primaryKey
   /// @ForeignKey(name: 'clientId')

@@ -588,28 +588,54 @@ extension AEntityBase on AEntity {
     return lst;
   }
 
-  List<(String, AProperty)> get allss {
+  List<(List<String>, AProperty)> allss([List<String> parents = const []]) {
+    final pp = [
+      if (parents.isEmpty) className,
+      ...parents,
+    ];
     if (parentClassName.length > (9 / 3) - 2) return [];
     final alls = [
       for (final e in aPs)
-        if (e is APrimaryKey &&
+        // if (e is APrimaryKey &&
 
-            /// primary key of child self
-            /// ```
-            /// class A{
-            ///   @primaryKey
-            ///   final A? child;
-            /// }
-            /// ```
-            /// result [true]
-            !e.parentClassName.contains(className)) ...[
-          ...e.expanded2().map((e) => (e.fieldNameFull, e)),
-        ] else if (e is AColumn) ...[
-          (e.nameDefault, e),
+        //     /// primary key of child self
+        //     /// ```
+        //     /// class A{
+        //     ///   @primaryKey
+        //     ///   final A? child;
+        //     /// }
+        //     /// ```
+        //     /// result [true]
+        //     !e.parentClassName.contains(className)) ...[
+        //   ...e.expanded2().map(
+        //     (e) {
+        //       return (
+        //         [
+        //           ...pp,
+        //           if (e.entityParent == null && e.parentClassName.isEmpty)
+        //             e.nameToDB
+        //           else if (e.entityParent == null) ...[
+        //             ...e.parentClassName,
+        //             e.nameToDB,
+        //           ] else ...[
+        //             ...[
+        //               // e.parentClassName.first,
+        //               ...e.parentClassName,
+        //             ],
+        //           ]
+        //         ],
+        //         e
+        //       );
+        //     },
+        //   ),
+        // ] else
+        if (e is AColumn) ...[
+          ([...pp, e.nameDefault], e),
         ] else if (e is AIndex) ...[
-          (e.nameDefault, e),
+          ([...pp, e.nameDefault], e),
         ] else if (e is AForeignKey)
-          ...(e.entityParent?.allss ?? <(String, AProperty)>[]),
+          ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
+              <(List<String>, AProperty)>[]),
     ];
     return alls;
   }
@@ -785,7 +811,7 @@ extension AEntityBase on AEntity {
   // TODO(hodoan): doing
   String rawDebug([AColumn? ps, String? newName]) {
     // final all = aPss(false);
-    final all = allss;
+    final all = allss();
     return all.join(',\n');
   }
 

@@ -16,11 +16,9 @@ extension BillMQuery on BillM {
 	)''';
 
   static const String debug =
-      '''(key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(bill_detail_key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
-(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
-(memos, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false)''';
+      '''([BillM, details, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [details]),
+([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: []),
+([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
@@ -49,28 +47,14 @@ extension BillMQuery on BillM {
     ]
   };
 
-// APkEx(nameCast: bill_m_key, name: key, name2: null, model: BillM, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [], fk: null)
-  static const $BillMSetArgs<int> key = $BillMSetArgs(
-    name: 'key',
-    nameCast: 'bill_m_key',
-    model: 'bill_m',
-  );
-
-// APkEx(nameCast: bill_detail_key, name: key, name2: details_key, model: BillDetail, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [details], fk: nameDefault: details, name: BillDetail, nameToDB: bill_detail, nameFromDB: bill_m_bill_detail, dartType: List<BillDetail>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false)
-  static const $BillMSetArgs<int> detailsKey = $BillMSetArgs(
-    name: 'key',
-    nameCast: 'details_key',
-    model: 'bill_detail',
-  );
-
-// APkEx(nameCast: bill_detail_name, name: details_name, name2: null, model: BillDetail, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [details], fk: null)
+// ([BillM, details, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [details])
   static const $BillMSetArgs<String> detailsName = $BillMSetArgs(
     name: 'name',
-    nameCast: 'bill_detail_name',
-    model: 'bill_detail',
+    nameCast: 'bill_m_details_name',
+    model: 'bill_m_details',
   );
 
-// APkEx(nameCast: bill_m_name, name: name, name2: null, model: BillM, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: name, parentClassName: [], fk: null)
+// ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])
   static const $BillMSetArgs<String> name = $BillMSetArgs(
     name: 'name',
     nameCast: 'bill_m_name',
@@ -78,7 +62,7 @@ extension BillMQuery on BillM {
   );
 
   @Deprecated('no such column')
-// APkEx(nameCast: bill_m_memos, name: memos, name2: null, model: BillM, children: [], property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: memos, parentClassName: [], fk: null)
+// ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])
   static const $BillMSetArgs<String> memos = $BillMSetArgs(
     name: 'memos',
     nameCast: 'bill_m_memos',
@@ -86,8 +70,6 @@ extension BillMQuery on BillM {
   );
 
   static Set<$BillMSetArgs> $default = {
-    BillMQuery.key,
-    BillMQuery.detailsKey,
     BillMQuery.detailsName,
     BillMQuery.name,
   };
@@ -259,44 +241,28 @@ extension BillDetailQuery on BillDetail {
 	)''';
 
   static const String debug =
-      '''(key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(bill_m_key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
-(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
-(memos, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
-(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false)''';
+      '''([BillDetail, parent, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent]),
+([BillDetail, parent, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent]),
+([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
 
-// APkEx(nameCast: bill_detail_key, name: key, name2: null, model: BillDetail, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [], fk: null)
-  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
-    name: 'key',
-    nameCast: 'bill_detail_key',
-    model: 'bill_detail',
-  );
-
-// APkEx(nameCast: bill_m_key, name: key, name2: parent_key, model: BillM, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parent], fk: nameDefault: parent, name: Bill, nameToDB: bill, nameFromDB: bill_detail_bill, dartType: BillM?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
-  static const $BillDetailSetArgs<int> parentKey = $BillDetailSetArgs(
-    name: 'key',
-    nameCast: 'parent_key',
-    model: 'bill_m',
-  );
-
-// APkEx(nameCast: bill_m_name, name: parent_name, name2: null, model: BillM, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [parent], fk: null)
+// ([BillDetail, parent, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent])
   static const $BillDetailSetArgs<String> parentName = $BillDetailSetArgs(
     name: 'name',
-    nameCast: 'bill_m_name',
-    model: 'bill_m',
+    nameCast: 'bill_detail_parent_name',
+    model: 'bill_detail_parent',
   );
 
   @Deprecated('no such column')
-// APkEx(nameCast: bill_m_memos, name: parent_memos, name2: null, model: BillM, children: [], property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [parent], fk: null)
+// ([BillDetail, parent, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent])
   static const $BillDetailSetArgs<String> parentMemos = $BillDetailSetArgs(
     name: 'memos',
-    nameCast: 'bill_m_memos',
-    model: 'bill_m',
+    nameCast: 'bill_detail_parent_memos',
+    model: 'bill_detail_parent',
   );
 
-// APkEx(nameCast: bill_detail_name, name: name, name2: null, model: BillDetail, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: name, parentClassName: [], fk: null)
+// ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])
   static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
     name: 'name',
     nameCast: 'bill_detail_name',
@@ -304,8 +270,6 @@ extension BillDetailQuery on BillDetail {
   );
 
   static Set<$BillDetailSetArgs> $default = {
-    BillDetailQuery.key,
-    BillDetailQuery.parentKey,
     BillDetailQuery.parentName,
     BillDetailQuery.name,
   };

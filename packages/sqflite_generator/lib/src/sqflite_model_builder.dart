@@ -63,25 +63,26 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..modifier = FieldModifier.constant
             ..static = true,
         ),
-        for (final item in entity.aPss())
+        for (final item in entity.allss())
           Field(
             (f) => f
-              ..name = (item.nameSelf ?? item.name2 ?? item.name).toCamelCase()
-              ..type =
-                  refer('${entity.setClassName}<${item.property.typeSelect}>')
+              ..name = (item.$1.sublist(1)).join('_').toCamelCase()
+              ..type = refer('${entity.setClassName}<${item.$2.typeSelect}>')
               ..docs.addAll([
-                if (item.property is AColumn &&
-                    item.property.alters
-                        .any((e) => e.type == AlterTypeGen.drop))
+                if (item.$2 is AColumn &&
+                    item.$2.alters.any((e) => e.type == AlterTypeGen.drop))
                   '@Deprecated(\'no such column\')'
               ])
               ..docs.addAll([
                 '// $item',
               ])
               ..assignment = Code('''${entity.setClassName}(
-              name: '${item.property.nameToDB}',
-              nameCast: '${item.name2 ?? item.nameCast}',
-              model: '${item.model.toSnakeCase()}',
+              name: '${item.$2.nameToDB}',
+              nameCast: '${[
+                ...item.$1.sublist(0, item.$1.length - 1),
+                item.$2.nameToDB
+              ].join('_').toSnakeCase()}',
+              model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
               )''')
               ..modifier = FieldModifier.constant
               ..static = true,
@@ -91,10 +92,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..name = entity.defaultSelectClass
             ..type = refer('Set<${entity.setClassName}>')
             ..assignment = Code('''{${[
-              for (final e in entity.aPss())
-                if (!(e.property is AColumn &&
-                    e.property.alters.any((e) => e.type == AlterTypeGen.drop)))
-                  '${entity.extensionName}.${(e.nameSelf ?? e.name2 ?? e.name).toCamelCase()}'
+              for (final e in entity.allss())
+                if (!(e.$2 is AColumn &&
+                    e.$2.alters.any((e) => e.type == AlterTypeGen.drop)))
+                  '${entity.extensionName}.${e.$1.sublist(1).join('_').toCamelCase()}'
             ].join(',')},}''')
             ..static = true,
         ),
