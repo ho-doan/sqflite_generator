@@ -254,11 +254,14 @@ class $ClientSetArgs<T> extends WhereModel<T> {
   const $ClientSetArgs({
     this.self = '',
     required this.name,
+    this.children = const [],
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
 
   final String self;
+
+  final List<$ClientSetArgs<T>> children;
 
   final String name;
 

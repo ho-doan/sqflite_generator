@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:source_gen/source_gen.dart';
@@ -19,7 +20,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
     if (_parsedElementCheckSet.contains(element)) return null;
     _parsedElementCheckSet.add(element);
 
-    final entity = AEntity.of(element)!;
+    final entity = AEntity.of(element, [])!;
 
     final classSetBuilder = Class((c) => c
       ..name = entity.setClassName
@@ -62,10 +63,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..modifier = FieldModifier.constant
             ..static = true,
         ),
-        for (final item in entity.aMPallSet)
+        for (final item in entity.aPss())
           Field(
             (f) => f
-              ..name = item.fieldName
+              ..name = (item.nameSelf ?? item.name2 ?? item.name).toCamelCase()
               ..type =
                   refer('${entity.setClassName}<${item.property.typeSelect}>')
               ..docs.addAll([
@@ -76,13 +77,11 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
               ])
               ..docs.addAll([
                 '// $item',
-                '// ${item.keyModel}',
               ])
               ..assignment = Code('''${entity.setClassName}(
-              name: '${item.name}',
-              ${item.self != null ? 'self: \'${item.self}\',' : ''}
-              nameCast: '${item.nameCast}',
-              model: '${item.model}',
+              name: '${item.property.nameToDB}',
+              nameCast: '${item.name2 ?? item.nameCast}',
+              model: '${item.model.toSnakeCase()}',
               )''')
               ..modifier = FieldModifier.constant
               ..static = true,
@@ -92,10 +91,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..name = entity.defaultSelectClass
             ..type = refer('Set<${entity.setClassName}>')
             ..assignment = Code('''{${[
-              for (final e in entity.aPsAll)
-                if (!(e.p is AColumn &&
-                    e.p.alters.any((e) => e.type == AlterTypeGen.drop)))
-                  '${entity.extensionName}.${e.name}'
+              for (final e in entity.aPss())
+                if (!(e.property is AColumn &&
+                    e.property.alters.any((e) => e.type == AlterTypeGen.drop)))
+                  '${entity.extensionName}.${(e.nameSelf ?? e.name2 ?? e.name).toCamelCase()}'
             ].join(',')},}''')
             ..static = true,
         ),

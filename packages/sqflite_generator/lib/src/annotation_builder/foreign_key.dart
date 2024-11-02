@@ -19,6 +19,7 @@ class AForeignKey extends AProperty {
 
   const AForeignKey._({
     super.name,
+    required super.parentClassName,
     required super.version,
     super.rawFromDB,
     this.onDelete = ForeignAction.noAction,
@@ -30,8 +31,13 @@ class AForeignKey extends AProperty {
     required super.step,
   });
 
-  factory AForeignKey.fromElement(FieldElement element,
-      FieldElement? parentElement, String className, int step) {
+  factory AForeignKey.fromElement(
+    FieldElement element,
+    FieldElement? parentElement,
+    String className,
+    List<String> parentClassName,
+    int step,
+  ) {
     AEntity? aEntity;
     if (element.type.isDartCoreList) {
       final es = [
@@ -46,12 +52,27 @@ class AForeignKey extends AProperty {
         pElement = parentElement;
       }
       if (pElement != null) {
-        aEntity = AEntity.of(pElement as ClassElement, step + 1);
+        aEntity = AEntity.of(
+          pElement as ClassElement,
+          [
+            ...parentClassName,
+            if (parentClassName.isEmpty) element.displayName else className,
+          ],
+          step + 1,
+        );
       }
     } else {
-      aEntity = AEntity.of(element.type.element as ClassElement, step + 1);
+      aEntity = AEntity.of(
+        element.type.element as ClassElement,
+        [
+          ...parentClassName,
+          if (parentClassName.isEmpty) element.displayName else className,
+        ],
+        step + 1,
+      );
     }
     return AForeignKey._(
+      parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
@@ -60,8 +81,9 @@ class AForeignKey extends AProperty {
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
+      // TODO(hodoan): check parentClassName
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
+          AEntity.of(element.type.element as ClassElement, [], step + 1)
                   ?.primaryKeys
                   .isNotEmpty ==
               true,
@@ -69,18 +91,28 @@ class AForeignKey extends AProperty {
     );
   }
   factory AForeignKey.fromSuperElement(
-      SuperFormalParameterElement element, String className, int step) {
+    SuperFormalParameterElement element,
+    String className,
+    List<String> parentClassName,
+    int step,
+  ) {
     return AForeignKey._(
+      parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
-      entityParent: AEntity.of(element.type.element as ClassElement, step + 1),
+      entityParent: AEntity.of(
+        element.type.element as ClassElement,
+        parentClassName,
+        step + 1,
+      ),
       name: AForeignKeyX._name(element),
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
+      // TODO(hodoan): check parentClassName
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
+          AEntity.of(element.type.element as ClassElement, [], step + 1)
                   ?.primaryKeys
                   .isNotEmpty ==
               true,
@@ -118,14 +150,8 @@ extension on Element {
 }
 
 extension AForeignKeyXL on List<AForeignKey> {
-  AEntity? of(String fieldName) {
-    final entity =
-        firstWhereOrNull((e) => e.nameDefault == fieldName)?.entityParent;
-    if (entity == null) {
-      print(
-          '=========== fieldName: $fieldName ${map((e) => e.nameDefault).toList()}');
-    }
-    return entity;
+  AForeignKey? of(String fieldName) {
+    return firstWhereOrNull((e) => e.nameDefault == fieldName);
   }
 }
 
@@ -141,16 +167,28 @@ extension AForeignKeyX on AForeignKey {
     int step,
     List<FieldElement> fields,
     String className,
+    List<String> parentClassName,
     List<SuperFormalParameterElement> cons,
   ) {
     return [
       ...cons
           .where((e) => _checker.hasAnnotationOfExact(e))
-          .map((e) => AForeignKey.fromSuperElement(e, className, step + 1))
+          .map((e) => AForeignKey.fromSuperElement(
+                e,
+                className,
+                parentClassName,
+                step + 1,
+              ))
           .toList(),
       ...fields
           .where((e) => _checker.hasAnnotationOfExact(e))
-          .map((e) => AForeignKey.fromElement(e, e, className, step + 1))
+          .map((e) => AForeignKey.fromElement(
+                e,
+                e,
+                className,
+                parentClassName,
+                step + 1,
+              ))
           .toList()
     ];
   }

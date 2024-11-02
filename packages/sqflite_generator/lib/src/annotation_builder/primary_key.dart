@@ -11,8 +11,11 @@ final _checker = const TypeChecker.fromRuntime(PrimaryKey);
 class APrimaryKey extends AProperty {
   final bool auto;
   final AEntity? entityParent;
+  final AForeignKey? foreignKey;
 
   const APrimaryKey._({
+    required this.foreignKey,
+    required super.parentClassName,
     required this.entityParent,
     required super.step,
     this.auto = true,
@@ -27,10 +30,14 @@ class APrimaryKey extends AProperty {
   factory APrimaryKey.fromElement(
     FieldElement element,
     String className,
+    List<String> parentClassName,
     int step,
     AEntity? entityParent,
+    AForeignKey? foreignKey,
   ) {
     return APrimaryKey._(
+      foreignKey: foreignKey,
+      parentClassName: parentClassName,
       entityParent: entityParent,
       auto: APrimaryKeyX._auto(element),
       step: step,
@@ -38,8 +45,9 @@ class APrimaryKey extends AProperty {
       version: APrimaryKeyX._version(element),
       nameDefault: element.displayName,
       dartType: element.type,
+      // TODO(hodoan): check parentClassName
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
+          AEntity.of(element.type.element as ClassElement, [], step + 1)
                   ?.primaryKeys
                   .isNotEmpty ==
               true,
@@ -52,18 +60,21 @@ extension APrimaryKeyX on APrimaryKey {
   static List<APrimaryKey> fields(
     List<FieldElement> fields,
     String className,
+    List<String> parentClassName,
     int step,
     List<AForeignKey>? fores,
   ) {
-    return fields
-        .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => APrimaryKey.fromElement(
-              e,
-              className,
-              step,
-              fores?.of(e.displayName),
-            ))
-        .toList();
+    return fields.where((e) => _checker.hasAnnotationOfExact(e)).map((e) {
+      final foreignKey = fores?.of(e.displayName);
+      return APrimaryKey.fromElement(
+        e,
+        className,
+        parentClassName,
+        step,
+        foreignKey?.entityParent,
+        foreignKey,
+      );
+    }).toList();
   }
 
   static bool isElement(Element e) {

@@ -39,8 +39,10 @@ class AProperty {
   final String className;
   final int step;
   final List<AlterDBGen> alters;
+  final List<String> parentClassName;
 
   const AProperty({
+    required this.parentClassName,
     this.name,
     this.alters = const [],
     required this.step,
@@ -58,7 +60,14 @@ class AProperty {
 
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
   String get _isNull => _isQues ? '' : 'NOT NULL';
-  String get _sqlType => dartType.typeSql(step)?.str ?? 'NONE';
+  String get _sqlType =>
+      dartType
+          .typeSql(
+            step,
+            parentClassName,
+          )
+          ?.str ??
+      'NONE';
 
   bool get isEnum => dartType.isEnum;
 
@@ -120,6 +129,38 @@ extension StringXm on String {
 }
 
 extension Aps on AProperty {
+  /// [fieldName] is null for primary key self
+  String _fieldNameFull(String? fieldName) {
+    if (parentClassName.length > 1) {
+      return [
+        if (fieldName != null) fieldName,
+        ...parentClassName,
+        className,
+        nameDefault
+      ].join('_');
+    } else if (parentClassName.isNotEmpty) {
+      return [
+        if (fieldName != null) fieldName,
+        className,
+        nameDefault,
+      ].join('_');
+    }
+    return nameDefault;
+  }
+
+  String get _fieldNameFullForForeign {
+    if (parentClassName.length > 1) {
+      return [...parentClassName.sublist(1), className, nameDefault].join('_');
+    }
+    return nameDefault;
+  }
+
+  String get fieldNameFull => _fieldNameFull(null).toSnakeCase();
+  String fieldNameFull2(String fieldName) =>
+      _fieldNameFull(fieldName).toSnakeCase();
+
+  String get fieldNameFullForForeign => _fieldNameFullForForeign.toSnakeCase();
+
   String get fieldSuffix => '${name ?? nameDefault}${dartType.fieldSuffix}';
   String get defaultSuffix => '$nameDefault${dartType.fieldSuffix}';
 

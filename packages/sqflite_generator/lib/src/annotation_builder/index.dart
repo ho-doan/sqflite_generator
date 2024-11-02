@@ -11,6 +11,7 @@ class AIndex extends AProperty {
   final bool unique;
 
   const AIndex._({
+    required super.parentClassName,
     // TODO(hodoan): unused
     // ignore: unused_element
     this.unique = false,
@@ -22,15 +23,22 @@ class AIndex extends AProperty {
     required super.className,
     super.rawFromDB,
   });
-  factory AIndex.fromElement(FieldElement element, String className, int step) {
+  factory AIndex.fromElement(
+    FieldElement element,
+    String className,
+    List<String> parentClassName,
+    int step,
+  ) {
     return AIndex._(
+      parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
       name: AIndexX._name(element),
       version: AIndexX._version(element),
+      // TODO(hodoan): check parentClassName
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
+          AEntity.of(element.type.element as ClassElement, [], step + 1)
                   ?.primaryKeys
                   .isNotEmpty ==
               true,
@@ -41,10 +49,14 @@ class AIndex extends AProperty {
 
 extension AIndexX on AIndex {
   static List<AIndex> fields(
-      List<FieldElement> fields, String className, int step) {
+    List<FieldElement> fields,
+    String className,
+    List<String> parentClassName,
+    int step,
+  ) {
     return fields
         .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => AIndex.fromElement(e, className, step))
+        .map((e) => AIndex.fromElement(e, className, parentClassName, step))
         .toList();
   }
 

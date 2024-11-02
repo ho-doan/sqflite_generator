@@ -13,6 +13,7 @@ final _checker = const TypeChecker.fromRuntime(Column);
 class AColumn extends AProperty {
   final String? converter;
   const AColumn._({
+    required super.parentClassName,
     required this.converter,
     super.alters,
     super.name,
@@ -24,10 +25,15 @@ class AColumn extends AProperty {
     required super.step,
   });
   factory AColumn.fromElement(
-      FieldElement element, String className, int step) {
+    FieldElement element,
+    String className,
+    List<String> parentClassName,
+    int step,
+  ) {
     final type = element.type;
 
     return AColumn._(
+      parentClassName: parentClassName,
       alters: AColumnX._alters(element),
       converter: AColumnX._type(element),
       step: step,
@@ -35,8 +41,9 @@ class AColumn extends AProperty {
       version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
+      // TODO(hodoan): check parentClassName
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
+          AEntity.of(element.type.element as ClassElement, [], step + 1)
                   ?.primaryKeys
                   .isNotEmpty ==
               true,
@@ -44,9 +51,14 @@ class AColumn extends AProperty {
     );
   }
   factory AColumn.fromConsElement(
-      ParameterElement element, String className, int step) {
+    ParameterElement element,
+    String className,
+    List<String> parentClassName,
+    int step,
+  ) {
     final type = element.type;
     return AColumn._(
+      parentClassName: parentClassName,
       alters: AColumnX._alters(element),
       converter: AColumnX._type(element),
       step: step,
@@ -54,8 +66,9 @@ class AColumn extends AProperty {
       version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
+      // TODO(hodoan): check parentClassName
       rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
+          AEntity.of(element.type.element as ClassElement, [], step + 1)
                   ?.primaryKeys
                   .isNotEmpty ==
               true,
@@ -69,6 +82,7 @@ extension AColumnX on AColumn {
     int step,
     List<FieldElement> fields,
     String className,
+    List<String> parentClassName,
     List<ParameterElement> cons,
     List<APrimaryKey> primaries,
     List<AIndex> indies,
@@ -93,10 +107,12 @@ extension AColumnX on AColumn {
     }
     return [
       ...columns
-          .map((e) => AColumn.fromConsElement(e, className, step + 1))
+          .map((e) =>
+              AColumn.fromConsElement(e, className, parentClassName, step + 1))
           .toList(),
       ...aColumns
-          .map((e) => AColumn.fromElement(e, className, step + 1))
+          .map((e) =>
+              AColumn.fromElement(e, className, parentClassName, step + 1))
           .toList(),
     ];
   }

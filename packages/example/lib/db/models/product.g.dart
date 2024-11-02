@@ -199,11 +199,14 @@ class $ProductSetArgs<T> extends WhereModel<T> {
   const $ProductSetArgs({
     this.self = '',
     required this.name,
+    this.children = const [],
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
 
   final String self;
+
+  final List<$ProductSetArgs<T>> children;
 
   final String name;
 

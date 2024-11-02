@@ -232,11 +232,14 @@ class $CategorySetArgs<T> extends WhereModel<T> {
   const $CategorySetArgs({
     this.self = '',
     required this.name,
+    this.children = const [],
     required this.nameCast,
     required this.model,
   }) : super(field: '$model.$name');
 
   final String self;
+
+  final List<$CategorySetArgs<T>> children;
 
   final String name;
 
