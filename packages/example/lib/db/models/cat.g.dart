@@ -17,11 +17,19 @@ extension CatQuery on Cat {
 	)''';
 
   static const String debug =
-      '''([Cat, parent, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]),
+      '''([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
+([Cat, parent, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]),
 ([Cat, child, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]),
 ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
+
+// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+  static const $CatSetArgs<int> id = $CatSetArgs(
+    name: 'id',
+    nameCast: 'cat_id',
+    model: 'cat',
+  );
 
 // ([Cat, parent, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
   static const $CatSetArgs<String> parentBirth = $CatSetArgs(
@@ -45,6 +53,7 @@ extension CatQuery on Cat {
   );
 
   static Set<$CatSetArgs> $default = {
+    CatQuery.id,
     CatQuery.parentBirth,
     CatQuery.childBirth,
     CatQuery.birth,

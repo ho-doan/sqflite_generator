@@ -15,11 +15,19 @@ extension ProductQuery on Product {
 	)''';
 
   static const String debug =
-      '''([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: []),
+      '''([Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
+([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: []),
 ([Product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: []),
 ([Product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
+
+// ([Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+  static const $ProductSetArgs<int> id = $ProductSetArgs(
+    name: 'id',
+    nameCast: 'product_id',
+    model: 'product',
+  );
 
 // ([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [])
   static const $ProductSetArgs<String> lastName = $ProductSetArgs(
@@ -43,6 +51,7 @@ extension ProductQuery on Product {
   );
 
   static Set<$ProductSetArgs> $default = {
+    ProductQuery.id,
     ProductQuery.lastName,
     ProductQuery.firstName,
     ProductQuery.blocked,

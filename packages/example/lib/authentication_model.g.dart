@@ -16,7 +16,8 @@ extension BillMQuery on BillM {
 	)''';
 
   static const String debug =
-      '''([BillM, details, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [details]),
+      '''([BillM, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
+([BillM, details, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [details]),
 ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: []),
 ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
 
@@ -47,6 +48,13 @@ extension BillMQuery on BillM {
     ]
   };
 
+// ([BillM, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+  static const $BillMSetArgs<int> key = $BillMSetArgs(
+    name: 'key',
+    nameCast: 'bill_m_key',
+    model: 'bill_m',
+  );
+
 // ([BillM, details, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [details])
   static const $BillMSetArgs<String> detailsName = $BillMSetArgs(
     name: 'name',
@@ -70,6 +78,7 @@ extension BillMQuery on BillM {
   );
 
   static Set<$BillMSetArgs> $default = {
+    BillMQuery.key,
     BillMQuery.detailsName,
     BillMQuery.name,
   };
@@ -241,11 +250,19 @@ extension BillDetailQuery on BillDetail {
 	)''';
 
   static const String debug =
-      '''([BillDetail, parent, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent]),
+      '''([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
+([BillDetail, parent, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent]),
 ([BillDetail, parent, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent]),
 ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
+
+// ([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
+    name: 'key',
+    nameCast: 'bill_detail_key',
+    model: 'bill_detail',
+  );
 
 // ([BillDetail, parent, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent])
   static const $BillDetailSetArgs<String> parentName = $BillDetailSetArgs(
@@ -270,6 +287,7 @@ extension BillDetailQuery on BillDetail {
   );
 
   static Set<$BillDetailSetArgs> $default = {
+    BillDetailQuery.key,
     BillDetailQuery.parentName,
     BillDetailQuery.name,
   };

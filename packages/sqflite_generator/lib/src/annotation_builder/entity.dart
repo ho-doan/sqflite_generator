@@ -596,40 +596,50 @@ extension AEntityBase on AEntity {
     if (parentClassName.length > (9 / 3) - 2) return [];
     final alls = [
       for (final e in aPs)
-        // if (e is APrimaryKey &&
+        if (e is APrimaryKey &&
 
-        //     /// primary key of child self
-        //     /// ```
-        //     /// class A{
-        //     ///   @primaryKey
-        //     ///   final A? child;
-        //     /// }
-        //     /// ```
-        //     /// result [true]
-        //     !e.parentClassName.contains(className)) ...[
-        //   ...e.expanded2().map(
-        //     (e) {
-        //       return (
-        //         [
-        //           ...pp,
-        //           if (e.entityParent == null && e.parentClassName.isEmpty)
-        //             e.nameToDB
-        //           else if (e.entityParent == null) ...[
-        //             ...e.parentClassName,
-        //             e.nameToDB,
-        //           ] else ...[
-        //             ...[
-        //               // e.parentClassName.first,
-        //               ...e.parentClassName,
-        //             ],
-        //           ]
-        //         ],
-        //         e
-        //       );
-        //     },
-        //   ),
-        // ] else
-        if (e is AColumn) ...[
+            /// primary key of child self
+            /// ```
+            /// class A{
+            ///   @primaryKey
+            ///   final A? child;
+            /// }
+            /// ```
+            /// result [true]
+            !e.parentClassName
+                .map((e) => e.toCamelCase())
+                .contains(className.toCamelCase())) ...[
+          ...[
+            for (final e in e.expanded2())
+
+              /// primary key of child self not foreign key && type entity
+              if (e.entityParent == null && e.parentClassName.isEmpty)
+                (
+                  [
+                    ...pp,
+                    // if (e.entityParent == null && e.parentClassName.isEmpty)
+                    e.nameToDB
+                    // else if (e.entityParent == null) ...[
+                    //   ...e.parentClassName,
+                    //   // e.nameToDB,
+                    // ] else ...[
+                    //   ...[
+                    //     // e.parentClassName.first,
+                    //     ...e.parentClassName,
+                    //   ],
+                    // ]
+                  ],
+                  e
+                )
+            // else
+            //   () {
+            //     return (
+            //       [...pp, e.nameToDB],
+            //       e,
+            //     );
+            //   }()
+          ],
+        ] else if (e is AColumn) ...[
           ([...pp, e.nameDefault], e),
         ] else if (e is AIndex) ...[
           ([...pp, e.nameDefault], e),
