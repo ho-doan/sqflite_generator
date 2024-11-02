@@ -19,10 +19,6 @@ import 'package:example/db/models/cat.dart' as i2;
 
 import 'package:example/db/models/bill.dart' as i3;
 
-import 'package:example/authentication_model.dart' as i4;
-
-import 'package:example/authentication_model.dart' as i5;
-
 import 'dart:io';
 
 import 'package:sqflite_annotation/sqflite_annotation.dart';
@@ -34,18 +30,14 @@ final List<String> _schemas = [
   i0.ProductQuery.createTable,
   i1.ClientQuery.createTable,
   i2.CatQuery.createTable,
-  i3.BillQuery.createTable,
-  i4.BillMQuery.createTable,
-  i5.BillDetailQuery.createTable
+  i3.BillQuery.createTable
 ];
 
 final List<Map<int, List<String>>> _alters = [
   i0.ProductQuery.alter,
   i1.ClientQuery.alter,
   i2.CatQuery.alter,
-  i3.BillQuery.alter,
-  i4.BillMQuery.alter,
-  i5.BillDetailQuery.alter
+  i3.BillQuery.alter
 ];
 
 Future<Database> $configSql([
@@ -127,6 +119,4 @@ Future<void> $clearDatabase(Database db) => Future.wait([
       i1.ClientQuery.deleteAll(db),
       i2.CatQuery.deleteAll(db),
       i3.BillQuery.deleteAll(db),
-      i4.BillMQuery.deleteAll(db),
-      i5.BillDetailQuery.deleteAll(db),
     ]);

@@ -19,6 +19,7 @@ extension ClientQuery on Client {
 
   static const String debug =
       '''([Client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
+([Client, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product]),
 ([Client, product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product]),
 ([Client, product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product]),
 ([Client, product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [product]),
@@ -33,6 +34,13 @@ extension ClientQuery on Client {
     name: 'id',
     nameCast: 'client_id',
     model: 'client',
+  );
+
+// ([Client, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product])
+  static const $ClientSetArgs<int> productId = $ClientSetArgs(
+    name: 'id',
+    nameCast: 'client_product_id',
+    model: 'client_product',
   );
 
 // ([Client, product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
@@ -79,6 +87,7 @@ extension ClientQuery on Client {
 
   static Set<$ClientSetArgs> $default = {
     ClientQuery.id,
+    ClientQuery.productId,
     ClientQuery.productLastName,
     ClientQuery.productFirstName,
     ClientQuery.productBlocked,

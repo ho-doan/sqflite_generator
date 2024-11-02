@@ -25,19 +25,36 @@ extension BillQuery on Bill {
 	)''';
 
   static const String debug =
-      '''([Bill, product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product]),
+      '''([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product]),
+([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client]),
+([Bill, product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product]),
 ([Bill, product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product]),
 ([Bill, product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [product]),
 ([Bill, client, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [client]),
 ([Bill, client, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [client]),
 ([Bill, client, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [client]),
 ([Bill, parent, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]),
+([Bill, parentClient, parentClient, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient]),
 ([Bill, parentClient, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [parentClient]),
 ([Bill, parentClient, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [parentClient]),
 ([Bill, parentClient, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parentClient]),
 ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
+
+// ([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product])
+  static const $BillSetArgs<int> productId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'bill_product_id',
+    model: 'bill_product',
+  );
+
+// ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client])
+  static const $BillSetArgs<int> clientId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'bill_client_id',
+    model: 'bill_client',
+  );
 
 // ([Bill, product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
   static const $BillSetArgs<String> productLastName = $BillSetArgs(
@@ -88,6 +105,13 @@ extension BillQuery on Bill {
     model: 'bill_parent',
   );
 
+// ([Bill, parentClient, parentClient, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient])
+  static const $BillSetArgs<int> parentClientParentClientId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'bill_parent_client_parent_client_id',
+    model: 'bill_parent_client_parent_client',
+  );
+
 // ([Bill, parentClient, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [parentClient])
   static const $BillSetArgs<String> parentClientFirstName = $BillSetArgs(
     name: 'first_name',
@@ -117,6 +141,8 @@ extension BillQuery on Bill {
   );
 
   static Set<$BillSetArgs> $default = {
+    BillQuery.productId,
+    BillQuery.clientId,
     BillQuery.productLastName,
     BillQuery.productFirstName,
     BillQuery.productBlocked,
@@ -124,6 +150,7 @@ extension BillQuery on Bill {
     BillQuery.clientLastName,
     BillQuery.clientBlocked,
     BillQuery.parentTime,
+    BillQuery.parentClientParentClientId,
     BillQuery.parentClientFirstName,
     BillQuery.parentClientLastName,
     BillQuery.parentClientBlocked,

@@ -57,30 +57,30 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Database database;
 
-  List<BillM> bills = [];
+  // List<BillM> bills = [];
 
-  @override
-  void initState() {
-    configSql().then((db) {
-      BillMQuery.getAll(
-        db,
-        where: {
-          BillMQuery.key.equal(1),
-        },
-        whereOr: [
-          {
-            BillMQuery.key.equal(0),
-            BillMQuery.name.equal('1'),
-            BillMQuery.key.lessThan(1),
-          },
-        ],
-      ).then(
-        (v) => setState(() => bills = v),
-      );
-      return database = db;
-    });
-    super.initState();
-  }
+  // @override
+  // void initState() {
+  //   configSql().then((db) {
+  //     BillMQuery.getAll(
+  //       db,
+  //       where: {
+  //         BillMQuery.key.equal(1),
+  //       },
+  //       whereOr: [
+  //         {
+  //           BillMQuery.key.equal(0),
+  //           BillMQuery.name.equal('1'),
+  //           BillMQuery.key.lessThan(1),
+  //         },
+  //       ],
+  //     ).then(
+  //       (v) => setState(() => bills = v),
+  //     );
+  //     return database = db;
+  //   });
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
               '',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            for (final item in bills)
-              Text('${item.name} ${item.details.map((e) => e.name)}')
+            // for (final item in bills)
+            //   Text('${item.name} ${item.details.map((e) => e.name)}')
           ],
         ),
       ),

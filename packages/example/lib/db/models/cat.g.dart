@@ -18,7 +18,9 @@ extension CatQuery on Cat {
 
   static const String debug =
       '''([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
+([Cat, parent, parent, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]),
 ([Cat, parent, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]),
+([Cat, child, child, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]),
 ([Cat, child, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]),
 ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])''';
 
@@ -31,11 +33,25 @@ extension CatQuery on Cat {
     model: 'cat',
   );
 
+// ([Cat, parent, parent, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
+  static const $CatSetArgs<int> parentParentId = $CatSetArgs(
+    name: 'id',
+    nameCast: 'cat_parent_parent_id',
+    model: 'cat_parent_parent',
+  );
+
 // ([Cat, parent, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
   static const $CatSetArgs<String> parentBirth = $CatSetArgs(
     name: 'birth',
     nameCast: 'cat_parent_birth',
     model: 'cat_parent',
+  );
+
+// ([Cat, child, child, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child])
+  static const $CatSetArgs<int> childChildId = $CatSetArgs(
+    name: 'id',
+    nameCast: 'cat_child_child_id',
+    model: 'cat_child_child',
   );
 
 // ([Cat, child, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child])
@@ -54,7 +70,9 @@ extension CatQuery on Cat {
 
   static Set<$CatSetArgs> $default = {
     CatQuery.id,
+    CatQuery.parentParentId,
     CatQuery.parentBirth,
+    CatQuery.childChildId,
     CatQuery.childBirth,
     CatQuery.birth,
   };

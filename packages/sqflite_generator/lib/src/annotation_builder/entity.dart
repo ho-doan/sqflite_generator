@@ -610,32 +610,37 @@ extension AEntityBase on AEntity {
                 .map((e) => e.toCamelCase())
                 .contains(className.toCamelCase())) ...[
           ...[
-            for (final e in e.expanded2())
+            for (final f in e.expanded2())
 
               /// primary key of child self not foreign key && type entity
-              if (e.entityParent == null && e.parentClassName.isEmpty)
-                (
-                  [
-                    ...pp,
-                    // if (e.entityParent == null && e.parentClassName.isEmpty)
-                    e.nameToDB
-                    // else if (e.entityParent == null) ...[
-                    //   ...e.parentClassName,
-                    //   // e.nameToDB,
-                    // ] else ...[
-                    //   ...[
-                    //     // e.parentClassName.first,
-                    //     ...e.parentClassName,
-                    //   ],
-                    // ]
-                  ],
-                  e
-                )
-            // else
+              if (f.entityParent == null && f.parentClassName.isEmpty)
+                ([...pp, f.nameToDB], f)
+              else if (f.entityParent == null && f.parentClassName.length == 1
+                  // &&
+                  // pp.length == 1
+                  )
+                () {
+                  return (
+                    [
+                      ...pp,
+                      ...f.parentClassName,
+                      f.nameToDB,
+                    ],
+                    f,
+                  );
+                }()
+            // else if (f.entityParent == null && f.parentClassName.length == 2
+            //     // &&
+            //     // pp.length == 1
+            //     )
             //   () {
             //     return (
-            //       [...pp, e.nameToDB],
-            //       e,
+            //       [
+            //         ...pp,
+            //         ...f.parentClassName,
+            //         f.nameToDB,
+            //       ],
+            //       f,
             //     );
             //   }()
           ],
