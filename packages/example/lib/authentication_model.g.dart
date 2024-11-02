@@ -9,34 +9,40 @@ part of 'authentication_model.dart';
 extension BillMQuery on BillM {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillM(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			bill_m_name TEXT NOT NULL,
-			details_key INTEGER
+			details_bill_detail_key INTEGER,
+			name TEXT NOT NULL,
+			memos TEXT NOT NULL,
+			null
 	)''';
 
   static const String debug =
-      '''nameCast: key, name: key, model: bill_m, self: null modelParent: null,
-nameCast: name, name: name, model: bill_m, self: null modelParent: null,
-nameCast: memos, name: memos, model: bill_m, self: null modelParent: null,
-nameCast: key, name: key, model: bill_detail, self: null modelParent: null,
-nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM,
-nameCast: key, name: key, model: bill_m, self: null modelParent: null,
-nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail,
-nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail''';
+      '''(key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(bill_detail_key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(details_bill_detail_bill_m_key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(memos, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(memos, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false)''';
 
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
-			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			bill_detail_name TEXT NOT NULL,
-			parent_key INTEGER
+			bill_detail_key INTEGER PRIMARY KEY AUTOINCREMENT,
+			parent_details_bill_detail_bill_m_key INTEGER,
+			name TEXT NOT NULL,
+			FOREIGN KEY (parent_details_bill_detail_bill_m_key) REFERENCES BillM (bill_detail_bill_m_key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''',
       'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
       'DROP TABLE BillDetail;',
       '''CREATE TABLE IF NOT EXISTS BillM_new(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			bill_m_name TEXT NOT NULL,
-			details_key INTEGER
+			details_bill_detail_key INTEGER,
+			name TEXT NOT NULL,
+			memos TEXT NOT NULL,
+			null
 	)''',
       'INSERT INTO BillM_new(key,name)SELECT key,name FROM BillM;',
       'DROP TABLE BillM;',
@@ -47,79 +53,46 @@ nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDe
     ]
   };
 
-// nameCast: key, name: key, model: bill_m, self: null modelParent: null
-// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+// APkEx(nameCast: bill_m_key, name: key, name2: null, model: BillM, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [], fk: null)
   static const $BillMSetArgs<int> key = $BillMSetArgs(
     name: 'key',
-    nameCast: 'key',
+    nameCast: 'bill_m_key',
     model: 'bill_m',
   );
 
-// nameCast: name, name: name, model: bill_m, self: null modelParent: null
-// name: bill_m_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> name = $BillMSetArgs(
-    name: 'name',
-    nameCast: 'name',
-    model: 'bill_m',
-  );
-
-  @Deprecated('no such column')
-// nameCast: memos, name: memos, model: bill_m, self: null modelParent: null
-// name: bill_m_memos, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> memos = $BillMSetArgs(
-    name: 'memos',
-    nameCast: 'memos',
-    model: 'bill_m',
-  );
-
-// nameCast: key, name: key, model: bill_detail, self: null modelParent: null
-// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillMSetArgs<int> key = $BillMSetArgs(
+// APkEx(nameCast: bill_detail_key, name: key, name2: details_key, model: BillDetail, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [details], fk: nameDefault: details, name: BillDetail, nameToDB: bill_detail, nameFromDB: bill_m_bill_detail, dartType: List<BillDetail>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false)
+  static const $BillMSetArgs<int> detailsKey = $BillMSetArgs(
     name: 'key',
-    nameCast: 'key',
+    nameCast: 'details_key',
     model: 'bill_detail',
   );
 
-// nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM
-// name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> billDetailName = $BillMSetArgs(
+// APkEx(nameCast: bill_detail_name, name: details_name, name2: null, model: BillDetail, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [details], fk: null)
+  static const $BillMSetArgs<String> detailsName = $BillMSetArgs(
     name: 'name',
-    self: 'bill_detail',
     nameCast: 'bill_detail_name',
     model: 'bill_detail',
   );
 
-// nameCast: key, name: key, model: bill_m, self: null modelParent: null
-// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillMSetArgs<int> key = $BillMSetArgs(
-    name: 'key',
-    nameCast: 'key',
-    model: 'bill_m',
-  );
-
-// nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
-// name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> billName = $BillMSetArgs(
+// APkEx(nameCast: bill_m_name, name: name, name2: null, model: BillM, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: name, parentClassName: [], fk: null)
+  static const $BillMSetArgs<String> name = $BillMSetArgs(
     name: 'name',
-    self: 'bill',
-    nameCast: 'bill_name',
+    nameCast: 'bill_m_name',
     model: 'bill_m',
   );
 
   @Deprecated('no such column')
-// nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail
-// name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillMSetArgs<String> billMemos = $BillMSetArgs(
+// APkEx(nameCast: bill_m_memos, name: memos, name2: null, model: BillM, children: [], property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: memos, parentClassName: [], fk: null)
+  static const $BillMSetArgs<String> memos = $BillMSetArgs(
     name: 'memos',
-    self: 'bill',
-    nameCast: 'bill_memos',
+    nameCast: 'bill_m_memos',
     model: 'bill_m',
   );
 
   static Set<$BillMSetArgs> $default = {
     BillMQuery.key,
-    BillMQuery.billDetailDetailsKey,
-    BillMQuery.billDetailDetailsName,
+    BillMQuery.detailsKey,
+    BillMQuery.detailsName,
     BillMQuery.name,
   };
 
@@ -249,7 +222,7 @@ WHERE bill_m.key = ?
   ]) =>
       BillM(
         key: json['${childName}bill_m_key'] as int?,
-        details: lst.map((e) => BillDetail.fromDB(e, [])).toList(),
+        key: json['${childName}bill_detail_key'] as int?,
         name: json['${childName}bill_m_name'] as String,
         memos: const StringListConverter()
             .fromJson(json['${childName}bill_m_memos'] as String?),
@@ -281,86 +254,64 @@ class $BillMSetArgs<T> extends WhereModel<T> {
 extension BillDetailQuery on BillDetail {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillDetail(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			bill_detail_name TEXT NOT NULL,
-			parent_key INTEGER,
-			FOREIGN KEY (parent_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
+			parent_bill_m_key INTEGER,
+			name TEXT NOT NULL,
+			FOREIGN KEY (parent_bill_m_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
-      '''nameCast: key, name: key, model: bill_detail, self: null modelParent: null,
-nameCast: name, name: name, model: bill_detail, self: null modelParent: null,
-nameCast: key, name: key, model: bill_m, self: null modelParent: null,
-nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail,
-nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail,
-nameCast: key, name: key, model: bill_detail, self: null modelParent: null,
-nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM''';
+      '''(key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(bill_m_key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_m_bill_detail_key, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(memos, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(memos, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false),
+(name, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false)''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: key, name: key, model: bill_detail, self: null modelParent: null
-// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+// APkEx(nameCast: bill_detail_key, name: key, name2: null, model: BillDetail, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [], fk: null)
   static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
     name: 'key',
-    nameCast: 'key',
+    nameCast: 'bill_detail_key',
     model: 'bill_detail',
   );
 
-// nameCast: name, name: name, model: bill_detail, self: null modelParent: null
-// name: bill_detail_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
-    name: 'name',
-    nameCast: 'name',
-    model: 'bill_detail',
-  );
-
-// nameCast: key, name: key, model: bill_m, self: null modelParent: null
-// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
+// APkEx(nameCast: bill_m_key, name: key, name2: parent_key, model: BillM, children: [], property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parent], fk: nameDefault: parent, name: Bill, nameToDB: bill, nameFromDB: bill_detail_bill, dartType: BillM?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $BillDetailSetArgs<int> parentKey = $BillDetailSetArgs(
     name: 'key',
-    nameCast: 'key',
+    nameCast: 'parent_key',
     model: 'bill_m',
   );
 
-// nameCast: bill_name, name: name, model: bill_m, self: bill modelParent: BillDetail
-// name: bill_m_name, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> billName = $BillDetailSetArgs(
+// APkEx(nameCast: bill_m_name, name: parent_name, name2: null, model: BillM, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [parent], fk: null)
+  static const $BillDetailSetArgs<String> parentName = $BillDetailSetArgs(
     name: 'name',
-    self: 'bill',
-    nameCast: 'bill_name',
+    nameCast: 'bill_m_name',
     model: 'bill_m',
   );
 
   @Deprecated('no such column')
-// nameCast: bill_memos, name: memos, model: bill_m, self: bill modelParent: BillDetail
-// name: bill_m_memos, children: [null] self: null, selfIs: false modelParent: BillDetail property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> billMemos = $BillDetailSetArgs(
+// APkEx(nameCast: bill_m_memos, name: parent_memos, name2: null, model: BillM, children: [], property: nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [parent], fk: null)
+  static const $BillDetailSetArgs<String> parentMemos = $BillDetailSetArgs(
     name: 'memos',
-    self: 'bill',
-    nameCast: 'bill_memos',
+    nameCast: 'bill_m_memos',
     model: 'bill_m',
   );
 
-// nameCast: key, name: key, model: bill_detail, self: null modelParent: null
-// name: key, children: [null] self: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
-    name: 'key',
-    nameCast: 'key',
-    model: 'bill_detail',
-  );
-
-// nameCast: bill_detail_name, name: name, model: bill_detail, self: bill_detail modelParent: BillM
-// name: bill_detail_name, children: [null] self: null, selfIs: false modelParent: BillM property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false
-  static const $BillDetailSetArgs<String> billDetailName = $BillDetailSetArgs(
+// APkEx(nameCast: bill_detail_name, name: name, name2: null, model: BillDetail, children: [], property: nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: name, parentClassName: [], fk: null)
+  static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
     name: 'name',
-    self: 'bill_detail',
     nameCast: 'bill_detail_name',
     model: 'bill_detail',
   );
 
   static Set<$BillDetailSetArgs> $default = {
     BillDetailQuery.key,
-    BillDetailQuery.billMParentKey,
-    BillDetailQuery.billMParentName,
+    BillDetailQuery.parentKey,
+    BillDetailQuery.parentName,
     BillDetailQuery.name,
   };
 
@@ -495,7 +446,7 @@ WHERE bill_detail.key = ?
   ]) =>
       BillDetail(
         key: json['${childName}bill_detail_key'] as int?,
-        parent: BillM.fromDB(json, []),
+        key: json['${childName}bill_m_key'] as int?,
         name: json['${childName}bill_detail_name'] as String,
       );
   Map<String, dynamic> $toDB() => {

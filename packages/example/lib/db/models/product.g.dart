@@ -9,48 +9,44 @@ part of 'product.dart';
 extension ProductQuery on Product {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Product(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			product_last_name TEXT,
-			product_first_name TEXT,
-			product_blocked BIT NOT NULL
+			last_name TEXT,
+			first_name TEXT,
+			blocked BIT NOT NULL
 	)''';
 
   static const String debug =
-      '''nameCast: id, name: id, model: product, self: null modelParent: null,
-nameCast: last_name, name: last_name, model: product, self: null modelParent: null,
-nameCast: first_name, name: first_name, model: product, self: null modelParent: null,
-nameCast: blocked, name: blocked, model: product, self: null modelParent: null''';
+      '''(id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false)''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: id, name: id, model: product, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+// APkEx(nameCast: product_id, name: id, name2: null, model: Product, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [], fk: null)
   static const $ProductSetArgs<int> id = $ProductSetArgs(
     name: 'id',
-    nameCast: 'id',
+    nameCast: 'product_id',
     model: 'product',
   );
 
-// nameCast: last_name, name: last_name, model: product, self: null modelParent: null
-// name: product_last_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+// APkEx(nameCast: product_last_name, name: last_name, name2: null, model: Product, children: [], property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: last_name, parentClassName: [], fk: null)
   static const $ProductSetArgs<String> lastName = $ProductSetArgs(
     name: 'last_name',
-    nameCast: 'last_name',
+    nameCast: 'product_last_name',
     model: 'product',
   );
 
-// nameCast: first_name, name: first_name, model: product, self: null modelParent: null
-// name: product_first_name, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+// APkEx(nameCast: product_first_name, name: first_name, name2: null, model: Product, children: [], property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: first_name, parentClassName: [], fk: null)
   static const $ProductSetArgs<String> firstName = $ProductSetArgs(
     name: 'first_name',
-    nameCast: 'first_name',
+    nameCast: 'product_first_name',
     model: 'product',
   );
 
-// nameCast: blocked, name: blocked, model: product, self: null modelParent: null
-// name: product_blocked, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
+// APkEx(nameCast: product_blocked, name: blocked, name2: null, model: Product, children: [], property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: blocked, parentClassName: [], fk: null)
   static const $ProductSetArgs<bool> blocked = $ProductSetArgs(
     name: 'blocked',
-    nameCast: 'blocked',
+    nameCast: 'product_blocked',
     model: 'product',
   );
 

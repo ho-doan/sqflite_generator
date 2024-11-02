@@ -10,285 +10,244 @@ extension BillQuery on Bill {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Bill(
 			product_id INTEGER,
 			client_id INTEGER,
-			client_product_id INTEGER,
-			bill_time INTEGER,
-			parent_product_id INTEGER,
-			parent_client_id INTEGER,
-			parent_client_product_id INTEGER,
-			PRIMARY KEY(product_id, client_id, client_product_id),
+			client_client_product_id INTEGER,
+			parent_parent_bill_product_id INTEGER,
+			parent_parent_bill_client_id INTEGER,
+			parent_parent_bill_client_product_id INTEGER,
+			parent_client_client_id INTEGER,
+			parent_client_parent_client_client_product_id INTEGER,
+			time INTEGER,
+			PRIMARY KEY [product_id, client_id, client_client_product_id],
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (client_id,client_product_id) REFERENCES Client (id,id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (parent_product_id,parent_client_id,parent_client_product_id) REFERENCES Bill (product_id,client_id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (client_id,client_client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (parent_parent_bill_product_id,parent_parent_bill_client_id,parent_parent_bill_client_product_id) REFERENCES Bill (bill_product_id,bill_client_id,bill_client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (parent_client_client_id,parent_client_parent_client_client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
-      '''nameCast: time, name: time, model: bill, self: null modelParent: null,
-nameCast: id, name: id, model: product, self: null modelParent: null,
-nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Bill,
-nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Bill,
-nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Bill,
-nameCast: id, name: id, model: client, self: null modelParent: null,
-nameCast: client_first_name, name: first_name, model: client, self: client modelParent: Bill,
-nameCast: client_last_name, name: last_name, model: client, self: client modelParent: Bill,
-nameCast: client_blocked, name: blocked, model: client, self: client modelParent: Bill,
-nameCast: id, name: id, model: product, self: null modelParent: null,
-nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Client,
-nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Client,
-nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Client,
-nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill,
-nameCast: id, name: id, model: product, self: null modelParent: null,
-nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Bill,
-nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Bill,
-nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Bill,
-nameCast: id, name: id, model: client, self: null modelParent: null,
-nameCast: product, name: product, model: client, self: null modelParent: null,
-nameCast: client_first_name, name: first_name, model: client, self: client modelParent: Bill,
-nameCast: client_last_name, name: last_name, model: client, self: client modelParent: Bill,
-nameCast: client_blocked, name: blocked, model: client, self: client modelParent: Bill,
-nameCast: product, name: product, model: bill, self: null modelParent: null,
-nameCast: client, name: client, model: bill, self: null modelParent: null,
-nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
+      '''(product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(client_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(client_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(client_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(parent_bill_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(parent_bill_client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(parent_bill_bill_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(parent_bill_bill_client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_bill_client_product, nameDefault: product, name: null, nameToDB: product, nameFromDB: client_product, dartType: Product, _isQues: false, _sqlType: NONE, _isNull: NOT NULLrawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(time, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_bill_client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_bill_client_product, nameDefault: product, name: null, nameToDB: product, nameFromDB: client_product, dartType: Product, _isQues: false, _sqlType: NONE, _isNull: NOT NULLrawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(time, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_bill_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(time, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(client_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_client_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(parent_client_client_product_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(firstName, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(lastName, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false),
+(blocked, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false),
+(time, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false)''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: time, name: time, model: bill, self: null modelParent: null
-// name: bill_time, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> time = $BillSetArgs(
-    name: 'time',
-    nameCast: 'time',
-    model: 'bill',
-  );
-
-// nameCast: id, name: id, model: product, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<int> id = $BillSetArgs(
+// APkEx(nameCast: product_id, name: id, name2: product_id, model: Product, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [product], fk: null)
+  static const $BillSetArgs<int> productId = $BillSetArgs(
     name: 'id',
-    nameCast: 'id',
+    nameCast: 'product_id',
     model: 'product',
   );
 
-// nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Bill
-// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+// APkEx(nameCast: client_id, name: id, name2: client_id, model: Client, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [client], fk: null)
+  static const $BillSetArgs<int> clientId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'client_id',
+    model: 'client',
+  );
+
+// APkEx(nameCast: product_id, name: id, name2: client_product_id, model: Product, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [client, Client], fk: null)
+  static const $BillSetArgs<int> clientProductId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'client_product_id',
+    model: 'product',
+  );
+
+// APkEx(nameCast: product_last_name, name: product_last_name, name2: null, model: Product, children: [], property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [product], fk: null)
   static const $BillSetArgs<String> productLastName = $BillSetArgs(
     name: 'last_name',
-    self: 'product',
     nameCast: 'product_last_name',
     model: 'product',
   );
 
-// nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Bill
-// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+// APkEx(nameCast: product_first_name, name: product_first_name, name2: null, model: Product, children: [], property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [product], fk: null)
   static const $BillSetArgs<String> productFirstName = $BillSetArgs(
     name: 'first_name',
-    self: 'product',
     nameCast: 'product_first_name',
     model: 'product',
   );
 
-// nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Bill
-// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
+// APkEx(nameCast: product_blocked, name: product_blocked, name2: null, model: Product, children: [], property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [product], fk: null)
   static const $BillSetArgs<bool> productBlocked = $BillSetArgs(
     name: 'blocked',
-    self: 'product',
     nameCast: 'product_blocked',
     model: 'product',
   );
 
-// nameCast: id, name: id, model: client, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<int> id = $BillSetArgs(
-    name: 'id',
-    nameCast: 'id',
-    model: 'client',
-  );
-
-// nameCast: client_first_name, name: first_name, model: client, self: client modelParent: Bill
-// name: client_first_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+// APkEx(nameCast: client_first_name, name: client_first_name, name2: null, model: Client, children: [], property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [client], fk: null)
   static const $BillSetArgs<String> clientFirstName = $BillSetArgs(
     name: 'first_name',
-    self: 'client',
     nameCast: 'client_first_name',
     model: 'client',
   );
 
-// nameCast: client_last_name, name: last_name, model: client, self: client modelParent: Bill
-// name: client_last_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
+// APkEx(nameCast: client_last_name, name: client_last_name, name2: null, model: Client, children: [], property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [client], fk: null)
   static const $BillSetArgs<String> clientLastName = $BillSetArgs(
     name: 'last_name',
-    self: 'client',
     nameCast: 'client_last_name',
     model: 'client',
   );
 
-// nameCast: client_blocked, name: blocked, model: client, self: client modelParent: Bill
-// name: client_blocked, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
+// APkEx(nameCast: client_blocked, name: client_blocked, name2: null, model: Client, children: [], property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [client], fk: null)
   static const $BillSetArgs<bool> clientBlocked = $BillSetArgs(
     name: 'blocked',
-    self: 'client',
     nameCast: 'client_blocked',
     model: 'client',
   );
 
-// nameCast: id, name: id, model: product, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<int> id = $BillSetArgs(
+// APkEx(nameCast: product_id, name: id, name2: parent_product_id, model: Product, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parent, Bill], fk: nameDefault: parent, name: Bill, nameToDB: bill, nameFromDB: bill_bill, dartType: Bill?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $BillSetArgs<int> parentProductId = $BillSetArgs(
     name: 'id',
-    nameCast: 'id',
+    nameCast: 'parent_product_id',
     model: 'product',
   );
 
-// nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Client
-// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> productLastName = $BillSetArgs(
-    name: 'last_name',
-    self: 'product',
-    nameCast: 'product_last_name',
+// APkEx(nameCast: client_id, name: id, name2: parent_client_id, model: Client, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parent, Bill], fk: nameDefault: parent, name: Bill, nameToDB: bill, nameFromDB: bill_bill, dartType: Bill?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $BillSetArgs<int> parentClientId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'parent_client_id',
+    model: 'client',
+  );
+
+// APkEx(nameCast: product_id, name: id, name2: parent_client_product_id, model: Product, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parent, Bill, Client], fk: nameDefault: parent, name: Bill, nameToDB: bill, nameFromDB: bill_bill, dartType: Bill?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $BillSetArgs<int> parentClientProductId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'parent_client_product_id',
     model: 'product',
   );
 
-// nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Client
-// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> productFirstName = $BillSetArgs(
-    name: 'first_name',
-    self: 'product',
-    nameCast: 'product_first_name',
-    model: 'product',
-  );
-
-// nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Client
-// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Client property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $BillSetArgs<bool> productBlocked = $BillSetArgs(
-    name: 'blocked',
-    self: 'product',
-    nameCast: 'product_blocked',
-    model: 'product',
-  );
-
-// nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill
-// name: bill_time, children: [null] self: null, selfIs: true modelParent: Bill property: nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> billTime = $BillSetArgs(
+// APkEx(nameCast: bill_time, name: parent_time, name2: null, model: Bill, children: [], property: nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [parent], fk: null)
+  static const $BillSetArgs<String> parentTime = $BillSetArgs(
     name: 'time',
-    self: 'bill',
     nameCast: 'bill_time',
     model: 'bill',
   );
 
-// nameCast: id, name: id, model: product, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<int> id = $BillSetArgs(
+// APkEx(nameCast: client_id, name: id, name2: parentClient_id, model: Client, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parentClient], fk: nameDefault: parentClient, name: Client, nameToDB: client, nameFromDB: bill_client, dartType: Client?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $BillSetArgs<int> parentClientId = $BillSetArgs(
     name: 'id',
-    nameCast: 'id',
-    model: 'product',
-  );
-
-// nameCast: product_last_name, name: last_name, model: product, self: product modelParent: Bill
-// name: product_last_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> productLastName = $BillSetArgs(
-    name: 'last_name',
-    self: 'product',
-    nameCast: 'product_last_name',
-    model: 'product',
-  );
-
-// nameCast: product_first_name, name: first_name, model: product, self: product modelParent: Bill
-// name: product_first_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> productFirstName = $BillSetArgs(
-    name: 'first_name',
-    self: 'product',
-    nameCast: 'product_first_name',
-    model: 'product',
-  );
-
-// nameCast: product_blocked, name: blocked, model: product, self: product modelParent: Bill
-// name: product_blocked, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $BillSetArgs<bool> productBlocked = $BillSetArgs(
-    name: 'blocked',
-    self: 'product',
-    nameCast: 'product_blocked',
-    model: 'product',
-  );
-
-// nameCast: id, name: id, model: client, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<int> id = $BillSetArgs(
-    name: 'id',
-    nameCast: 'id',
+    nameCast: 'parentClient_id',
     model: 'client',
   );
 
-// nameCast: product, name: product, model: client, self: null modelParent: null
-// name: product, children: [null] self: nameDefault: product, name: null, nameToDB: product, nameFromDB: client_product, dartType: Product, _isQues: false, _sqlType: NONE, _isNull: NOT NULLrawFromDB: false, selfIs: false modelParent: null property: nameDefault: product, name: null, nameToDB: product, nameFromDB: client_product, dartType: Product, _isQues: false, _sqlType: NONE, _isNull: NOT NULLrawFromDB: false
-  static const $BillSetArgs<String> product = $BillSetArgs(
-    name: 'product',
-    nameCast: 'product',
-    model: 'client',
+// APkEx(nameCast: product_id, name: id, name2: parentClient_product_id, model: Product, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parentClient, Client], fk: nameDefault: parentClient, name: Client, nameToDB: client, nameFromDB: bill_client, dartType: Client?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $BillSetArgs<int> parentClientProductId = $BillSetArgs(
+    name: 'id',
+    nameCast: 'parentClient_product_id',
+    model: 'product',
   );
 
-// nameCast: client_first_name, name: first_name, model: client, self: client modelParent: Bill
-// name: client_first_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> clientFirstName = $BillSetArgs(
+// APkEx(nameCast: client_first_name, name: parent_client_first_name, name2: null, model: Client, children: [], property: nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [parentClient], fk: null)
+  static const $BillSetArgs<String> parentClientFirstName = $BillSetArgs(
     name: 'first_name',
-    self: 'client',
     nameCast: 'client_first_name',
     model: 'client',
   );
 
-// nameCast: client_last_name, name: last_name, model: client, self: client modelParent: Bill
-// name: client_last_name, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> clientLastName = $BillSetArgs(
+// APkEx(nameCast: client_last_name, name: parent_client_last_name, name2: null, model: Client, children: [], property: nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [parentClient], fk: null)
+  static const $BillSetArgs<String> parentClientLastName = $BillSetArgs(
     name: 'last_name',
-    self: 'client',
     nameCast: 'client_last_name',
     model: 'client',
   );
 
-// nameCast: client_blocked, name: blocked, model: client, self: client modelParent: Bill
-// name: client_blocked, children: [null] self: null, selfIs: false modelParent: Bill property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false
-  static const $BillSetArgs<bool> clientBlocked = $BillSetArgs(
+// APkEx(nameCast: client_blocked, name: parent_client_blocked, name2: null, model: Client, children: [], property: nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, pk: null, nameSelf: null, parentClassName: [parentClient], fk: null)
+  static const $BillSetArgs<bool> parentClientBlocked = $BillSetArgs(
     name: 'blocked',
-    self: 'client',
     nameCast: 'client_blocked',
     model: 'client',
   );
 
-// nameCast: product, name: product, model: bill, self: null modelParent: null
-// name: product, children: [null] self: nameDefault: product, name: null, nameToDB: product, nameFromDB: bill_product, dartType: Product?, _isQues: true, _sqlType: NONE, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: product, name: null, nameToDB: product, nameFromDB: bill_product, dartType: Product?, _isQues: true, _sqlType: NONE, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> product = $BillSetArgs(
-    name: 'product',
-    nameCast: 'product',
-    model: 'bill',
-  );
-
-// nameCast: client, name: client, model: bill, self: null modelParent: null
-// name: client, children: [null] self: nameDefault: client, name: null, nameToDB: client, nameFromDB: bill_client, dartType: Client?, _isQues: true, _sqlType: NONE, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: client, name: null, nameToDB: client, nameFromDB: bill_client, dartType: Client?, _isQues: true, _sqlType: NONE, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> client = $BillSetArgs(
-    name: 'client',
-    nameCast: 'client',
-    model: 'bill',
-  );
-
-// nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill
-// name: bill_time, children: [null] self: null, selfIs: true modelParent: Bill property: nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $BillSetArgs<String> billTime = $BillSetArgs(
+// APkEx(nameCast: bill_time, name: time, name2: null, model: Bill, children: [], property: nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: time, parentClassName: [], fk: null)
+  static const $BillSetArgs<String> time = $BillSetArgs(
     name: 'time',
-    self: 'bill',
     nameCast: 'bill_time',
     model: 'bill',
   );
 
   static Set<$BillSetArgs> $default = {
     BillQuery.productId,
+    BillQuery.clientId,
+    BillQuery.clientProductId,
     BillQuery.productLastName,
     BillQuery.productFirstName,
     BillQuery.productBlocked,
-    BillQuery.clientId,
-    BillQuery.clientProduct,
     BillQuery.clientFirstName,
     BillQuery.clientLastName,
     BillQuery.clientBlocked,
-    BillQuery.billParentProduct,
-    BillQuery.billParentClient,
-    BillQuery.billParentTime,
+    BillQuery.parentProductId,
+    BillQuery.parentClientId,
+    BillQuery.parentClientProductId,
+    BillQuery.parentTime,
+    BillQuery.parentClientId,
+    BillQuery.parentClientProductId,
+    BillQuery.parentClientFirstName,
+    BillQuery.parentClientLastName,
+    BillQuery.parentClientBlocked,
     BillQuery.time,
   };
 
@@ -323,8 +282,9 @@ nameCast: bill_time, name: time, model: bill, self: bill modelParent: Bill''';
 
     final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
  LEFT JOIN Product product ON product.id = bill.product
- LEFT JOIN Client client ON client.id = bill.client AND client.product = bill.client
+ LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
+ LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -335,7 +295,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[BillQuery.productId.nameCast]))
+        .groupBy(((m) => m[BillQuery.product.nameCast]))
         .values
         .map((e) => Bill.fromDB(e.first, e))
         .toList();
@@ -368,15 +328,22 @@ ${offset != null ? 'OFFSET $offset' : ''}
     final $productIdProduct = await product?.insert(database);
     final $clientIdClient = await client?.insert(database);
     final $billIdParent = await parent?.insert(database);
+    final $clientIdParentClient = await parentClient?.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Bill (product,
 client,
+product,
+client,
 bill,
+client,
 time) 
-       VALUES(?, ?, ?, ?)''', [
+       VALUES(?, ?, ?, ?, ?, ?, ?)''', [
+      this.product,
+      this.client,
       $productIdProduct,
       $clientIdClient,
       $billIdParent,
+      $clientIdParentClient,
       this.time,
     ]);
     return $id;
@@ -386,6 +353,7 @@ time)
     await product?.update(database);
     await client?.update(database);
     await parent?.update(database);
+    await parentClient?.update(database);
     return await database.update('Bill', toDB(),
         where: "product = ? AND client = ?",
         whereArgs: [product?.id, client?.id, client?.product]);
@@ -404,8 +372,9 @@ SELECT
 ${$createSelect(select)}
  FROM Bill bill
  LEFT JOIN Product product ON product.id = bill.product
- LEFT JOIN Client client ON client.id = bill.client AND client.product = bill.client
+ LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
+ LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
 WHERE bill.product = ? AND bill.client = ?
 ''', [productId, clientId, clientProduct]) as List<Map>);
     return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
@@ -439,17 +408,25 @@ WHERE bill.product = ? AND bill.client = ?
     String childName = '',
   ]) =>
       Bill(
-        product: Product.fromDB(json, []),
-        client: Client.fromDB(json, []),
-        parent: Bill.fromDB(json, []),
+        id: json['${childName}product_id'] as int?,
+        id: json['${childName}client_id'] as int?,
+        id: json['${childName}product_id'] as int?,
+        id: json['${childName}product_id'] as int?,
+        id: json['${childName}client_id'] as int?,
+        id: json['${childName}product_id'] as int?,
+        id: json['${childName}client_id'] as int?,
+        id: json['${childName}product_id'] as int?,
         time: DateTime.fromMillisecondsSinceEpoch(
           json['${childName}bill_time'] as int? ?? -1,
         ),
       );
   Map<String, dynamic> $toDB() => {
+        'product': this.product,
+        'client': this.client,
         'product': product?.id,
         'client': client?.id,
         'bill': parent?.product,
+        'client': parentClient?.id,
         'time': this.time?.millisecondsSinceEpoch,
       };
 }

@@ -9,155 +9,83 @@ part of 'cat.dart';
 extension CatQuery on Cat {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Cat(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			cat_birth INTEGER,
-			parent_id INTEGER,
-			child_id INTEGER,
-			FOREIGN KEY (parent_id) REFERENCES Cat (cat_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (child_id) REFERENCES Cat (cat_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			parent_cat_id INTEGER,
+			child_cat_id INTEGER,
+			birth INTEGER,
+			FOREIGN KEY (parent_cat_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (child_cat_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
-      '''nameCast: id, name: id, model: cat, self: null modelParent: null,
-nameCast: birth, name: birth, model: cat, self: null modelParent: null,
-nameCast: id, name: id, model: cat, self: null modelParent: null,
-nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
-nameCast: id, name: id, model: cat, self: null modelParent: null,
-nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
-nameCast: id, name: id, model: cat, self: null modelParent: null,
-nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
-nameCast: id, name: id, model: cat, self: null modelParent: null,
-nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
-nameCast: id, name: id, model: cat, self: null modelParent: null,
-nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat,
-nameCast: id, name: id, model: cat, self: null modelParent: null,
-nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat''';
+      '''(id, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(cat_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(cat_id, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false),
+(birth, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false)''';
 
   static const Map<int, List<String>> alter = {};
 
-// nameCast: id, name: id, model: cat, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+// APkEx(nameCast: cat_id, name: id, name2: null, model: Cat, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [], fk: null)
   static const $CatSetArgs<int> id = $CatSetArgs(
     name: 'id',
-    nameCast: 'id',
+    nameCast: 'cat_id',
     model: 'cat',
   );
 
-// nameCast: birth, name: birth, model: cat, self: null modelParent: null
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: null property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
+// APkEx(nameCast: cat_id, name: id, name2: parent_id, model: Cat, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [parent], fk: nameDefault: parent, name: Cat, nameToDB: cat, nameFromDB: cat_cat, dartType: Cat?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $CatSetArgs<int> parentId = $CatSetArgs(
+    name: 'id',
+    nameCast: 'parent_id',
+    model: 'cat',
+  );
+
+// APkEx(nameCast: cat_birth, name: parent_birth, name2: null, model: Cat, children: [], property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [parent], fk: null)
+  static const $CatSetArgs<String> parentBirth = $CatSetArgs(
+    name: 'birth',
+    nameCast: 'cat_birth',
+    model: 'cat',
+  );
+
+// APkEx(nameCast: cat_id, name: id, name2: child_id, model: Cat, children: [], property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: APrimaryKey, nameSelf: null, parentClassName: [child], fk: nameDefault: child, name: Cat, nameToDB: cat, nameFromDB: cat_cat, dartType: Cat?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: true)
+  static const $CatSetArgs<int> childId = $CatSetArgs(
+    name: 'id',
+    nameCast: 'child_id',
+    model: 'cat',
+  );
+
+// APkEx(nameCast: cat_birth, name: child_birth, name2: null, model: Cat, children: [], property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: null, parentClassName: [child], fk: null)
+  static const $CatSetArgs<String> childBirth = $CatSetArgs(
+    name: 'birth',
+    nameCast: 'cat_birth',
+    model: 'cat',
+  );
+
+// APkEx(nameCast: cat_birth, name: birth, name2: null, model: Cat, children: [], property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, pk: null, nameSelf: birth, parentClassName: [], fk: null)
   static const $CatSetArgs<String> birth = $CatSetArgs(
     name: 'birth',
-    nameCast: 'birth',
-    model: 'cat',
-  );
-
-// nameCast: id, name: id, model: cat, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'id',
-    model: 'cat',
-  );
-
-// nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> catBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'cat',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-// nameCast: id, name: id, model: cat, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'id',
-    model: 'cat',
-  );
-
-// nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> catBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'cat',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-// nameCast: id, name: id, model: cat, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'id',
-    model: 'cat',
-  );
-
-// nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> catBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'cat',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-// nameCast: id, name: id, model: cat, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'id',
-    model: 'cat',
-  );
-
-// nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> catBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'cat',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-// nameCast: id, name: id, model: cat, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'id',
-    model: 'cat',
-  );
-
-// nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> catBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'cat',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-// nameCast: id, name: id, model: cat, self: null modelParent: null
-// name: id, children: [null] self: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, selfIs: false modelParent: null property: nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'id',
-    model: 'cat',
-  );
-
-// nameCast: cat_birth, name: birth, model: cat, self: cat modelParent: Cat
-// name: cat_birth, children: [null] self: null, selfIs: true modelParent: Cat property: nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false
-  static const $CatSetArgs<String> catBirth = $CatSetArgs(
-    name: 'birth',
-    self: 'cat',
     nameCast: 'cat_birth',
     model: 'cat',
   );
 
   static Set<$CatSetArgs> $default = {
     CatQuery.id,
-    CatQuery.catParentId,
-    CatQuery.catParentBirth,
-    CatQuery.catChildId,
-    CatQuery.catChildBirth,
+    CatQuery.parentId,
+    CatQuery.parentBirth,
+    CatQuery.childId,
+    CatQuery.childBirth,
     CatQuery.birth,
   };
 
@@ -294,8 +222,8 @@ WHERE cat.id = ?
   ]) =>
       Cat(
         id: json['${childName}cat_id'] as int?,
-        parent: Cat.fromDB(json, []),
-        child: Cat.fromDB(json, []),
+        id: json['${childName}cat_id'] as int?,
+        id: json['${childName}cat_id'] as int?,
         birth: DateTime.fromMillisecondsSinceEpoch(
           json['${childName}cat_birth'] as int? ?? -1,
         ),
