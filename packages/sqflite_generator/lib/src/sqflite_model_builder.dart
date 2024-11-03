@@ -240,7 +240,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) => m
           ..name = '\$toDB'
           ..lambda = true
-          ..docs.add('// TODO(hodoan): check')
           ..body = Code('{${entity.rawToDB}}')
           ..returns = refer('Map<String,dynamic>')),
       ]);

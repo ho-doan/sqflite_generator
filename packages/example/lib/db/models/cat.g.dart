@@ -95,7 +95,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[CatQuery.id.nameCast]))
+        .groupBy(((m) => [m[CatQuery.id.nameCast]]))
         .values
         .map((e) => Cat.fromDB(e.first, e))
         .toList();
@@ -194,16 +194,15 @@ WHERE cat.id = ?
           ),
           parent: Cat.fromDB(json, lst, 'parent_'),
           child: Cat.fromDB(json, lst, 'child_'));
-// TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'birth': this.birth?.millisecondsSinceEpoch,
 
 // nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]
-        'cat_id': this.parent?.id,
+        'parent_cat_id': this.parent?.id,
 
 // nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]
-        'cat_id': this.child?.id
+        'child_cat_id': this.child?.id
       };
 }
 

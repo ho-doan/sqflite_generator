@@ -134,7 +134,7 @@ extension Aps on AProperty {
     if (parentClassName.length > 1) {
       return [
         if (fieldName != null) fieldName,
-        ...parentClassName,
+        ...parentClassName.sublist(0, parentClassName.length - 1),
         className,
         nameDefault
       ].join('_');
@@ -183,6 +183,28 @@ extension Aps on AProperty {
         // ...parentClassName,
         ...parentClassName,
         // className,
+        nameDefault,
+      ];
+    }
+    return [nameDefault];
+  }
+
+  List<String> fieldNameFull5(String? fieldName) {
+    if (parentClassName.length > 1) {
+      return [
+        if (fieldName != null) fieldName,
+        parentClassName.first,
+        ...parentClassName.sublist(1),
+        // parentClassName.last,
+        className,
+        nameDefault
+      ].map((e) => e.toCamelCase()).toList();
+    } else if (parentClassName.isNotEmpty) {
+      return [
+        if (fieldName != null) fieldName,
+        // ...parentClassName,
+        ...parentClassName,
+        className,
         nameDefault,
       ];
     }

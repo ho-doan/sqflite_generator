@@ -22,24 +22,24 @@ extension BillQuery on Bill {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Bill(
 			product_id INTEGER,
 			client_id INTEGER,
-			client_client_product_id INTEGER,
+			client_product_id INTEGER,
+			parent_parent_product_id INTEGER,
+			parent_parent_client_id INTEGER,
 			parent_parent_bill_product_id INTEGER,
-			parent_parent_bill_client_id INTEGER,
-			parent_parent_bill_client_product_id INTEGER,
 			parent_client_client_id INTEGER,
-			parent_client_parent_client_client_product_id INTEGER,
+			parent_client_parent_client_product_id INTEGER,
 			time INTEGER,
-			PRIMARY KEY [product_id, client_id, client_client_product_id],
+			PRIMARY KEY [product_id, client_id, client_product_id],
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (client_id,client_client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (parent_parent_bill_product_id,parent_parent_bill_client_id,parent_parent_bill_client_product_id) REFERENCES Bill (bill_product_id,bill_client_id,bill_client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (parent_client_client_id,parent_client_parent_client_client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (client_id,client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (parent_parent_product_id,parent_parent_client_id,parent_parent_bill_product_id) REFERENCES Bill (bill_product_id,bill_client_id,bill_client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (parent_client_client_id,parent_client_parent_client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
       '''([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product]),
 ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client]),
-([Bill, client, Client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client]),
+([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client]),
 ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
@@ -58,11 +58,11 @@ extension BillQuery on Bill {
     model: 'bill_client',
   );
 
-// ([Bill, client, Client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client])
-  static const $BillSetArgs<int> clientClientId = $BillSetArgs(
+// ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client])
+  static const $BillSetArgs<int> clientProductId = $BillSetArgs(
     name: 'id',
-    nameCast: 'bill_client_client_id',
-    model: 'bill_client_client',
+    nameCast: 'bill_client_product_id',
+    model: 'bill_client_product',
   );
 
 // ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
@@ -75,7 +75,7 @@ extension BillQuery on Bill {
   static Set<$BillSetArgs> $default = {
     BillQuery.productId,
     BillQuery.clientId,
-    BillQuery.clientClientId,
+    BillQuery.clientProductId,
     BillQuery.time,
     BillQuery.product$$.id,
     BillQuery.product$$.lastName,
@@ -91,7 +91,7 @@ extension BillQuery on Bill {
     BillQuery.clientProduct$$.blocked,
     BillQuery.parent$$.productId,
     BillQuery.parent$$.clientId,
-    BillQuery.parent$$.clientClientId,
+    BillQuery.parent$$.clientProductId,
     BillQuery.parent$$.time,
     BillQuery.parentClient$$.id,
     BillQuery.parentClient$$.firstName,
@@ -145,7 +145,11 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[BillQuery.product.nameCast]))
+        .groupBy(((m) => [
+              m[BillQuery.productId.nameCast],
+              m[BillQuery.clientId.nameCast],
+              m[BillQuery.clientProductId.nameCast]
+            ]))
         .values
         .map((e) => Bill.fromDB(e.first, e))
         .toList();
@@ -213,8 +217,7 @@ time)
     await parent?.update(database);
     await parentClient?.update(database);
     return await database.update('Bill', toDB(),
-        where:
-            "product_id = ? AND client_id = ? AND client_client_product_id = ?",
+        where: "product_id = ? AND client_id = ? AND client_product_id = ?",
         whereArgs: [product?.id, client?.id, client?.product?.id]);
   }
 
@@ -234,14 +237,14 @@ ${$createSelect(select)}
  LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
  LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
-WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_id = ?
+WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
     return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_id = ?''',
+        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
         [product?.id, client?.id, client?.product?.id]);
   }
 
@@ -252,7 +255,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_
     int? clientProductId,
   ) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_id = ?''',
+        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
         [productId, clientId, clientProductId]);
   }
 
@@ -273,27 +276,28 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_
           client: Client.fromDB(json, lst, 'client_'),
           parent: Bill.fromDB(json, lst, 'parent_'),
           parentClient: Client.fromDB(json, lst, 'parent_client_'));
-// TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'product_id': this.product?.id,
         'client_id': this.client?.id,
-        'client_client_product_id': this.client?.product?.id,
+        'client_product_id': this.client?.product?.id,
         'time': this.time?.millisecondsSinceEpoch,
 
 // nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
-        'parent_bill_product_id': this.parent?.product?.id,
+        'parent_parent_bill_product_id': this.parent?.product?.id,
 
 // nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
-        'parent_bill_client_id': this.parent?.client?.id,
+        'parent_parent_bill_client_id': this.parent?.client?.id,
 
 // nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill, Client]
-        'parent_bill_client_product_id': this.parent?.client?.product?.id,
+        'parent_parent_bill_client_product_id':
+            this.parent?.client?.product?.id,
 
 // nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient]
-        'client_id': this.parentClient?.id,
+        'parent_client_client_id': this.parentClient?.id,
 
 // nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient, Client]
-        'parent_client_client_product_id': this.parentClient?.product?.id
+        'parent_client_parent_client_client_product_id':
+            this.parentClient?.product?.id
       };
 }
 
@@ -428,11 +432,11 @@ class _$$BillSetArgs {
         model: 'bill_client',
       );
 
-// ([Bill, client, Client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client])
-  _$$$BillSetArgs<int> get clientClientId => const _$$$BillSetArgs(
+// ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client])
+  _$$$BillSetArgs<int> get clientProductId => const _$$$BillSetArgs(
         name: 'id',
-        nameCast: 'bill_client_client_id',
-        model: 'bill_client_client',
+        nameCast: 'bill_client_product_id',
+        model: 'bill_client_product',
       );
 
 // ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])

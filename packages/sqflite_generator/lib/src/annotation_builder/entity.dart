@@ -156,7 +156,10 @@ class AEntity {
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
         for (final key
             in k.entityParent!.primaryKeys.expand((e) => e.expanded2()))
-          '\n// $key\n \'${key.fieldNameFull}\': this.${key.fieldNameFull4(null).join('?.')}',
+          '\n// $key\n \'${[
+            if (key.parentClassName.length > 1) k.nameDefault,
+            ...key.fieldNameFull5(null)
+          ].join('_').toSnakeCase()}\': this.${key.fieldNameFull4(null).join('?.')}',
     ].join(',\n');
   }
 
@@ -185,7 +188,7 @@ class AEntity {
       "''';",
       "if (kDebugMode) { print('get all $className \$sql'); }",
       'final mapList = (await database.rawQuery(sql) as List<Map>);',
-      'return mapList.groupBy(((m) => m[$extensionName.${aPsAll.first.name}.nameCast]))'
+      'return mapList.groupBy(((m) => [${keysNew.map((e) => 'm[$extensionName.${e.$2.fieldNameFull.toCamelCase()}.nameCast]').join(',')}]))'
           '.values.map((e)=>$classType.fromDB(e.first,e)).toList();',
     ].join('\n');
   }
@@ -385,60 +388,6 @@ extension AEntityBase on AEntity {
     return lst;
   }
 
-  List<KeyModel> _expandedPrimaryKeysWithoutFore() {
-    final lst = <KeyModel>[];
-    final items = _treePrimaryKeys();
-    for (final item in items) {
-      if (item.name == item.property.nameToDB) lst.add(item);
-      if (item.children != null && item.children!.isNotEmpty) {
-        //   lst.addAll(_expandedPrimaryKeysWithoutFore());
-      }
-    }
-    return lst;
-  }
-
-  /// self columns
-  /// ```dart
-  /// class A{
-  ///   @Column
-  ///   final int? id;
-  /// }
-  /// ```
-  /// result [id]
-  List<KeyModel> _expandedColumns([AProperty? propertyParent]) {
-    final lst = <KeyModel>[];
-    for (final item in columns) {
-      lst.add(KeyModel._columnOrIndex(
-        item,
-        isParent: propertyParent == null,
-        className: propertyParent?.className ?? className,
-        propertyParent: propertyParent,
-      ));
-    }
-    return lst;
-  }
-
-  /// self indices
-  /// ```dart
-  /// class A{
-  ///   @Index
-  ///   final int? id;
-  /// }
-  /// ```
-  /// result [id]
-  List<KeyModel> _expandedIndices([AProperty? propertyParent]) {
-    final lst = <KeyModel>[];
-    for (final item in indices) {
-      lst.add(KeyModel._columnOrIndex(
-        item,
-        isParent: propertyParent == null,
-        className: propertyParent?.className ?? className,
-        propertyParent: propertyParent,
-      ));
-    }
-    return lst;
-  }
-
   /// using for gen select args
   // List<KeyModel> _expandedForeignKeysAllForSelect() {
   //   final lst = <KeyModel>[];
@@ -473,62 +422,6 @@ extension AEntityBase on AEntity {
   //   }
   //   return lst;
   // }
-
-  List<KeyModel> aMPall([AProperty? parent, int step = 0]) => step > 2
-      ? []
-      : [
-          ..._expandedPrimaryKeysWithoutFore(),
-          ..._expandedColumns(parent),
-          ..._expandedIndices(parent),
-          for (final item in foreignKeys)
-            if (item.entityParent != null)
-              ...item.entityParent!.aMPall(item, step + 1),
-
-          // ...expandedForeignKeysAllForSelect(),
-        ];
-
-  @Deprecated('not use')
-  List<KeyModelSet> get aMPallSet {
-    // TODO(hodoan): aMPallSet primary key
-    final lst = [
-      for (final e in aMPall())
-        if (e.children?.expanded() != null) ...[
-          for (final f in e.children!.expanded()) KeyModelSet._ofPrimaryKey(f),
-        ] else
-          KeyModelSet._ofColumnOrIndex(e),
-      // for (final e in aMPall)
-      //   if (e.children?.expanded() != null) ...[
-      //     for (final f in e.children!.expanded())
-      //       KeyModelSet(
-      //         keyModel: f,
-      //         name: f.name ?? '-------',
-      //         property: e.property,
-      //         model: e.nameSelfGen ?? e.nameGen,
-      //         self: e.selfIs ? className.toSnakeCase() : null,
-      //       )
-      //   ] else
-      //     KeyModelSet(
-      //       keyModel: e,
-      //       name: e.this$ ? e.property.nameToDB : e.property.nameFromDB,
-      //       property: e.property,
-      //       model: e.nameSelfGen ?? e.nameGen ?? className.toSnakeCase(),
-      //       self: e.this$ ? className.toSnakeCase() : null,
-      //     )
-    ];
-    // .where(
-    //   (e) => !(e.self == null && e.name == e.nameCast),
-    // )
-    // .where(
-    //   (e) => !(e.model == null && e.name == e.nameCast),
-    // )
-    // .toList();
-    // final set = <String, KeyModelSet>{};
-    // for (final e in lst) {
-    //   set[e.fieldName] = e;
-    // }
-    // return set.values.toList();
-    return lst;
-  }
 
   List<(List<String>, AProperty)> allss([List<String> parents = const []]) {
     final pp = [
@@ -579,7 +472,11 @@ extension AEntityBase on AEntity {
                   return (
                     [
                       ...pp,
-                      ...f.parentClassName,
+                      ...f.parentClassName.sublist(
+                        0,
+                        f.parentClassName.length - 1,
+                      ),
+                      f.className,
                       f.nameToDB,
                     ],
                     f,

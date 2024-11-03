@@ -101,7 +101,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[ProductQuery.id.nameCast]))
+        .groupBy(((m) => [m[ProductQuery.id.nameCast]]))
         .values
         .map((e) => Product.fromDB(e.first, e))
         .toList();
@@ -192,7 +192,6 @@ WHERE product.id = ?
           lastName: json['${childName}product_last_name'] as String?,
           firstName: json['${childName}product_first_name'] as String?,
           blocked: (json['${childName}product_blocked'] as int?) == 1);
-// TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'last_name': this.lastName,
