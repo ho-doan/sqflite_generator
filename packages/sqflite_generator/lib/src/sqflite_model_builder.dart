@@ -40,85 +40,26 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
     final classBuilderList = <Class>[];
     final classBuilderListExtends = <(String, Class)>[];
 
-    for (final e in entity.primaryKeys) {
-      // lever 1
-      if (e.entityParent != null) {
-        classBuilderList.addAll(
-          [
-            Class(
-              (c) => c
-                ..name = '_\$\$${e.entityParent!.setClassName}'
-                ..types.add(refer('T'))
-                ..extend = refer('${entity.setClassName}<T>')
-                ..constructors.add(
-                  Constructor(
-                    (c) => c
-                      ..constant = true
-                      ..optionalParameters.addAll(entity.setOptionalArgsChild),
-                  ),
-                ),
-            ),
-          ],
-        );
-        classBuilderListExtends.add(
-          (
-            e.nameDefault,
-            Class(
-              (c) => c
-                ..name = '_\$${e.entityParent!.setClassName}'
-                ..methods.addAll(
-                  [
-                    for (final item in e.entityParent!.allss())
-                      Method(
-                        (f) => f
-                          ..name = (item.$1.sublist(1)).join('_').toCamelCase()
-                          ..returns = refer(
-                              '_\$\$${e.entityParent!.setClassName}<${item.$2.typeSelect}>')
-                          ..docs.addAll([
-                            if (item.$2 is AColumn &&
-                                item.$2.alters
-                                    .any((e) => e.type == AlterTypeGen.drop))
-                              '@Deprecated(\'no such column\')'
-                          ])
-                          ..docs.addAll([
-                            '// $item',
-                          ])
-                          ..lambda = true
-                          ..type = MethodType.getter
-                          ..body = Code(
-                              '''const _\$\$${e.entityParent!.setClassName}(
-                            name: '${item.$2.nameToDB}',
-                            nameCast: '${[
-                            ...item.$1.sublist(0, item.$1.length - 1),
-                            item.$2.nameToDB
-                          ].join('_').toSnakeCase()}',
-                            model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
-                            )'''),
-                      ),
-                  ],
-                )
-                ..constructors.add(
-                  Constructor((c) => c..constant = true),
-                ),
-            )
-          ),
-        );
-      }
-    }
+    final fieldList = <Field>[];
+
+    generatorListClass(
+      entity,
+      classBuilderList,
+      classBuilderListExtends,
+      fieldList,
+    );
+    generatorListClassFore(
+      entity,
+      classBuilderList,
+      classBuilderListExtends,
+      fieldList,
+    );
 
     final extensionBuilder = ExtensionBuilder()
       ..name = entity.extensionName
       ..on = refer(entity.classType)
       ..fields.addAll([
-        for (final e in classBuilderListExtends)
-          Field(
-            (f) => f
-              ..name = e.$1
-              ..type = refer(e.$2.name)
-              ..assignment = Code('${e.$2.name}()')
-              ..modifier = FieldModifier.constant
-              ..static = true,
-          ),
+        ...fieldList,
         Field(
           (f) => f
             ..name = 'createTable'
@@ -175,7 +116,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
               for (final e in entity.allss())
                 if (!(e.$2 is AColumn &&
                     e.$2.alters.any((e) => e.type == AlterTypeGen.drop)))
-                  '${entity.extensionName}.${e.$1.sublist(1).join('_').toCamelCase()}'
+                  '${entity.extensionName}.${e.$1.sublist(1).join('_').toCamelCase()}',
+              for (final aExtend in classBuilderListExtends)
+                for (final field in aExtend.$2.methods)
+                  '${entity.extensionName}.${aExtend.$1}.${field.name}'
             ].join(',')},}''')
             ..static = true,
         ),
@@ -300,5 +244,220 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
       ...classBuilderList.map((e) => e.accept(emitter)),
       ...classBuilderListExtends.map((e) => e.$2.accept(emitter)),
     ].join('\n\n'));
+  }
+}
+
+void generatorListClass(
+  AEntity entity,
+  List<Class> classBuilderList,
+  List<(String, Class)> classBuilderListExtends,
+  List<Field> fieldList, [
+  List<String> nameDefaults = const [],
+]) {
+  if (nameDefaults.length > 9 / 3) return;
+  for (final e in entity.primaryKeys) {
+    if (e.entityParent != null) {
+      final name = '_\$${e.entityParent!.setClassName}';
+      final name2 = '_\$\$${e.entityParent!.setClassName}';
+      final classExistIndex = classBuilderList.indexWhere(
+        (c) => c.name == name2,
+      );
+
+      if (classExistIndex == -1) {
+        classBuilderList.addAll(
+          [
+            Class(
+              (c) => c
+                ..name = name2
+                ..types.add(refer('T'))
+                ..extend = refer('${entity.setClassName}<T>')
+                ..constructors.add(
+                  Constructor(
+                    (c) => c
+                      ..constant = true
+                      ..optionalParameters.addAll(entity.setOptionalArgsChild),
+                  ),
+                ),
+            ),
+          ],
+        );
+        classBuilderListExtends.add(
+          (
+            e.nameDefault,
+            Class(
+              (c) => c
+                ..name = name
+                ..methods.addAll(
+                  [
+                    for (final item in e.entityParent!
+                        .allssForChild(nameDefaults.length + 1))
+                      Method(
+                        (f) => f
+                          ..name = (item.$1.sublist(1)).join('_').toCamelCase()
+                          ..returns = refer('$name2<${item.$2.typeSelect}>')
+                          ..docs.addAll([
+                            if (item.$2 is AColumn &&
+                                item.$2.alters
+                                    .any((e) => e.type == AlterTypeGen.drop))
+                              '@Deprecated(\'no such column\')'
+                          ])
+                          ..docs.addAll([
+                            '// $item',
+                          ])
+                          ..lambda = true
+                          ..type = MethodType.getter
+                          ..body = Code('''const $name2(
+                            name: '${item.$2.nameToDB}',
+                            nameCast: '${[
+                            ...item.$1.sublist(0, item.$1.length - 1),
+                            item.$2.nameToDB
+                          ].join('_').toSnakeCase()}',
+                            model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
+                            )'''),
+                      ),
+                  ],
+                )
+                ..constructors.add(
+                  Constructor((c) => c..constant = true),
+                ),
+            )
+          ),
+        );
+      }
+
+      fieldList.add(
+        Field(
+          (f) => f
+            ..name = [
+              ...nameDefaults,
+              e.nameDefault,
+            ].join('_').toCamelCase()
+            ..modifier = FieldModifier.constant
+            ..type = refer(name)
+            ..assignment = Code('$name()')
+            ..static = true,
+        ),
+      );
+
+      generatorListClass(
+        e.entityParent!,
+        classBuilderList,
+        classBuilderListExtends,
+        fieldList,
+        [
+          ...nameDefaults,
+          e.nameDefault,
+        ],
+      );
+    }
+  }
+}
+
+void generatorListClassFore(
+  AEntity entity,
+  List<Class> classBuilderList,
+  List<(String, Class)> classBuilderListExtends,
+  List<Field> fieldList, [
+  List<String> nameDefaults = const [],
+]) {
+  if (nameDefaults.length > 9 / 3) return;
+  for (final e in entity.foreignKeys.where((e) =>
+      !entity.primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault))) {
+    if (entity.className == e.className && nameDefaults.isNotEmpty) {
+      continue;
+    }
+    if (e.entityParent != null) {
+      final name = '_\$${e.entityParent!.setClassName}';
+      final name2 = '_\$\$${e.entityParent!.setClassName}';
+      final classExistIndex = classBuilderList.indexWhere(
+        (c) => c.name == name2,
+      );
+      if (classExistIndex == -1) {
+        classBuilderList.addAll(
+          [
+            Class(
+              (c) => c
+                ..name = name2
+                ..types.add(refer('T'))
+                ..extend = refer('${entity.setClassName}<T>')
+                ..constructors.add(
+                  Constructor(
+                    (c) => c
+                      ..constant = true
+                      ..optionalParameters.addAll(entity.setOptionalArgsChild),
+                  ),
+                ),
+            ),
+          ],
+        );
+        classBuilderListExtends.add(
+          (
+            e.nameDefault,
+            Class(
+              (c) => c
+                ..name = name
+                ..methods.addAll(
+                  [
+                    for (final item in e.entityParent!
+                        .allssForChild(nameDefaults.length + 1))
+                      Method(
+                        (f) => f
+                          ..name = (item.$1.sublist(1)).join('_').toCamelCase()
+                          ..returns = refer('$name2<${item.$2.typeSelect}>')
+                          ..docs.addAll([
+                            if (item.$2 is AColumn &&
+                                item.$2.alters
+                                    .any((e) => e.type == AlterTypeGen.drop))
+                              '@Deprecated(\'no such column\')'
+                          ])
+                          ..docs.addAll([
+                            '// $item',
+                          ])
+                          ..lambda = true
+                          ..type = MethodType.getter
+                          ..body = Code('''const $name2(
+                            name: '${item.$2.nameToDB}',
+                            nameCast: '${[
+                            ...item.$1.sublist(0, item.$1.length - 1),
+                            item.$2.nameToDB
+                          ].join('_').toSnakeCase()}',
+                            model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
+                            )'''),
+                      ),
+                  ],
+                )
+                ..constructors.add(
+                  Constructor((c) => c..constant = true),
+                ),
+            )
+          ),
+        );
+      }
+      fieldList.add(
+        Field(
+          (f) => f
+            ..name = [
+              ...nameDefaults,
+              e.nameDefault,
+            ].join('_').toCamelCase()
+            ..modifier = FieldModifier.constant
+            ..type = refer(name)
+            ..assignment = Code('$name()')
+            ..static = true,
+        ),
+      );
+      if (entity.className != e.className) {
+        generatorListClassFore(
+          e.entityParent!,
+          classBuilderList,
+          classBuilderListExtends,
+          fieldList,
+          [
+            ...nameDefaults,
+            e.nameDefault,
+          ],
+        );
+      }
+    }
   }
 }

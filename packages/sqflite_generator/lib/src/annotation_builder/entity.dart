@@ -593,7 +593,7 @@ extension AEntityBase on AEntity {
       if (parents.isEmpty) className,
       ...parents,
     ];
-    if (parentClassName.length > (9 / 3) - 2) return [];
+    if (parentClassName.length > (9 / 3)) return [];
     final alls = [
       for (final e in aPs)
         if (e is APrimaryKey &&
@@ -648,6 +648,49 @@ extension AEntityBase on AEntity {
           ([...pp, e.nameDefault], e),
         ] else if (e is AIndex) ...[
           ([...pp, e.nameDefault], e),
+        ]
+      // else if (e is AForeignKey)
+      //   ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
+      //       <(List<String>, AProperty)>[]),
+    ];
+    return alls;
+  }
+
+  List<(List<String>, AProperty)> allssForChild([int step = 0]) {
+    if (parentClassName.length > (9 / 3)) return [];
+    final oo = aPs.whereType<APrimaryKey>();
+    oo.forEach(print);
+    final alls = [
+      // if(parents!=null)
+      // for(final key in parents)
+      // ([],key),
+      for (final e in aPs)
+        if (e is APrimaryKey) ...[
+          ...[
+            for (final f in e.expanded2())
+
+              /// primary key of child self not foreign key && type entity
+              if (f.entityParent == null && f.parentClassName.isEmpty)
+                ([f.nameToDB], f)
+              else if (f.entityParent == null &&
+                      f.parentClassName.length == step
+                  // &&
+                  // pp.length == 1
+                  )
+                () {
+                  return (
+                    [
+                      ...f.parentClassName,
+                      f.nameToDB,
+                    ],
+                    f,
+                  );
+                }()
+          ],
+        ] else if (e is AColumn) ...[
+          ([e.className, e.nameDefault], e),
+        ] else if (e is AIndex) ...[
+          ([e.className, e.nameDefault], e),
         ]
       // else if (e is AForeignKey)
       //   ...(e.entityParent?.allss([...pp, e.nameDefault]) ??

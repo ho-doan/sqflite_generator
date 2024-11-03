@@ -71,6 +71,10 @@ extension ClientQuery on Client {
     ClientQuery.firstName,
     ClientQuery.lastName,
     ClientQuery.blocked,
+    ClientQuery.product.id,
+    ClientQuery.product.lastName,
+    ClientQuery.product.firstName,
+    ClientQuery.product.blocked,
   };
 
   static String $createSelect(
@@ -258,6 +262,13 @@ class _$$$ProductSetArgs<T> extends $ClientSetArgs<T> {
 
 class _$$ProductSetArgs {
   const _$$ProductSetArgs();
+
+// ([product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product])
+  _$$$ProductSetArgs<int> get id => const _$$$ProductSetArgs(
+        name: 'id',
+        nameCast: 'product_id',
+        model: 'product',
+      );
 
 // ([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
   _$$$ProductSetArgs<String> get lastName => const _$$$ProductSetArgs(
