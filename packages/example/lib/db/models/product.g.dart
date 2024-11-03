@@ -130,14 +130,14 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
-// TODO(hodoan): check
+// TODO(hodoan): check primary keys auto
   Future<int> insert(Database database) async {
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Product (id,
 last_name,
 first_name,
 blocked) 
        VALUES(?, ?, ?, ?)''', [
-      this.id,
+      id,
       this.lastName,
       this.firstName,
       this.blocked,
@@ -145,10 +145,9 @@ blocked)
     return $id;
   }
 
-// TODO(hodoan): check
   Future<int> update(Database database) async {
     return await database
-        .update('Product', toDB(), where: "id = ?", whereArgs: [this.id]);
+        .update('Product', toDB(), where: "id = ?", whereArgs: [id]);
   }
 
 // TODO(hodoan): check
@@ -166,13 +165,11 @@ WHERE product.id = ?
     return res.isNotEmpty ? Product.fromDB(res.first, res) : null;
   }
 
-// TODO(hodoan): check
   Future<void> delete(Database database) async {
-    await database.rawQuery(
-        '''DELETE FROM Product product WHERE product.id = ?''', [this.id]);
+    await database
+        .rawQuery('''DELETE FROM Product product WHERE product.id = ?''', [id]);
   }
 
-// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? id,
@@ -185,19 +182,22 @@ WHERE product.id = ?
     await database.rawDelete('''DELETE * FROM Product''');
   }
 
-// TODO(hodoan): check
   static Product $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Product();
+      Product(
+          id: json['product_id'] as int?,
+          lastName: json['${childName}product_last_name'] as String?,
+          firstName: json['${childName}product_first_name'] as String?,
+          blocked: (json['${childName}product_blocked'] as int?) == 1);
 // TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'last_name': this.lastName,
         'first_name': this.firstName,
-        'blocked': (this.blocked ?? false) ? 1 : 0,
+        'blocked': (this.blocked ?? false) ? 1 : 0
       };
 }
 

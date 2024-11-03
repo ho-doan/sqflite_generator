@@ -149,19 +149,18 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
-// TODO(hodoan): check
+// TODO(hodoan): check primary keys auto
   Future<int> insert(Database database) async {
-    final $productIdProduct = await product.insert(database);
+    await product.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
 product,
 product,
 first_name,
 last_name,
 blocked) 
-       VALUES(?, ?, ?, ?, ?, ?)''', [
-      this.id,
-      this.product,
-      $productIdProduct,
+       VALUES(?, ?, ?, ?, ?)''', [
+      id,
+      product?.id,
       this.firstName,
       this.lastName,
       this.blocked,
@@ -169,11 +168,10 @@ blocked)
     return $id;
   }
 
-// TODO(hodoan): check
   Future<int> update(Database database) async {
     await product.update(database);
     return await database.update('Client', toDB(),
-        where: "id = ? AND product = ?", whereArgs: [this.id, product.id]);
+        where: "id = ? AND product_id = ?", whereArgs: [id, product?.id]);
   }
 
 // TODO(hodoan): check
@@ -188,26 +186,24 @@ SELECT
 ${$createSelect(select)}
  FROM Client client
  LEFT JOIN Product product ON product.id = client.product
-WHERE client.id = ? AND client.product = ?
+WHERE client.id = ? AND client.product_id = ?
 ''', [id, productId]) as List<Map>);
     return res.isNotEmpty ? Client.fromDB(res.first, res) : null;
   }
 
-// TODO(hodoan): check
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Client client WHERE client.id = ? AND client.product = ?''',
-        [this.id, product.id]);
+        '''DELETE FROM Client client WHERE client.id = ? AND client.product_id = ?''',
+        [id, product?.id]);
   }
 
-// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? id,
     int? productId,
   ) async {
     await database.rawQuery(
-        '''DELETE FROM Client client WHERE client.id = ? AND client.product = ?''',
+        '''DELETE FROM Client client WHERE client.id = ? AND client.product_id = ?''',
         [id, productId]);
   }
 
@@ -215,21 +211,24 @@ WHERE client.id = ? AND client.product = ?
     await database.rawDelete('''DELETE * FROM Client''');
   }
 
-// TODO(hodoan): check
   static Client $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Client();
+      Client(
+          id: json['client_id'] as int?,
+          firstName: json['${childName}client_first_name'] as String?,
+          lastName: json['${childName}client_last_name'] as String?,
+          blocked: (json['${childName}client_blocked'] as int?) == 1,
+          product: Product.fromDB(json, lst, 'product_'));
 // TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'id': this.id,
-        'product': this.product,
-        'product': product.id,
+        'product_id': this.product?.id,
         'first_name': this.firstName,
         'last_name': this.lastName,
-        'blocked': (this.blocked ?? false) ? 1 : 0,
+        'blocked': (this.blocked ?? false) ? 1 : 0
       };
 }
 

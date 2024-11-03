@@ -174,12 +174,12 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
-// TODO(hodoan): check
+// TODO(hodoan): check primary keys auto
   Future<int> insert(Database database) async {
-    final $productIdProduct = await product?.insert(database);
-    final $clientIdClient = await client?.insert(database);
-    final $billIdParent = await parent?.insert(database);
-    final $clientIdParentClient = await parentClient?.insert(database);
+    await product?.insert(database);
+    await client?.insert(database);
+    await parent?.insert(database);
+    await parentClient?.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Bill (product,
 client,
@@ -188,27 +188,34 @@ client,
 bill,
 client,
 time) 
-       VALUES(?, ?, ?, ?, ?, ?, ?)''', [
-      this.product,
-      this.client,
-      $productIdProduct,
-      $clientIdClient,
-      $billIdParent,
-      $clientIdParentClient,
-      this.time,
+       VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''', [
+      product?.id,
+      client?.id,
+      client?.product?.id,
+      this.time?.millisecondsSinceEpoch,
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+      parent?.product?.id,
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+      parent?.client?.id,
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill, Client]
+      parent?.client?.product?.id,
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient]
+      parentClient?.id,
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient, Client]
+      parentClient?.product?.id,
     ]);
     return $id;
   }
 
-// TODO(hodoan): check
   Future<int> update(Database database) async {
     await product?.update(database);
     await client?.update(database);
     await parent?.update(database);
     await parentClient?.update(database);
     return await database.update('Bill', toDB(),
-        where: "product = ? AND client = ?",
-        whereArgs: [product?.id, client?.id, client?.product]);
+        where:
+            "product_id = ? AND client_id = ? AND client_client_product_id = ?",
+        whereArgs: [product?.id, client?.id, client?.product?.id]);
   }
 
 // TODO(hodoan): check
@@ -216,8 +223,7 @@ time)
     Database database,
     int? productId,
     int? clientId,
-    int? productId,
-    Product productProduct, {
+    int? clientProductId, {
     Set<$BillSetArgs>? select,
   }) async {
     final res = (await database.rawQuery('''
@@ -228,51 +234,51 @@ ${$createSelect(select)}
  LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
  LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
-WHERE bill.product = ? AND bill.client = ?
-''', [productId, clientId, clientProduct]) as List<Map>);
+WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_id = ?
+''', [productId, clientId, clientProductId]) as List<Map>);
     return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
   }
 
-// TODO(hodoan): check
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product = ? AND bill.client = ?''',
-        [product?.id, client?.id, client?.product]);
+        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_id = ?''',
+        [product?.id, client?.id, client?.product?.id]);
   }
 
-// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? productId,
     int? clientId,
-    int? productId,
-    Product productProduct,
+    int? clientProductId,
   ) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product = ? AND bill.client = ?''',
-        [productId, clientId, clientProduct]);
+        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_id = ?''',
+        [productId, clientId, clientProductId]);
   }
 
   static Future<void> deleteAll(Database database) async {
     await database.rawDelete('''DELETE * FROM Bill''');
   }
 
-// TODO(hodoan): check
   static Bill $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Bill();
+      Bill(
+          time: DateTime.fromMillisecondsSinceEpoch(
+            json['${childName}bill_time'] as int? ?? -1,
+          ),
+          product: Product.fromDB(json, lst, 'product_'),
+          client: Client.fromDB(json, lst, 'client_'),
+          parent: Bill.fromDB(json, lst, 'parent_'),
+          parentClient: Client.fromDB(json, lst, 'parent_client_'));
 // TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
-        'product': this.product,
-        'client': this.client,
-        'product': product?.id,
-        'client': client?.id,
-        'bill': parent?.product,
-        'client': parentClient?.id,
-        'time': this.time?.millisecondsSinceEpoch,
+        'product_id': this.product?.id,
+        'client_id': this.client?.id,
+        'client_client_product_id': this.client?.product?.id,
+        'time': this.time?.millisecondsSinceEpoch
       };
 }
 

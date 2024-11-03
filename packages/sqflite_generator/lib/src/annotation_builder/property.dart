@@ -148,6 +148,47 @@ extension Aps on AProperty {
     return nameDefault;
   }
 
+  String fieldNameFull3(String? fieldName) {
+    if (parentClassName.length > 1) {
+      return [
+        if (fieldName != null) fieldName,
+        // ...parentClassName,
+        parentClassName.last,
+        className,
+        nameDefault
+      ].join('_');
+    } else if (parentClassName.isNotEmpty) {
+      return [
+        if (fieldName != null) fieldName,
+        className,
+        nameDefault,
+      ].join('_');
+    }
+    return nameDefault;
+  }
+
+  List<String> fieldNameFull4(String? fieldName) {
+    if (parentClassName.length > 1) {
+      return [
+        if (fieldName != null) fieldName,
+        parentClassName.first,
+        ...parentClassName.sublist(2),
+        // parentClassName.last,
+        className,
+        nameDefault
+      ].map((e) => e.toCamelCase()).toList();
+    } else if (parentClassName.isNotEmpty) {
+      return [
+        if (fieldName != null) fieldName,
+        // ...parentClassName,
+        ...parentClassName,
+        // className,
+        nameDefault,
+      ];
+    }
+    return [nameDefault];
+  }
+
   String get _fieldNameFullForForeign {
     if (parentClassName.length > 1) {
       return [...parentClassName.sublist(1), className, nameDefault].join('_');

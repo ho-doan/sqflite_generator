@@ -124,29 +124,30 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
-// TODO(hodoan): check
+// TODO(hodoan): check primary keys auto
   Future<int> insert(Database database) async {
-    final $catIdParent = await parent?.insert(database);
-    final $catIdChild = await child?.insert(database);
+    await parent?.insert(database);
+    await child?.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Cat (id,
 cat,
 cat,
 birth) 
        VALUES(?, ?, ?, ?)''', [
-      this.id,
-      $catIdParent,
-      $catIdChild,
-      this.birth,
+      id,
+      this.birth?.millisecondsSinceEpoch,
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]
+      parent?.id,
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]
+      child?.id,
     ]);
     return $id;
   }
 
-// TODO(hodoan): check
   Future<int> update(Database database) async {
     await parent?.update(database);
     await child?.update(database);
     return await database
-        .update('Cat', toDB(), where: "id = ?", whereArgs: [this.id]);
+        .update('Cat', toDB(), where: "id = ?", whereArgs: [id]);
   }
 
 // TODO(hodoan): check
@@ -166,13 +167,10 @@ WHERE cat.id = ?
     return res.isNotEmpty ? Cat.fromDB(res.first, res) : null;
   }
 
-// TODO(hodoan): check
   Future<void> delete(Database database) async {
-    await database
-        .rawQuery('''DELETE FROM Cat cat WHERE cat.id = ?''', [this.id]);
+    await database.rawQuery('''DELETE FROM Cat cat WHERE cat.id = ?''', [id]);
   }
 
-// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? id,
@@ -184,20 +182,21 @@ WHERE cat.id = ?
     await database.rawDelete('''DELETE * FROM Cat''');
   }
 
-// TODO(hodoan): check
   static Cat $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Cat();
+      Cat(
+          id: json['cat_id'] as int?,
+          birth: DateTime.fromMillisecondsSinceEpoch(
+            json['${childName}cat_birth'] as int? ?? -1,
+          ),
+          parent: Cat.fromDB(json, lst, 'parent_'),
+          child: Cat.fromDB(json, lst, 'child_'));
 // TODO(hodoan): check
-  Map<String, dynamic> $toDB() => {
-        'id': this.id,
-        'cat': parent?.id,
-        'cat': child?.id,
-        'birth': this.birth?.millisecondsSinceEpoch,
-      };
+  Map<String, dynamic> $toDB() =>
+      {'id': this.id, 'birth': this.birth?.millisecondsSinceEpoch};
 }
 
 class $CatSetArgs<T> extends WhereModel<T> {

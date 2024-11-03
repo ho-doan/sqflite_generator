@@ -85,68 +85,98 @@ class AEntity {
 // TODO(hodoan): check
   String get rawFromDB {
     return [
-      // aPs.map(
-      //   (e) {
-      //     if (e.property is AForeignKey) {
-      //       if (!e.property.dartType.isDartCoreList) {
-      //         return '${e.property.nameDefault}:${(e.property as AForeignKey).entityParent?.className}.fromDB(json,[])';
-      //       }
-      //       return '${e.property.nameDefault}: lst.map((e)=>${(e.property as AForeignKey).entityParent?.className}.fromDB(e,[])).toList()';
-      //     }
-      //     if (e.property is APrimaryKey &&
-      //         (e.property as APrimaryKey).entityParent != null) {
-      //       return '${e.property.nameDefault}: ${e.property.dartType}'
-      //           '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
-      //     }
-      //     if (e.property.rawFromDB) {
-      //       return '${e.property.nameDefault}: ${e.property.dartType}'
-      //           '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
-      //     }
-      //     if (e.property.dartType.toString().contains('DateTime')) {
-      //       return '${e.property.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.property.nameFromDB}\'] as int? ?? -1,)';
-      //     }
-      //     if (e.property.dartType.isDartCoreBool) {
-      //       return '${e.property.nameDefault}: (json[\'${e.property.nameFromDB}\'] as int?) == 1';
-      //     }
-      //     if (e.property is AColumn &&
-      //         (e.property as AColumn).converter != null) {
-      //       return '${e.property.nameDefault}: const ${(e.property as AColumn).converter}().fromJson(json[\'\${childName}${e.property.nameFromDB}\'] as String?)';
-      //     }
+      for (final e in allss())
+        // if (e.$2 is AForeignKey)
+        //   {
+        //     if (!e.$2.dartType.isDartCoreList)
+        //       '${e.$2.nameDefault}:${(e.$2 as AForeignKey).entityParent?.className}.fromDB(json,[])'
+        //     else
+        //       '${e.$2.nameDefault}: lst.map((e)=>${(e.$2 as AForeignKey).entityParent?.className}.fromDB(e,[])).toList()'
+        //   }
+        if (e.$2 is AIndex)
+          '${e.$2.nameDefault}: json[\'\${childName}${e.$2.nameFromDB}\'] as ${e.$2.dartType}'
+        else if (e.$2 is AColumn)
+          () {
+            if (e.$2.dartType.toString().contains('DateTime')) {
+              return '${e.$2.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.$2.nameFromDB}\'] as int? ?? -1,)';
+            } else if (e.$2.dartType.isDartCoreBool) {
+              return '${e.$2.nameDefault}: (json[\'\${childName}${e.$2.nameFromDB}\'] as int?) == 1';
+            } else if (e.$2 is AColumn && (e.$2 as AColumn).converter != null) {
+              return '${e.$2.nameDefault}: const ${(e.$2 as AColumn).converter}().fromJson(json[\'\${childName}${e.$2.nameFromDB}\'] as String?)';
+            } else {
+              return '${e.$2.nameDefault}: json[\'\${childName}${e.$2.nameFromDB}\'] as ${e.$2.dartType}';
+            }
+          }()
+        else if (e.$2 is APrimaryKey && e.$2.parentClassName.isEmpty)
+          '${e.$2.nameDefault}: json[\'${e.$2.nameFromDB}\'] as ${e.$2.dartType}',
 
-      //     return '${e.property.nameDefault}: json[\'\${childName}${e.property.nameFromDB}\'] as ${e.property.dartType}';
-      //   },
-      // ).join(','),
-      // ','
-    ].join();
+      for (final key in primaryKeys.where(
+          (e) => foreignKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        '${key.nameDefault}: ${key.entityParent?.className}'
+            '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\')',
+      for (final key in foreignKeys.where((e) =>
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        '${key.nameDefault}: ${key.entityParent?.className}'
+            '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\')',
+      // if (e.property.rawFromDB) {
+      //   return '${e.property.nameDefault}: ${e.property.dartType}'
+      //       '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
+      // }
+      // if (e.property.dartType.toString().contains('DateTime')) {
+      //   return '${e.property.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.property.nameFromDB}\'] as int? ?? -1,)';
+      // }
+      // if (e.property.dartType.isDartCoreBool) {
+      //   return '${e.property.nameDefault}: (json[\'${e.property.nameFromDB}\'] as int?) == 1';
+      // }
+      // if (e.property is AColumn &&
+      //     (e.property as AColumn).converter != null) {
+      //   return '${e.property.nameDefault}: const ${(e.property as AColumn).converter}().fromJson(json[\'\${childName}${e.property.nameFromDB}\'] as String?)';
+      // }
+
+      // return '${e.property.nameDefault}: json[\'\${childName}${e.property.nameFromDB}\'] as ${e.property.dartType}';
+    ].join(',\n');
   }
 
   String get rawToDB {
     return [
-      aPs
-          .map(
-            (e) {
-              if (e is AForeignKey) {
-                if (!e.dartType.isDartCoreList) {
-                  return '\'${e.nameToDB}\': ${e.defaultSuffix}.${e.entityParent?.primaryKeys.firstOrNull?.nameDefault}';
-                }
-                return '';
-              }
-              if (e.dartType.toString().contains('DateTime')) {
-                return '\'${e.nameToDB}\': this.${e.defaultSuffix}.millisecondsSinceEpoch';
-              }
-              if (e.dartType.isDartCoreBool) {
-                return '\'${e.nameDefault}\': (this.${e.nameDefault} ?? false) ? 1 : 0';
-              }
-              if (e is AColumn && e.converter != null) {
-                return '\'${e.nameToDB}\': const ${e.converter}().toJson(this.${e.nameDefault})';
-              }
-              return '\'${e.nameToDB}\':this.${e.nameDefault}';
-            },
-          )
-          .where((e) => e.isNotEmpty)
-          .join(','),
-      ','
-    ].join();
+      for (final item in keysNew)
+        '\'${item.$2.fieldNameFull}\': this.${item.$2.fieldNameFull4(null).join('?.')}',
+      for (final item in indices)
+        '\'${item.nameToDB}\': this.${item.nameDefault}',
+      for (final item in columns)
+        if (item.dartType.toString().contains('DateTime'))
+          '\'${item.nameToDB}\': this.${item.nameDefault}?.millisecondsSinceEpoch'
+        else if (item.dartType.isDartCoreBool)
+          '\'${item.nameToDB}\': (this.${item.nameDefault} ?? false) ? 1 : 0'
+        else if (item.converter != null)
+          '\'${item.nameToDB}\': const ${(item).converter}().toJson(this.${item.nameDefault})'
+        else
+          '\'${item.nameToDB}\':this.${item.nameDefault}',
+      // aPs
+      //     .map(
+      //       (e) {
+      //         if (e is AForeignKey) {
+      //           if (!e.dartType.isDartCoreList) {
+      //             return '\'${e.nameToDB}\': ${e.defaultSuffix}.${e.entityParent?.primaryKeys.firstOrNull?.nameDefault}';
+      //           }
+      //           return '';
+      //         }
+      //         if (e.dartType.toString().contains('DateTime')) {
+      //           return '\'${e.nameToDB}\': this.${e.defaultSuffix}.millisecondsSinceEpoch';
+      //         }
+      //         if (e.dartType.isDartCoreBool) {
+      //           return '\'${e.nameDefault}\': (this.${e.nameDefault} ?? false) ? 1 : 0';
+      //         }
+      //         if (e is AColumn && e.converter != null) {
+      //           return '\'${e.nameToDB}\': const ${e.converter}().toJson(this.${e.nameDefault})';
+      //         }
+      //         return '\'${e.nameToDB}\':this.${e.nameDefault}';
+      //       },
+      //     )
+      //     .where((e) => e.isNotEmpty)
+      //     .join(','),
+      // ','
+    ].join(',\n');
   }
 
   String get rawGetAll {
@@ -424,76 +454,6 @@ extension AEntityBase on AEntity {
         className: propertyParent?.className ?? className,
         propertyParent: propertyParent,
       ));
-    }
-    return lst;
-  }
-
-  /// `dart
-  /// class A{
-  ///   @primaryKey
-  ///   final B? child;
-  ///   @ForeignKey(name: 'B')
-  ///   @primaryKey
-  ///   final B? parent;
-  ///   @ForeignKey(name: 'B')
-  ///   final B? child;
-  /// }
-  ///
-  /// class B{
-  ///   @primaryKey
-  ///   final int? id;
-  ///   @primaryKey
-  ///   final int? id2;
-  /// }
-  /// `
-  /// result [child_b_id, child_b_id2]
-  List<KeyModel> _expandedForeignKeysWithoutPri() {
-    final lst = <KeyModel>[];
-    for (final item in foreignKeys) {
-      if (!_treePrimaryKeys()
-          .map((e) => e.property.nameDefault)
-          .contains(item.nameDefault)) {
-        if (item.entityParent?.className == className) {
-          lst.addAll(_expandedPrimaryKeys(null, item.nameDefault));
-        } else {
-          lst.addAll(
-              item.entityParent?._expandedPrimaryKeys(null, item.nameDefault) ??
-                  []);
-        }
-      }
-    }
-    return lst;
-  }
-
-  /// `dart
-  /// class A{
-  ///   @primaryKey
-  ///   final B? child;
-  ///   @ForeignKey(name: 'B')
-  ///   @primaryKey
-  ///   final B? parent;
-  ///   @ForeignKey(name: 'B')
-  ///   final B? child;
-  /// }
-  ///
-  /// class B{
-  ///   @primaryKey
-  ///   final int? id;
-  ///   @primaryKey
-  ///   final int? id2;
-  /// }
-  /// `
-  /// result [child_b_id, child_b_id2,parent_b_id,parent_b_id2]
-  List<KeyModel> _expandedForeignKeysAll() {
-    final lst = <KeyModel>[];
-    for (final item in foreignKeys) {
-      lst.add(
-        KeyModel._foreignKey(
-          item,
-          children: _expandedPrimaryKeys(null, item.nameDefault),
-          className: className,
-        ),
-      );
     }
     return lst;
   }
@@ -903,25 +863,46 @@ extension AInsert on AEntity {
         .join(',\n');
 
     if (ps != null) {
-      return 'final \$${'${className}Id_${ps.nameDefault}'.toCamelCase()} = await ${ps.defaultSuffix}.insert(database);';
+      // final \$${'${className}Id_${ps.nameDefault}'.toCamelCase()} =
+      return 'await ${ps.defaultSuffix}.insert(database);';
     }
 
-    final fieldsValue = aPs.map((e) {
-      if (e is AForeignKey) {
-        if (e.dartType.isDartCoreList) {
-          return null;
-        }
-        return '\$${'${e.entityParent?.className}Id_${e.nameDefault}'.toCamelCase()}';
-      }
-      if (ps != null) return '$ps.${e.nameDefault}';
-      if (e is AColumn && e.converter != null) {
-        if (e.dartType.toString().contains('DateTime')) {
-          return 'this.${e.defaultSuffix}.millisecondsSinceEpoch';
-        }
-        return 'const ${e.converter}().toJson(this.${e.nameDefault})';
-      }
-      return 'this.${e.nameDefault}';
-    }).where((e) => e != null);
+    final fieldsValue = [
+      for (final key in keysNew)
+        key.$2.fieldNameFull3(null).toDotCase().replaceAll('.', '?.'),
+      for (final item in columns)
+        if (item.dartType.toString().contains('DateTime'))
+          'this.${item.defaultSuffix}.millisecondsSinceEpoch'
+        else if (item.converter != null)
+          'const ${item.converter}().toJson(this.${item.nameDefault})'
+        else
+          'this.${item.nameDefault}',
+      for (final k in foreignKeys.where((e) =>
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        ...k.entityParent!.primaryKeys.expand((e) => e.expanded2()).map(
+              (m) => ['// $m', m.fieldNameFull4(null).join('?.')].join('\n'),
+            ),
+    ];
+
+    // final fieldsValue = allss().map((e) {
+    //   if (e.$2 is APrimaryKey) {
+    //     return '\$${'${e.$1.join('_').toCamelCase()}Id_${e.$2.nameDefault}'.toCamelCase()}';
+    //   }
+    //   if (e.$2 is AForeignKey) {
+    //     if (e.$2.dartType.isDartCoreList) {
+    //       return null;
+    //     }
+    //     return '\$${'${e.$1.join('_').toCamelCase()}Id_${e.$2.nameDefault}'.toCamelCase()}';
+    //   }
+    //   if (ps != null) return '$ps.${e.$2.nameDefault}';
+    //   if (e.$2 is AColumn && (e.$2 as AColumn).converter != null) {
+    //     if ((e.$2 as AColumn).dartType.toString().contains('DateTime')) {
+    //       return 'this.${e.$2.defaultSuffix}.millisecondsSinceEpoch';
+    //     }
+    //     return 'const ${(e.$2 as AColumn).converter}().toJson(this.${e.$2.nameDefault})';
+    //   }
+    //   return 'this.${e.$2.nameDefault}';
+    // }).where((e) => e != null);
 
     return [
       ...foreignKeys.where((e) => !e.dartType.isDartCoreList).map(
@@ -930,7 +911,7 @@ extension AInsert on AEntity {
       '''final \$id = await database.rawInsert(\'\'\'INSERT OR REPLACE INTO $className ($fieldsRaw) 
        VALUES(${List.generate(fieldsValue.length, (index) => '?').join(', ')})\'\'\',
        [
-        ${fieldsValue.join(',')},
+        ${fieldsValue.join(',\n')},
        ]
       );''',
       if (ps == null) 'return \$id;'
@@ -1118,22 +1099,10 @@ extension AParam on AEntity {
     ..name = 'lst'
     ..type = refer('List<Map>'));
   List<Parameter> get keysRequiredArgs => [
-        for (final key in keys)
-          if (key is AForeignKey)
-            for (final k in key.entityParent?.keys ?? <AProperty>[])
-              if (k is AForeignKey)
-                for (final sk in key.entityParent?.keys ?? <AProperty>[])
-                  Parameter((p) => p
-                    ..name = '${k.nameDefault}_${sk.nameDefault}'.toCamelCase()
-                    ..type = refer(sk.dartType.toString()))
-              else
-                Parameter((p) => p
-                  ..name = '${key.nameDefault}_${k.nameDefault}'.toCamelCase()
-                  ..type = refer(k.dartType.toString()))
-          else
-            Parameter((p) => p
-              ..name = key.nameDefault.toCamelCase()
-              ..type = refer(key.dartType.toString()))
+        for (final key in keysNew)
+          Parameter((p) => p
+            ..name = key.$2.fieldNameFull3(null).toCamelCase()
+            ..type = refer(key.$2.dartType.toString()))
       ];
   List<Parameter> get setOptionalArgs => [
         Parameter(
@@ -1295,14 +1264,33 @@ extension AFields on AEntity {
     ];
   }
 
+  List<(String, APrimaryKey)> get keysNew {
+    return [
+      for (final e in primaryKeys)
+        if (
+
+            /// primary key of child self
+            /// ```
+            /// class A{
+            ///   @primaryKey
+            ///   final A? child;
+            /// }
+            /// ```
+            /// result [true]
+            !e.parentClassName
+                .map((e) => e.toCamelCase())
+                .contains(className.toCamelCase())) ...[
+          ...[
+            for (final f in e.expanded2()) (e.nameDefault, f),
+          ],
+        ],
+    ];
+  }
+
   List<String> get _whereArgs {
     return [
-      for (final key in keys)
-        if (key is AForeignKey)
-          for (final item in key.entityParent?.keys ?? <AProperty>[])
-            '${key.defaultSuffix}.${item.nameDefault}'
-        else
-          'this.${key.nameDefault}'
+      for (final key in keysNew)
+        key.$2.fieldNameFull3(null).toDotCase().replaceAll('.', '?.'),
     ];
   }
 
@@ -1311,12 +1299,13 @@ extension AFields on AEntity {
 
   List<String> get _whereDB {
     return [
-      for (final key in keys) '${className.toSnakeCase()}.${key.nameToDB} = ?'
+      for (final key in keysNew)
+        '${className.toSnakeCase()}.${key.$2.fieldNameFull} = ?'
     ];
   }
 
   List<String> get _whereDBUpdate {
-    return [for (final key in keys) '${key.nameToDB} = ?'];
+    return [for (final key in keysNew) '${key.$2.fieldNameFull} = ?'];
   }
 }
 
