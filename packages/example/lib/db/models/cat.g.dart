@@ -9,9 +9,9 @@ part of 'cat.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 extension CatQuery on Cat {
-  static const _$$CatSetArgs parent = _$$CatSetArgs();
+  static const _$$CatSetArgs parent$$ = _$$CatSetArgs();
 
-  static const _$$CatSetArgs child = _$$CatSetArgs();
+  static const _$$CatSetArgs child$$ = _$$CatSetArgs();
 
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Cat(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,8 +45,10 @@ extension CatQuery on Cat {
   static Set<$CatSetArgs> $default = {
     CatQuery.id,
     CatQuery.birth,
-    CatQuery.parent.id,
-    CatQuery.parent.birth,
+    CatQuery.parent$$.id,
+    CatQuery.parent$$.birth,
+    CatQuery.child$$.id,
+    CatQuery.child$$.birth,
   };
 
   static String $createSelect(
@@ -229,14 +231,14 @@ class _$$$CatSetArgs<T> extends $CatSetArgs<T> {
 class _$$CatSetArgs {
   const _$$CatSetArgs();
 
-// ([parent, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
+// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
   _$$$CatSetArgs<int> get id => const _$$$CatSetArgs(
         name: 'id',
-        nameCast: 'parent_id',
-        model: 'parent',
+        nameCast: 'cat_id',
+        model: 'cat',
       );
 
-// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
+// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
   _$$$CatSetArgs<String> get birth => const _$$$CatSetArgs(
         name: 'birth',
         nameCast: 'cat_birth',

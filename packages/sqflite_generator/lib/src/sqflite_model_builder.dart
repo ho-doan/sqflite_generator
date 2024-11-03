@@ -44,11 +44,13 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
 
     generatorListClass(
       entity,
+      entity,
       classBuilderList,
       classBuilderListExtends,
       fieldList,
     );
     generatorListClassFore(
+      entity,
       entity,
       classBuilderList,
       classBuilderListExtends,
@@ -117,9 +119,11 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                 if (!(e.$2 is AColumn &&
                     e.$2.alters.any((e) => e.type == AlterTypeGen.drop)))
                   '${entity.extensionName}.${e.$1.sublist(1).join('_').toCamelCase()}',
-              for (final aExtend in classBuilderListExtends)
-                for (final field in aExtend.$2.methods)
-                  '${entity.extensionName}.${aExtend.$1}.${field.name}'
+              for (final f in fieldList)
+                // for (final aExtend in classBuilderListExtends)
+                for (final field in (classBuilderListExtends
+                    .firstWhere((e) => e.$2.name == f.type?.symbol)).$2.methods)
+                  '${entity.extensionName}.${f.name}.${field.name}'
             ].join(',')},}''')
             ..static = true,
         ),
@@ -249,6 +253,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
 
 void generatorListClass(
   AEntity entity,
+  AEntity parent,
   List<Class> classBuilderList,
   List<(String, Class)> classBuilderListExtends,
   List<Field> fieldList, [
@@ -290,7 +295,7 @@ void generatorListClass(
                 ..methods.addAll(
                   [
                     for (final item in e.entityParent!
-                        .allssForChild(nameDefaults.length + 1))
+                        .allssForChild(parent, nameDefaults.length + 1))
                       Method(
                         (f) => f
                           ..name = (item.$1.sublist(1)).join('_').toCamelCase()
@@ -328,10 +333,10 @@ void generatorListClass(
       fieldList.add(
         Field(
           (f) => f
-            ..name = [
+            ..name = '${[
               ...nameDefaults,
               e.nameDefault,
-            ].join('_').toCamelCase()
+            ].join('_').toCamelCase()}\$\$'
             ..modifier = FieldModifier.constant
             ..type = refer(name)
             ..assignment = Code('$name()')
@@ -341,6 +346,7 @@ void generatorListClass(
 
       generatorListClass(
         e.entityParent!,
+        parent,
         classBuilderList,
         classBuilderListExtends,
         fieldList,
@@ -355,6 +361,7 @@ void generatorListClass(
 
 void generatorListClassFore(
   AEntity entity,
+  AEntity parent,
   List<Class> classBuilderList,
   List<(String, Class)> classBuilderListExtends,
   List<Field> fieldList, [
@@ -399,7 +406,7 @@ void generatorListClassFore(
                 ..methods.addAll(
                   [
                     for (final item in e.entityParent!
-                        .allssForChild(nameDefaults.length + 1))
+                        .allssForChild(parent, nameDefaults.length + 1))
                       Method(
                         (f) => f
                           ..name = (item.$1.sublist(1)).join('_').toCamelCase()
@@ -436,10 +443,10 @@ void generatorListClassFore(
       fieldList.add(
         Field(
           (f) => f
-            ..name = [
+            ..name = '${[
               ...nameDefaults,
               e.nameDefault,
-            ].join('_').toCamelCase()
+            ].join('_').toCamelCase()}\$\$'
             ..modifier = FieldModifier.constant
             ..type = refer(name)
             ..assignment = Code('$name()')
@@ -449,6 +456,7 @@ void generatorListClassFore(
       if (entity.className != e.className) {
         generatorListClassFore(
           e.entityParent!,
+          parent,
           classBuilderList,
           classBuilderListExtends,
           fieldList,

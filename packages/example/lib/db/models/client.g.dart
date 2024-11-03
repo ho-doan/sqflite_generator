@@ -9,7 +9,7 @@ part of 'client.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 extension ClientQuery on Client {
-  static const _$$ProductSetArgs product = _$$ProductSetArgs();
+  static const _$$ProductSetArgs product$$ = _$$ProductSetArgs();
 
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Client(
 			id INTEGER,
@@ -71,10 +71,10 @@ extension ClientQuery on Client {
     ClientQuery.firstName,
     ClientQuery.lastName,
     ClientQuery.blocked,
-    ClientQuery.product.id,
-    ClientQuery.product.lastName,
-    ClientQuery.product.firstName,
-    ClientQuery.product.blocked,
+    ClientQuery.product$$.id,
+    ClientQuery.product$$.lastName,
+    ClientQuery.product$$.firstName,
+    ClientQuery.product$$.blocked,
   };
 
   static String $createSelect(

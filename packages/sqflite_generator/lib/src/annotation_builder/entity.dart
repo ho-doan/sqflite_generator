@@ -656,10 +656,12 @@ extension AEntityBase on AEntity {
     return alls;
   }
 
-  List<(List<String>, AProperty)> allssForChild([int step = 0]) {
+  List<(List<String>, AProperty)> allssForChild(
+      [AEntity? parent, int step = 0]) {
     if (parentClassName.length > (9 / 3)) return [];
-    final oo = aPs.whereType<APrimaryKey>();
-    oo.forEach(print);
+    if (parent != null && parent.className == className) {
+      return parent.allss().where((e) => e.$2 is! AForeignKey).toList();
+    }
     final alls = [
       // if(parents!=null)
       // for(final key in parents)

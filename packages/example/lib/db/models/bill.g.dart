@@ -9,15 +9,15 @@ part of 'bill.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 extension BillQuery on Bill {
-  static const _$$ProductSetArgs product = _$$ProductSetArgs();
+  static const _$$ProductSetArgs product$$ = _$$ProductSetArgs();
 
-  static const _$$ClientSetArgs client = _$$ClientSetArgs();
+  static const _$$ClientSetArgs client$$ = _$$ClientSetArgs();
 
-  static const _$$ProductSetArgs clientProduct = _$$ProductSetArgs();
+  static const _$$ProductSetArgs clientProduct$$ = _$$ProductSetArgs();
 
-  static const _$$BillSetArgs parent = _$$BillSetArgs();
+  static const _$$BillSetArgs parent$$ = _$$BillSetArgs();
 
-  static const _$$ClientSetArgs parentClient = _$$ClientSetArgs();
+  static const _$$ClientSetArgs parentClient$$ = _$$ClientSetArgs();
 
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Bill(
 			product_id INTEGER,
@@ -77,15 +77,26 @@ extension BillQuery on Bill {
     BillQuery.clientId,
     BillQuery.clientClientId,
     BillQuery.time,
-    BillQuery.product.id,
-    BillQuery.product.lastName,
-    BillQuery.product.firstName,
-    BillQuery.product.blocked,
-    BillQuery.client.id,
-    BillQuery.client.firstName,
-    BillQuery.client.lastName,
-    BillQuery.client.blocked,
-    BillQuery.parent.time,
+    BillQuery.product$$.id,
+    BillQuery.product$$.lastName,
+    BillQuery.product$$.firstName,
+    BillQuery.product$$.blocked,
+    BillQuery.client$$.id,
+    BillQuery.client$$.firstName,
+    BillQuery.client$$.lastName,
+    BillQuery.client$$.blocked,
+    BillQuery.clientProduct$$.id,
+    BillQuery.clientProduct$$.lastName,
+    BillQuery.clientProduct$$.firstName,
+    BillQuery.clientProduct$$.blocked,
+    BillQuery.parent$$.productId,
+    BillQuery.parent$$.clientId,
+    BillQuery.parent$$.clientClientId,
+    BillQuery.parent$$.time,
+    BillQuery.parentClient$$.id,
+    BillQuery.parentClient$$.firstName,
+    BillQuery.parentClient$$.lastName,
+    BillQuery.parentClient$$.blocked,
   };
 
   static String $createSelect(
@@ -132,7 +143,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[BillQuery.product.nameCast]))
+        .groupBy(((m) => m[BillQuery.productId.nameCast]))
         .values
         .map((e) => Bill.fromDB(e.first, e))
         .toList();
@@ -213,7 +224,7 @@ ${$createSelect(select)}
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
  LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
 WHERE bill.product = ? AND bill.client = ?
-''', [productId, clientId, clientProduct]) as List<Map>);
+''', [productId, clientId, productId]) as List<Map>);
     return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
   }
 
@@ -385,7 +396,28 @@ class _$$ClientSetArgs {
 class _$$BillSetArgs {
   const _$$BillSetArgs();
 
-// ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
+// ([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product])
+  _$$$BillSetArgs<int> get productId => const _$$$BillSetArgs(
+        name: 'id',
+        nameCast: 'bill_product_id',
+        model: 'bill_product',
+      );
+
+// ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client])
+  _$$$BillSetArgs<int> get clientId => const _$$$BillSetArgs(
+        name: 'id',
+        nameCast: 'bill_client_id',
+        model: 'bill_client',
+      );
+
+// ([Bill, client, Client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client])
+  _$$$BillSetArgs<int> get clientClientId => const _$$$BillSetArgs(
+        name: 'id',
+        nameCast: 'bill_client_client_id',
+        model: 'bill_client_client',
+      );
+
+// ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
   _$$$BillSetArgs<String> get time => const _$$$BillSetArgs(
         name: 'time',
         nameCast: 'bill_time',
