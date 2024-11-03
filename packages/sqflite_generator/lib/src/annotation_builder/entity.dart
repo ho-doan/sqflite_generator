@@ -116,8 +116,11 @@ class AEntity {
             '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\')',
       for (final key in foreignKeys.where((e) =>
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
-        '${key.nameDefault}: ${key.entityParent?.className}'
-            '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\')',
+        if (key.dartType.isDartCoreList)
+          '${key.nameDefault}: lst.map((e)=>${key.entityParent?.className}.fromDB(e,[])).toList()'
+        else
+          '${key.nameDefault}: ${key.entityParent?.className}'
+              '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\')',
       // if (e.property.rawFromDB) {
       //   return '${e.property.nameDefault}: ${e.property.dartType}'
       //       '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
@@ -154,12 +157,13 @@ class AEntity {
           '\'${item.nameToDB}\':this.${item.nameDefault}',
       for (final k in foreignKeys.where((e) =>
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
-        for (final key
-            in k.entityParent!.primaryKeys.expand((e) => e.expanded2()))
-          '\n// $key\n \'${[
-            if (key.parentClassName.length > 1) k.nameDefault,
-            ...key.fieldNameFull5(null)
-          ].join('_').toSnakeCase()}\': this.${key.fieldNameFull4(null).join('?.')}',
+        if (!k.dartType.isDartCoreList)
+          for (final key
+              in k.entityParent!.primaryKeys.expand((e) => e.expanded2()))
+            '\n// $key\n \'${[
+              if (key.parentClassName.length > 1) k.nameDefault,
+              ...key.fieldNameFull5(null)
+            ].join('_').toSnakeCase()}\': this.${key.fieldNameFull4(null).join('?.')}',
     ].join(',\n');
   }
 
@@ -320,74 +324,6 @@ class AEntity {
 }
 
 extension AEntityBase on AEntity {
-  /// `dart
-  /// class A{
-  ///   @primaryKey
-  ///   final B? child;
-  /// }
-  ///
-  /// class B{
-  ///   @primaryKey
-  ///   final int? id;
-  ///   @primaryKey
-  ///   final int? id2;
-  /// }
-  /// `
-  List<KeyModel> _treePrimaryKeys({
-    String self = '',
-    APrimaryKey? selfKey,
-  }) {
-    return [
-      for (final item in primaryKeys)
-        KeyModel._ofPrimaryKey(
-          item,
-          self: self,
-          selfKey: selfKey,
-        )
-    ];
-  }
-
-  // List<KeyModel> _treePrimaryKeysWithoutFore({
-  //   String self = '',
-  // }) {
-  //   return [
-  //     for (final item in primaryKeys.where(
-  //       (e) => !foreignKeys.map((e) => e.nameDefault).contains(e.nameDefault),
-  //     ))
-  //       KeyModel.ofPrimaryKey(
-  //         item,
-  //         self: self,
-  //         withoutFore: true,
-  //       )
-  //   ];
-  // }
-
-  /// `dart
-  /// class A{
-  ///   @primaryKey
-  ///   final B? child;
-  /// }
-  ///
-  /// class B{
-  ///   @primaryKey
-  ///   final int? id;
-  ///   @primaryKey
-  ///   final int? id2;
-  /// }
-  /// `
-  /// result [b_id, b_id2]
-  List<KeyModel> _expandedPrimaryKeys(
-      [List<KeyModel>? child, String self = '']) {
-    final lst = <KeyModel>[];
-    for (final item in child ?? _treePrimaryKeys(self: self)) {
-      if (item.name != null) lst.add(item);
-      if (item.children != null && item.children!.isNotEmpty) {
-        lst.addAll(_expandedPrimaryKeys(item.children));
-      }
-    }
-    return lst;
-  }
-
   /// using for gen select args
   // List<KeyModel> _expandedForeignKeysAllForSelect() {
   //   final lst = <KeyModel>[];
@@ -589,11 +525,11 @@ extension AEntityBase on AEntity {
           ),
         ],
       if (primaryKeys.length > 1)
-        'PRIMARY KEY ${primaryKeys.expand(
+        'PRIMARY KEY (${primaryKeys.expand(
               (e) => e.expanded2(),
             ).map(
               (e) => e.fieldNameFull,
-            ).toList()}',
+            ).toList().join(',')})',
       for (final k in foreignKeys)
         k.rawCreateForeign(
           k.entityParent!.primaryKeys
@@ -611,7 +547,7 @@ extension AEntityBase on AEntity {
               .map((e) => e.fieldNameFullForForeign)
               .join(','),
         ),
-    ];
+    ].where((e) => e != null);
 
     return 'CREATE TABLE IF NOT EXISTS $className${newName ?? ''}(\n\t\t\t${alls.join(',\n\t\t\t')}\n\t)';
   }
@@ -756,6 +692,7 @@ extension AInsert on AEntity {
         else
           'this.${item.nameDefault}',
       for (final k in foreignKeys.where((e) =>
+          !e.dartType.isDartCoreList &&
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
         ...k.entityParent!.primaryKeys.expand((e) => e.expanded2()).map(
               (m) => ['// $m', m.fieldNameFull4(null).join('?.')].join('\n'),
@@ -1159,7 +1096,8 @@ extension AFields on AEntity {
                 .map((e) => e.toCamelCase())
                 .contains(className.toCamelCase())) ...[
           ...[
-            for (final f in e.expanded2()) (e.nameDefault, f),
+            for (final f in e.expanded2())
+              if (!e.dartType.isDartCoreList) (e.nameDefault, f),
           ],
         ],
     ];
@@ -1184,251 +1122,5 @@ extension AFields on AEntity {
 
   List<String> get _whereDBUpdate {
     return [for (final key in keysNew) '${key.$2.fieldNameFull} = ?'];
-  }
-}
-
-class KeyModel {
-  final String model;
-  final String? modelParent;
-  final String? name;
-  final List<KeyModel>? children;
-  final AProperty property;
-  final AProperty? propertyParent;
-  final APrimaryKey? self;
-  final bool selfIs;
-
-  KeyModel._({
-    this.propertyParent,
-    this.modelParent,
-    required this.model,
-    String? nameSelf,
-    this.children,
-    required this.property,
-    this.self,
-    this.selfIs = false,
-  }) : name = nameSelf?.toSnakeCase();
-
-  // factory KeyModel.cloneOfChild(KeyModel item) => KeyModel._(
-  //       property: item.property,
-  //       nameSelf: item.name,
-  //       children: item.children,
-  //       self: item.self,
-  //       selfIs: item.selfIs,
-  //       nameGen: item.nameGen,
-  //       nameSelfGen: item.nameSelfGen,
-  //       this$: false,
-  //     );
-
-  factory KeyModel._ofPrimaryKey(
-    APrimaryKey item, {
-    String self = '',
-    APrimaryKey? selfKey,
-    bool withoutFore = false,
-  }) {
-    final entityParent = item.entityParent;
-    if (entityParent != null) {
-      // TODO(hodoan): check bug
-      return KeyModel._(
-        model: item.className,
-        modelParent: entityParent.className,
-        self: selfKey ?? item,
-        children: [
-          ...entityParent._treePrimaryKeys(
-            self: '${self}_${entityParent.className}'.replaceFirst(
-              RegExp('^_'),
-              '',
-            ),
-            selfKey: !withoutFore ? (selfKey ?? item) : null,
-          ),
-        ],
-        property: item,
-        propertyParent: item,
-      );
-    }
-    // TODO(hodoan): bug
-    return KeyModel._(
-      model: item.className,
-      self: !withoutFore ? selfKey ?? item : null,
-      nameSelf: '${self}_${item.nameToDB}'.replaceFirst(RegExp('^_'), ''),
-      property: item,
-      modelParent: entityParent?.className,
-      propertyParent: item,
-    );
-  }
-
-  // static KeyModel? _ofForeignKeys(
-  //   List<AForeignKey> fores,
-  //   String className, {
-  //   required KeyModelChildren children,
-  // }) {
-  //   final self =
-  //       fores.firstWhereOrNull((e) => e.entityParent?.className == className);
-  //   if (self == null) return null;
-  //   return KeyModel._(
-  //     property: self,
-  //     nameSelf: self.nameDefault,
-  //     children: children.call(null, self.className),
-  //     selfIs: true,
-  //   );
-  // }
-
-  factory KeyModel._foreignKey(
-    AForeignKey item, {
-    required List<KeyModel> children,
-    required String className,
-  }) {
-    if (item.entityParent?.className == className) {
-      return KeyModel._(
-        modelParent: item.entityParent?.className ?? 'me may',
-        model: item.className,
-        property: item,
-        nameSelf: item.nameDefault,
-        children: children,
-        selfIs: true,
-        propertyParent: item,
-      );
-    }
-
-    return KeyModel._(
-      model: item.className,
-      modelParent: item.entityParent?.className ?? 'me may',
-      property: item,
-      nameSelf: item.nameDefault,
-      children: item.entityParent?._expandedPrimaryKeys(
-        null,
-        item.nameDefault,
-      ),
-      propertyParent: item,
-    );
-  }
-
-  factory KeyModel._columnOrIndex(
-    AProperty item, {
-    String? className,
-    bool isParent = false,
-    required AProperty? propertyParent,
-  }) {
-    return KeyModel._(
-      model: item.className,
-      modelParent: isParent ? null : (className ?? item.className),
-      property: item,
-      nameSelf: className == null ? item.nameToDB : item.nameFromDB,
-      selfIs: item.className == className,
-      propertyParent: propertyParent,
-    );
-  }
-
-  @override
-  String toString() => 'name: $name, children: [$children] self: $self,'
-      ' selfIs: $selfIs modelParent: $modelParent property: $property';
-}
-
-typedef KeyModelChildren = List<KeyModel> Function(
-    [List<KeyModel>? child, String self]);
-
-// TODO(hodoan): work with self
-class KeyModelSet {
-  final String nameCast;
-  final String name;
-  final String model;
-  final String? modelParent;
-  final String? self;
-  final AProperty property;
-  final KeyModel keyModel;
-  final String fieldName;
-
-  /// [nameCast] is name without [model] or [self] prefix
-  KeyModelSet._({
-    this.modelParent,
-    required this.keyModel,
-    required this.name,
-    required this.self,
-    required this.property,
-    required this.model,
-    required this.nameCast,
-    required this.fieldName,
-  });
-
-  factory KeyModelSet._ofColumnOrIndex(KeyModel model) {
-    final name = model.property.nameToDB;
-    final fieldName = [
-      /// for column vs index
-      if (model.propertyParent != null)
-
-        /// for primary key self
-        if (model.propertyParent?.nameToDB != name)
-          model.propertyParent!.nameToDB,
-      name,
-    ].join('_').toCamelCase();
-    return KeyModelSet._(
-      fieldName: fieldName,
-      keyModel: model,
-      modelParent: model.modelParent,
-      name: name,
-      self: (model.propertyParent?.nameToDB == name)
-
-          /// for primary key
-          ? null
-
-          /// for column vs index
-          : model.propertyParent?.nameToDB,
-      property: model.property,
-      model: model.model.toSnakeCase(),
-      nameCast: fieldName.toSnakeCase(),
-    );
-  }
-  factory KeyModelSet._ofPrimaryKey(KeyModel model) {
-    final name = model.property.nameToDB;
-    // TODO(hodoan): for primary key
-    final fieldName = model.property.nameFromDB.toCamelCase();
-    return KeyModelSet._(
-      fieldName: fieldName,
-      keyModel: model,
-      modelParent: model.modelParent,
-      name: name,
-      self: null,
-      property: model.property,
-      model: model.model.toSnakeCase(),
-      nameCast: fieldName.toSnakeCase(),
-    );
-  }
-
-  // factory KeyModelSet.of(KeyModelSet item) => KeyModelSet(
-  //       name: item.name,
-  //       self: item.self,
-  //       property: item.property,
-  //       model: item.model,
-  //     );
-
-  @override
-  String toString() {
-    return 'nameCast: $nameCast, name: $name, model: $model, self: $self modelParent: $modelParent';
-  }
-}
-
-extension KeyModelX on List<KeyModel> {
-  List<KeyModel> expanded() {
-    return [
-      for (final item in this)
-        if (item.children == null || item.children!.isEmpty)
-          item
-        else
-          ...item.children!.expanded(),
-    ];
-  }
-
-  List<KeyModel> expandedDefaultKeyName(bool selfIs) {
-    return [
-      for (final item in this)
-        if (item.children != null &&
-            item.children!.isNotEmpty &&
-            selfIs &&
-            item.children!.first.name != null)
-          item
-        else if (item.children == null || item.children!.isEmpty)
-          item
-        else
-          ...item.children!.expanded(),
-    ];
   }
 }

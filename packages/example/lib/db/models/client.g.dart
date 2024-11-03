@@ -17,7 +17,7 @@ extension ClientQuery on Client {
 			first_name TEXT,
 			last_name TEXT,
 			blocked BIT NOT NULL,
-			PRIMARY KEY [id, product_id],
+			PRIMARY KEY (id,product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 

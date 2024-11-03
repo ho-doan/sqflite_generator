@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:example/authentication_model.dart';
+import 'package:example/db/models/bill.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart' hide Column;
@@ -57,30 +58,31 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Database database;
 
-  // List<BillM> bills = [];
+  List<Bill> bills = [];
 
-  // @override
-  // void initState() {
-  //   configSql().then((db) {
-  //     BillMQuery.getAll(
-  //       db,
-  //       where: {
-  //         BillMQuery.key.equal(1),
-  //       },
-  //       whereOr: [
-  //         {
-  //           BillMQuery.key.equal(0),
-  //           BillMQuery.name.equal('1'),
-  //           BillMQuery.key.lessThan(1),
-  //         },
-  //       ],
-  //     ).then(
-  //       (v) => setState(() => bills = v),
-  //     );
-  //     return database = db;
-  //   });
-  //   super.initState();
-  // }
+  @override
+  void initState() {
+    final s = BillMQuery.key.equal(0);
+    configSql().then((db) {
+      BillQuery.getAll(
+        db,
+        where: {
+          BillMQuery.key.equal(1),
+        },
+        whereOr: [
+          {
+            BillQuery.productId.equal(1),
+            BillMQuery.name.equal('1'),
+            BillMQuery.key.lessThan(1),
+          },
+        ],
+      ).then(
+        (v) => setState(() => bills = v),
+      );
+      return database = db;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

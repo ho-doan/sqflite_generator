@@ -29,7 +29,7 @@ extension BillQuery on Bill {
 			parent_client_client_id INTEGER,
 			parent_client_parent_client_product_id INTEGER,
 			time INTEGER,
-			PRIMARY KEY [product_id, client_id, client_product_id],
+			PRIMARY KEY (product_id,client_id,client_product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
 			FOREIGN KEY (client_id,client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
 			FOREIGN KEY (parent_parent_product_id,parent_parent_client_id,parent_parent_bill_product_id) REFERENCES Bill (bill_product_id,bill_client_id,bill_client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
@@ -108,7 +108,7 @@ extension BillQuery on Bill {
           .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
-  static Future<List<Bill>> getAll(
+  static Future<List<Bill>> getAll<T>(
     Database database, {
     Set<$BillSetArgs>? select,
     Set<WhereResult>? where,
