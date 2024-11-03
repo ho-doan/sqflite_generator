@@ -22,23 +22,103 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
 
     final entity = AEntity.of(element, [])!;
 
-    final classSetBuilder = Class((c) => c
-      ..name = entity.setClassName
-      ..types.add(refer('T'))
-      ..extend = refer('WhereModel<T>')
-      ..fields.addAll(entity.setFields)
-      ..constructors.add(
-        Constructor((c) => c
-          ..constant = true
-          ..initializers.add(Code('super(field: \'\$model.\$name\')'))
-          // ..body = Code('super(field: \'\$model.\$name\')')
-          ..optionalParameters.addAll(entity.setOptionalArgs)),
-      ));
+    final classSetBuilder = Class(
+      (c) => c
+        ..name = entity.setClassName
+        ..types.add(refer('T'))
+        ..extend = refer('WhereModel<T>')
+        ..fields.addAll(entity.setFields)
+        ..constructors.add(
+          Constructor((c) => c
+            ..constant = true
+            ..initializers.add(Code('super(field: \'\$model.\$name\')'))
+            // ..body = Code('super(field: \'\$model.\$name\')')
+            ..optionalParameters.addAll(entity.setOptionalArgs)),
+        ),
+    );
+
+    final classBuilderList = <Class>[];
+    final classBuilderListExtends = <(String, Class)>[];
+
+    for (final e in entity.primaryKeys) {
+      // lever 1
+      if (e.entityParent != null) {
+        classBuilderList.addAll(
+          [
+            Class(
+              (c) => c
+                ..name = '_\$\$${e.entityParent!.setClassName}'
+                ..types.add(refer('T'))
+                ..extend = refer('${entity.setClassName}<T>')
+                ..constructors.add(
+                  Constructor(
+                    (c) => c
+                      ..constant = true
+                      ..optionalParameters.addAll(entity.setOptionalArgsChild),
+                  ),
+                ),
+            ),
+          ],
+        );
+        classBuilderListExtends.add(
+          (
+            e.nameDefault,
+            Class(
+              (c) => c
+                ..name = '_\$${e.entityParent!.setClassName}'
+                ..methods.addAll(
+                  [
+                    for (final item in e.entityParent!.allss())
+                      Method(
+                        (f) => f
+                          ..name = (item.$1.sublist(1)).join('_').toCamelCase()
+                          ..returns = refer(
+                              '_\$\$${e.entityParent!.setClassName}<${item.$2.typeSelect}>')
+                          ..docs.addAll([
+                            if (item.$2 is AColumn &&
+                                item.$2.alters
+                                    .any((e) => e.type == AlterTypeGen.drop))
+                              '@Deprecated(\'no such column\')'
+                          ])
+                          ..docs.addAll([
+                            '// $item',
+                          ])
+                          ..lambda = true
+                          ..type = MethodType.getter
+                          ..body = Code(
+                              '''const _\$\$${e.entityParent!.setClassName}(
+                            name: '${item.$2.nameToDB}',
+                            nameCast: '${[
+                            ...item.$1.sublist(0, item.$1.length - 1),
+                            item.$2.nameToDB
+                          ].join('_').toSnakeCase()}',
+                            model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
+                            )'''),
+                      ),
+                  ],
+                )
+                ..constructors.add(
+                  Constructor((c) => c..constant = true),
+                ),
+            )
+          ),
+        );
+      }
+    }
 
     final extensionBuilder = ExtensionBuilder()
       ..name = entity.extensionName
       ..on = refer(entity.classType)
       ..fields.addAll([
+        for (final e in classBuilderListExtends)
+          Field(
+            (f) => f
+              ..name = e.$1
+              ..type = refer(e.$2.name)
+              ..assignment = Code('${e.$2.name}()')
+              ..modifier = FieldModifier.constant
+              ..static = true,
+          ),
         Field(
           (f) => f
             ..name = 'createTable'
@@ -214,8 +294,11 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
 
     final emitter = DartEmitter(useNullSafetySyntax: true);
     return DartFormatter().format([
+      '// ignore_for_file: library_private_types_in_public_api',
       extensionBuilder.build().accept(emitter),
       classSetBuilder.accept(emitter),
+      ...classBuilderList.map((e) => e.accept(emitter)),
+      ...classBuilderListExtends.map((e) => e.$2.accept(emitter)),
     ].join('\n\n'));
   }
 }

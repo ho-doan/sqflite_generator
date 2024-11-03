@@ -6,7 +6,11 @@ part of 'client.dart';
 // SqfliteModelGenerator
 // **************************************************************************
 
+// ignore_for_file: library_private_types_in_public_api
+
 extension ClientQuery on Client {
+  static const _$$ProductSetArgs product = _$$ProductSetArgs();
+
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Client(
 			id INTEGER,
 			product_id INTEGER,
@@ -20,9 +24,6 @@ extension ClientQuery on Client {
   static const String debug =
       '''([Client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
 ([Client, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product]),
-([Client, product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product]),
-([Client, product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product]),
-([Client, product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [product]),
 ([Client, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: []),
 ([Client, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: []),
 ([Client, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
@@ -40,27 +41,6 @@ extension ClientQuery on Client {
   static const $ClientSetArgs<int> productId = $ClientSetArgs(
     name: 'id',
     nameCast: 'client_product_id',
-    model: 'client_product',
-  );
-
-// ([Client, product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
-  static const $ClientSetArgs<String> productLastName = $ClientSetArgs(
-    name: 'last_name',
-    nameCast: 'client_product_last_name',
-    model: 'client_product',
-  );
-
-// ([Client, product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
-  static const $ClientSetArgs<String> productFirstName = $ClientSetArgs(
-    name: 'first_name',
-    nameCast: 'client_product_first_name',
-    model: 'client_product',
-  );
-
-// ([Client, product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [product])
-  static const $ClientSetArgs<bool> productBlocked = $ClientSetArgs(
-    name: 'blocked',
-    nameCast: 'client_product_blocked',
     model: 'client_product',
   );
 
@@ -88,9 +68,6 @@ extension ClientQuery on Client {
   static Set<$ClientSetArgs> $default = {
     ClientQuery.id,
     ClientQuery.productId,
-    ClientQuery.productLastName,
-    ClientQuery.productFirstName,
-    ClientQuery.productBlocked,
     ClientQuery.firstName,
     ClientQuery.lastName,
     ClientQuery.blocked,
@@ -267,4 +244,39 @@ class $ClientSetArgs<T> extends WhereModel<T> {
   final String model;
 
   final String nameCast;
+}
+
+class _$$$ProductSetArgs<T> extends $ClientSetArgs<T> {
+  const _$$$ProductSetArgs({
+    super.self = '',
+    required super.name,
+    super.children = const [],
+    required super.nameCast,
+    required super.model,
+  });
+}
+
+class _$$ProductSetArgs {
+  const _$$ProductSetArgs();
+
+// ([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
+  _$$$ProductSetArgs<String> get lastName => const _$$$ProductSetArgs(
+        name: 'last_name',
+        nameCast: 'product_last_name',
+        model: 'product',
+      );
+
+// ([Product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
+  _$$$ProductSetArgs<String> get firstName => const _$$$ProductSetArgs(
+        name: 'first_name',
+        nameCast: 'product_first_name',
+        model: 'product',
+      );
+
+// ([Product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [product])
+  _$$$ProductSetArgs<bool> get blocked => const _$$$ProductSetArgs(
+        name: 'blocked',
+        nameCast: 'product_blocked',
+        model: 'product',
+      );
 }

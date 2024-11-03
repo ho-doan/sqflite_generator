@@ -629,28 +629,29 @@ extension AEntityBase on AEntity {
                     f,
                   );
                 }()
-            // else if (f.entityParent == null && f.parentClassName.length == 2
-            //     // &&
-            //     // pp.length == 1
-            //     )
-            //   () {
-            //     return (
-            //       [
-            //         ...pp,
-            //         ...f.parentClassName,
-            //         f.nameToDB,
-            //       ],
-            //       f,
-            //     );
-            //   }()
+              else if (f.entityParent == null && f.parentClassName.length == 2
+                  // &&
+                  // pp.length == 1
+                  )
+                () {
+                  return (
+                    [
+                      ...pp,
+                      ...f.parentClassName,
+                      f.nameToDB,
+                    ],
+                    f,
+                  );
+                }()
           ],
         ] else if (e is AColumn) ...[
           ([...pp, e.nameDefault], e),
         ] else if (e is AIndex) ...[
           ([...pp, e.nameDefault], e),
-        ] else if (e is AForeignKey)
-          ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
-              <(List<String>, AProperty)>[]),
+        ]
+      // else if (e is AForeignKey)
+      //   ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
+      //       <(List<String>, AProperty)>[]),
     ];
     return alls;
   }
@@ -1216,6 +1217,43 @@ extension AParam on AEntity {
             ..named = true
             ..required = true
             ..toThis = true,
+        ),
+      ];
+  List<Parameter> get setOptionalArgsChild => [
+        Parameter(
+          (f) => f
+            ..name = 'self'
+            ..defaultTo = Code('\'\'')
+            ..named = true
+            ..toSuper = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'name'
+            ..required = true
+            ..named = true
+            ..toSuper = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'children'
+            ..named = true
+            ..defaultTo = Code('const []')
+            ..toSuper = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'nameCast'
+            ..named = true
+            ..required = true
+            ..toSuper = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'model'
+            ..named = true
+            ..required = true
+            ..toSuper = true,
         ),
       ];
   List<Parameter> get fieldOptionalQuery => [

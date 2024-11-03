@@ -6,6 +6,8 @@ part of 'product.dart';
 // SqfliteModelGenerator
 // **************************************************************************
 
+// ignore_for_file: library_private_types_in_public_api
+
 extension ProductQuery on Product {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Product(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
