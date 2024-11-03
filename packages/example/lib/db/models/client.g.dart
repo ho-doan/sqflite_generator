@@ -77,6 +77,7 @@ extension ClientQuery on Client {
     ClientQuery.product$$.blocked,
   };
 
+// TODO(hodoan): check
   static String $createSelect(
     Set<$ClientSetArgs>? select, [
     String childName = '',
@@ -84,6 +85,7 @@ extension ClientQuery on Client {
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
           .join(',');
+// TODO(hodoan): check
   static Future<List<Client>> getAll(
     Database database, {
     Set<$ClientSetArgs>? select,
@@ -147,6 +149,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
+// TODO(hodoan): check
   Future<int> insert(Database database) async {
     final $productIdProduct = await product.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
@@ -166,12 +169,14 @@ blocked)
     return $id;
   }
 
+// TODO(hodoan): check
   Future<int> update(Database database) async {
     await product.update(database);
     return await database.update('Client', toDB(),
         where: "id = ? AND product = ?", whereArgs: [this.id, product.id]);
   }
 
+// TODO(hodoan): check
   static Future<Client?> getById(
     Database database,
     int? id,
@@ -188,12 +193,14 @@ WHERE client.id = ? AND client.product = ?
     return res.isNotEmpty ? Client.fromDB(res.first, res) : null;
   }
 
+// TODO(hodoan): check
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE FROM Client client WHERE client.id = ? AND client.product = ?''',
         [this.id, product.id]);
   }
 
+// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? id,
@@ -208,18 +215,14 @@ WHERE client.id = ? AND client.product = ?
     await database.rawDelete('''DELETE * FROM Client''');
   }
 
+// TODO(hodoan): check
   static Client $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Client(
-        id: json['${childName}client_id'] as int?,
-        id: json['${childName}product_id'] as int?,
-        firstName: json['${childName}client_first_name'] as String?,
-        lastName: json['${childName}client_last_name'] as String?,
-        blocked: (json['client_blocked'] as int?) == 1,
-      );
+      Client();
+// TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'product': this.product,

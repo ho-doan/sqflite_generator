@@ -59,6 +59,7 @@ extension ProductQuery on Product {
     ProductQuery.blocked,
   };
 
+// TODO(hodoan): check
   static String $createSelect(
     Set<$ProductSetArgs>? select, [
     String childName = '',
@@ -66,6 +67,7 @@ extension ProductQuery on Product {
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
           .join(',');
+// TODO(hodoan): check
   static Future<List<Product>> getAll(
     Database database, {
     Set<$ProductSetArgs>? select,
@@ -128,6 +130,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
+// TODO(hodoan): check
   Future<int> insert(Database database) async {
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Product (id,
 last_name,
@@ -142,11 +145,13 @@ blocked)
     return $id;
   }
 
+// TODO(hodoan): check
   Future<int> update(Database database) async {
     return await database
         .update('Product', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
+// TODO(hodoan): check
   static Future<Product?> getById(
     Database database,
     int? id, {
@@ -161,11 +166,13 @@ WHERE product.id = ?
     return res.isNotEmpty ? Product.fromDB(res.first, res) : null;
   }
 
+// TODO(hodoan): check
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE FROM Product product WHERE product.id = ?''', [this.id]);
   }
 
+// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? id,
@@ -178,17 +185,14 @@ WHERE product.id = ?
     await database.rawDelete('''DELETE * FROM Product''');
   }
 
+// TODO(hodoan): check
   static Product $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Product(
-        id: json['${childName}product_id'] as int?,
-        lastName: json['${childName}product_last_name'] as String?,
-        firstName: json['${childName}product_first_name'] as String?,
-        blocked: (json['product_blocked'] as int?) == 1,
-      );
+      Product();
+// TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'last_name': this.lastName,

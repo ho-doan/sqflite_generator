@@ -51,6 +51,7 @@ extension CatQuery on Cat {
     CatQuery.child$$.birth,
   };
 
+// TODO(hodoan): check
   static String $createSelect(
     Set<$CatSetArgs>? select, [
     String childName = '',
@@ -58,6 +59,7 @@ extension CatQuery on Cat {
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
           .join(',');
+// TODO(hodoan): check
   static Future<List<Cat>> getAll(
     Database database, {
     Set<$CatSetArgs>? select,
@@ -122,6 +124,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
+// TODO(hodoan): check
   Future<int> insert(Database database) async {
     final $catIdParent = await parent?.insert(database);
     final $catIdChild = await child?.insert(database);
@@ -138,6 +141,7 @@ birth)
     return $id;
   }
 
+// TODO(hodoan): check
   Future<int> update(Database database) async {
     await parent?.update(database);
     await child?.update(database);
@@ -145,6 +149,7 @@ birth)
         .update('Cat', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
+// TODO(hodoan): check
   static Future<Cat?> getById(
     Database database,
     int? id, {
@@ -161,11 +166,13 @@ WHERE cat.id = ?
     return res.isNotEmpty ? Cat.fromDB(res.first, res) : null;
   }
 
+// TODO(hodoan): check
   Future<void> delete(Database database) async {
     await database
         .rawQuery('''DELETE FROM Cat cat WHERE cat.id = ?''', [this.id]);
   }
 
+// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? id,
@@ -177,19 +184,14 @@ WHERE cat.id = ?
     await database.rawDelete('''DELETE * FROM Cat''');
   }
 
+// TODO(hodoan): check
   static Cat $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Cat(
-        id: json['${childName}cat_id'] as int?,
-        id: json['${childName}cat_id'] as int?,
-        id: json['${childName}cat_id'] as int?,
-        birth: DateTime.fromMillisecondsSinceEpoch(
-          json['${childName}cat_birth'] as int? ?? -1,
-        ),
-      );
+      Cat();
+// TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'cat': parent?.id,

@@ -134,6 +134,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..name = '\$createSelect'
             ..lambda = true
             ..static = true
+            ..docs.add('// TODO(hodoan): check')
             ..body = Code('''((select??{}).isEmpty ? \$default : select!)
             .map((e)=>'\$childName\${e.model}.\${e.name} as \${e.nameCast}')
             .join(',')''')
@@ -146,6 +147,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) => m
           ..name = 'getAll'
           ..static = true
+          ..docs.add('// TODO(hodoan): check')
           ..modifier = MethodModifier.async
           ..body = Code(entity.rawGetAll)
           ..requiredParameters.add(entity.databaseArgs)
@@ -182,12 +184,14 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) => m
           ..name = 'insert'
           ..modifier = MethodModifier.async
+          ..docs.add('// TODO(hodoan): check')
           ..body = Code(entity.rawInsert())
           ..requiredParameters.addAll([entity.databaseArgs])
           ..returns = refer('Future<int>')),
         Method((m) => m
           ..name = 'update'
           ..modifier = MethodModifier.async
+          ..docs.add('// TODO(hodoan): check')
           ..body = Code(entity.rawUpdate().join('\n'))
           ..requiredParameters.addAll([entity.databaseArgs])
           ..returns = refer('Future<int>')),
@@ -195,6 +199,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..name = 'getById'
           ..modifier = MethodModifier.async
           ..static = true
+          ..docs.add('// TODO(hodoan): check')
           ..body = Code(entity.rawFindOne)
           ..requiredParameters
               .addAll([entity.databaseArgs, ...entity.keysRequiredArgs])
@@ -203,6 +208,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) => m
           ..name = 'delete'
           ..modifier = MethodModifier.async
+          ..docs.add('// TODO(hodoan): check')
           ..body = Code(entity.delete(false))
           ..requiredParameters.addAll([
             entity.databaseArgs,
@@ -212,6 +218,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..name = 'deleteById'
           ..modifier = MethodModifier.async
           ..static = true
+          ..docs.add('// TODO(hodoan): check')
           ..body = Code(entity.delete(true))
           ..requiredParameters
               .addAll([entity.databaseArgs, ...entity.keysRequiredArgs])
@@ -229,6 +236,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..name = '\$fromDB'
           ..lambda = true
           ..static = true
+          ..docs.add('// TODO(hodoan): check')
           ..body = Code('${entity.classType}(${entity.rawFromDB})')
           ..requiredParameters.addAll([entity.fromArgs, entity.fromArgsList])
           ..optionalParameters.add(entity.selectChildArgs)
@@ -236,6 +244,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) => m
           ..name = '\$toDB'
           ..lambda = true
+          ..docs.add('// TODO(hodoan): check')
           ..body = Code('{${entity.rawToDB}}')
           ..returns = refer('Map<String,dynamic>')),
       ]);

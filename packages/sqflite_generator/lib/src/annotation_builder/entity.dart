@@ -82,40 +82,41 @@ class AEntity {
     return map;
   }
 
+// TODO(hodoan): check
   String get rawFromDB {
     return [
-      aPss(false).map(
-        (e) {
-          if (e.property is AForeignKey) {
-            if (!e.property.dartType.isDartCoreList) {
-              return '${e.property.nameDefault}:${(e.property as AForeignKey).entityParent?.className}.fromDB(json,[])';
-            }
-            return '${e.property.nameDefault}: lst.map((e)=>${(e.property as AForeignKey).entityParent?.className}.fromDB(e,[])).toList()';
-          }
-          if (e.property is APrimaryKey &&
-              (e.property as APrimaryKey).entityParent != null) {
-            return '${e.property.nameDefault}: ${e.property.dartType}'
-                '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
-          }
-          if (e.property.rawFromDB) {
-            return '${e.property.nameDefault}: ${e.property.dartType}'
-                '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
-          }
-          if (e.property.dartType.toString().contains('DateTime')) {
-            return '${e.property.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.property.nameFromDB}\'] as int? ?? -1,)';
-          }
-          if (e.property.dartType.isDartCoreBool) {
-            return '${e.property.nameDefault}: (json[\'${e.property.nameFromDB}\'] as int?) == 1';
-          }
-          if (e.property is AColumn &&
-              (e.property as AColumn).converter != null) {
-            return '${e.property.nameDefault}: const ${(e.property as AColumn).converter}().fromJson(json[\'\${childName}${e.property.nameFromDB}\'] as String?)';
-          }
+      // aPs.map(
+      //   (e) {
+      //     if (e.property is AForeignKey) {
+      //       if (!e.property.dartType.isDartCoreList) {
+      //         return '${e.property.nameDefault}:${(e.property as AForeignKey).entityParent?.className}.fromDB(json,[])';
+      //       }
+      //       return '${e.property.nameDefault}: lst.map((e)=>${(e.property as AForeignKey).entityParent?.className}.fromDB(e,[])).toList()';
+      //     }
+      //     if (e.property is APrimaryKey &&
+      //         (e.property as APrimaryKey).entityParent != null) {
+      //       return '${e.property.nameDefault}: ${e.property.dartType}'
+      //           '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
+      //     }
+      //     if (e.property.rawFromDB) {
+      //       return '${e.property.nameDefault}: ${e.property.dartType}'
+      //           '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
+      //     }
+      //     if (e.property.dartType.toString().contains('DateTime')) {
+      //       return '${e.property.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.property.nameFromDB}\'] as int? ?? -1,)';
+      //     }
+      //     if (e.property.dartType.isDartCoreBool) {
+      //       return '${e.property.nameDefault}: (json[\'${e.property.nameFromDB}\'] as int?) == 1';
+      //     }
+      //     if (e.property is AColumn &&
+      //         (e.property as AColumn).converter != null) {
+      //       return '${e.property.nameDefault}: const ${(e.property as AColumn).converter}().fromJson(json[\'\${childName}${e.property.nameFromDB}\'] as String?)';
+      //     }
 
-          return '${e.property.nameDefault}: json[\'\${childName}${e.property.nameFromDB}\'] as ${e.property.dartType}';
-        },
-      ).join(','),
-      ','
+      //     return '${e.property.nameDefault}: json[\'\${childName}${e.property.nameFromDB}\'] as ${e.property.dartType}';
+      //   },
+      // ).join(','),
+      // ','
     ].join();
   }
 
@@ -808,67 +809,6 @@ extension AEntityBase on AEntity {
     ];
   }
 
-  List<APkEx> aPss([bool primaryKeyOnly = true]) {
-    return [
-      for (final e in aPs)
-        if (e is AColumn || e is AIndex)
-          APkEx(
-            parentClassName: parentClassName,
-            pk: null,
-            property: e,
-            nameSelf: e.nameToDB,
-            nameCast: e.nameFromDB,
-            name: e.nameToDB,
-            model: className,
-            children: [],
-          )
-        else if (e is APrimaryKey)
-          ...() {
-            if (e.entityParent == null) {
-              return [
-                APkEx(
-                  parentClassName: parentClassName,
-                  pk: e,
-                  property: e,
-                  nameCast: e.nameFromDB,
-                  name: e.nameToDB,
-                  model: className,
-                  children: [],
-                ),
-              ];
-            }
-            final lst = e.entityParent!.primaryKeys
-                .map((f) => f.expanded(null, e.nameDefault));
-            final lst2 = lst.expand((e) => e.expanded()).toList();
-            return lst2;
-          }()
-        else
-          ...() {
-            final f = e as AForeignKey;
-            final f2 = fKWithoutPK(f);
-            if (f2 != null) {
-              // if (f2.className == className) {
-              final lst = e.entityParent?.primaryKeys
-                      .map((f) => f.expanded(f2, e.nameDefault)) ??
-                  [];
-              final lst2 = lst.expand((e) => e.expanded()).toList();
-              if (!primaryKeyOnly) {
-                return lst2;
-              }
-              return [
-                ...lst2,
-                ...(e.entityParent?.aPssNoKey(e.nameDefault) ?? <APkEx>[])
-              ];
-            }
-            if (!primaryKeyOnly) {
-              return <APkEx>[];
-            }
-            // Fore && PrimaryKey
-            return e.entityParent?.aPssNoKey(e.nameDefault) ?? <APkEx>[];
-          }()
-    ];
-  }
-
   // TODO(hodoan): doing
   String rawDebug([AColumn? ps, String? newName]) {
     // final all = aPss(false);
@@ -917,39 +857,7 @@ class APkEx {
   }
 }
 
-extension on APkEx {
-  List<APkEx> expanded() => [
-        if (pk != null) this,
-        for (final e in children) ...e.expanded(),
-      ];
-}
-
 extension on APrimaryKey {
-  APkEx expanded(AForeignKey? foreignKey, [String s = '']) {
-    String name2;
-    if (entityParent != null) {
-      name2 = '${s}_$nameDefault';
-    } else {
-      name2 = '${s}_$nameToDB';
-    }
-    return APkEx(
-      fk: foreignKey,
-      parentClassName: parentClassName,
-      pk: entityParent == null ? this : null,
-      property: this,
-      nameCast: nameFromDB,
-      name2: name2,
-      name: nameToDB,
-      model: className,
-      children: entityParent?.primaryKeys
-              .map(
-                (e) => e.expanded(foreignKey, name2),
-              )
-              .toList() ??
-          [],
-    );
-  }
-
   List<APrimaryKey> expanded2() {
     final lst = <APrimaryKey>[];
     if (entityParent == null) {
@@ -1376,6 +1284,8 @@ extension AFields on AEntity {
             ..type = refer('String'),
         ),
       ];
+  // TODO(hodoan): check
+  @Deprecated('using [keys]')
   List<AProperty> get keys {
     return [
       for (final item in primaryKeys)

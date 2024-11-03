@@ -99,6 +99,7 @@ extension BillQuery on Bill {
     BillQuery.parentClient$$.blocked,
   };
 
+// TODO(hodoan): check
   static String $createSelect(
     Set<$BillSetArgs>? select, [
     String childName = '',
@@ -106,6 +107,7 @@ extension BillQuery on Bill {
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
           .join(',');
+// TODO(hodoan): check
   static Future<List<Bill>> getAll(
     Database database, {
     Set<$BillSetArgs>? select,
@@ -143,7 +145,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[BillQuery.productId.nameCast]))
+        .groupBy(((m) => m[BillQuery.product.nameCast]))
         .values
         .map((e) => Bill.fromDB(e.first, e))
         .toList();
@@ -172,6 +174,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
+// TODO(hodoan): check
   Future<int> insert(Database database) async {
     final $productIdProduct = await product?.insert(database);
     final $clientIdClient = await client?.insert(database);
@@ -197,6 +200,7 @@ time)
     return $id;
   }
 
+// TODO(hodoan): check
   Future<int> update(Database database) async {
     await product?.update(database);
     await client?.update(database);
@@ -207,6 +211,7 @@ time)
         whereArgs: [product?.id, client?.id, client?.product]);
   }
 
+// TODO(hodoan): check
   static Future<Bill?> getById(
     Database database,
     int? productId,
@@ -224,16 +229,18 @@ ${$createSelect(select)}
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
  LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
 WHERE bill.product = ? AND bill.client = ?
-''', [productId, clientId, productId]) as List<Map>);
+''', [productId, clientId, clientProduct]) as List<Map>);
     return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
   }
 
+// TODO(hodoan): check
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE FROM Bill bill WHERE bill.product = ? AND bill.client = ?''',
         [product?.id, client?.id, client?.product]);
   }
 
+// TODO(hodoan): check
   static Future<void> deleteById(
     Database database,
     int? productId,
@@ -250,24 +257,14 @@ WHERE bill.product = ? AND bill.client = ?
     await database.rawDelete('''DELETE * FROM Bill''');
   }
 
+// TODO(hodoan): check
   static Bill $fromDB(
     Map json,
     List<Map> lst, [
     String childName = '',
   ]) =>
-      Bill(
-        id: json['${childName}product_id'] as int?,
-        id: json['${childName}client_id'] as int?,
-        id: json['${childName}product_id'] as int?,
-        id: json['${childName}product_id'] as int?,
-        id: json['${childName}client_id'] as int?,
-        id: json['${childName}product_id'] as int?,
-        id: json['${childName}client_id'] as int?,
-        id: json['${childName}product_id'] as int?,
-        time: DateTime.fromMillisecondsSinceEpoch(
-          json['${childName}bill_time'] as int? ?? -1,
-        ),
-      );
+      Bill();
+// TODO(hodoan): check
   Map<String, dynamic> $toDB() => {
         'product': this.product,
         'client': this.client,
