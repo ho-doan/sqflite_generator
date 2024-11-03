@@ -197,6 +197,7 @@ extension Aps on AProperty {
   }
 
   String get fieldNameFull => _fieldNameFull(null).toSnakeCase();
+
   String fieldNameFull2(String fieldName) =>
       _fieldNameFull(fieldName).toSnakeCase();
 

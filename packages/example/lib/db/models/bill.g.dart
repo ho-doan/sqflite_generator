@@ -278,7 +278,22 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_client_product_
         'product_id': this.product?.id,
         'client_id': this.client?.id,
         'client_client_product_id': this.client?.product?.id,
-        'time': this.time?.millisecondsSinceEpoch
+        'time': this.time?.millisecondsSinceEpoch,
+
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+        'parent_bill_product_id': this.parent?.product?.id,
+
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+        'parent_bill_client_id': this.parent?.client?.id,
+
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill, Client]
+        'parent_bill_client_product_id': this.parent?.client?.product?.id,
+
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient]
+        'client_id': this.parentClient?.id,
+
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient, Client]
+        'parent_client_client_product_id': this.parentClient?.product?.id
       };
 }
 

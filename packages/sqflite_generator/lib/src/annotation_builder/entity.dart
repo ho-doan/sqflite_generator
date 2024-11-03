@@ -152,30 +152,11 @@ class AEntity {
           '\'${item.nameToDB}\': const ${(item).converter}().toJson(this.${item.nameDefault})'
         else
           '\'${item.nameToDB}\':this.${item.nameDefault}',
-      // aPs
-      //     .map(
-      //       (e) {
-      //         if (e is AForeignKey) {
-      //           if (!e.dartType.isDartCoreList) {
-      //             return '\'${e.nameToDB}\': ${e.defaultSuffix}.${e.entityParent?.primaryKeys.firstOrNull?.nameDefault}';
-      //           }
-      //           return '';
-      //         }
-      //         if (e.dartType.toString().contains('DateTime')) {
-      //           return '\'${e.nameToDB}\': this.${e.defaultSuffix}.millisecondsSinceEpoch';
-      //         }
-      //         if (e.dartType.isDartCoreBool) {
-      //           return '\'${e.nameDefault}\': (this.${e.nameDefault} ?? false) ? 1 : 0';
-      //         }
-      //         if (e is AColumn && e.converter != null) {
-      //           return '\'${e.nameToDB}\': const ${e.converter}().toJson(this.${e.nameDefault})';
-      //         }
-      //         return '\'${e.nameToDB}\':this.${e.nameDefault}';
-      //       },
-      //     )
-      //     .where((e) => e.isNotEmpty)
-      //     .join(','),
-      // ','
+      for (final k in foreignKeys.where((e) =>
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        for (final key
+            in k.entityParent!.primaryKeys.expand((e) => e.expanded2()))
+          '\n// $key\n \'${key.fieldNameFull}\': this.${key.fieldNameFull4(null).join('?.')}',
     ].join(',\n');
   }
 
