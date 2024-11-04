@@ -386,7 +386,6 @@ name)
        VALUES(?, ?, ?)''', [
       key,
       this.name,
-// nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, key], step: 2), parentClassName: [parent]
       parent?.key,
     ]);
     return $id;

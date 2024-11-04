@@ -194,15 +194,10 @@ time)
       client?.id,
       client?.product?.id,
       this.time?.millisecondsSinceEpoch,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Product], fieldNames: [parent, product, id], step: 3), parentClassName: [parent, Bill]
       parent?.product?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client], fieldNames: [parent, client, id], step: 3), parentClassName: [parent, Bill]
       parent?.client?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client, Product], fieldNames: [parent, client, product, id], step: 4), parentClassName: [parent, Bill, Client]
       parent?.client?.product?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [parentClient, id], step: 2), parentClassName: [parentClient]
       parentClient?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [parentClient, product, id], step: 3), parentClassName: [parentClient, Client]
       parentClient?.product?.id,
     ]);
     return $id;

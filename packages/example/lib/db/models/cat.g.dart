@@ -134,9 +134,7 @@ birth)
        VALUES(?, ?, ?, ?)''', [
       id,
       this.birth?.millisecondsSinceEpoch,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [parent, id], step: 2), parentClassName: [parent]
       parent?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [child, id], step: 2), parentClassName: [child]
       child?.id,
     ]);
     return $id;

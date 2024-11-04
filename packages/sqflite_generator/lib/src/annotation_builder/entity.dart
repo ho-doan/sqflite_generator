@@ -701,30 +701,10 @@ extension AInsert on AEntity {
       for (final k in foreignKeys.where((e) =>
           !e.dartType.isDartCoreList &&
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
-        ...k.entityParent!.primaryKeys.expand((e) => e.expanded2()).map(
-              (m) => ['// $m', m.fieldNameFull4(null).join('?.')].join('\n'),
-            ),
+        ...k.entityParent!.primaryKeys
+            .expand((e) => e.expanded2())
+            .map((m) => m.args.fieldNames.join('?.')),
     ];
-
-    // final fieldsValue = allss().map((e) {
-    //   if (e.$2 is APrimaryKey) {
-    //     return '\$${'${e.$1.join('_').toCamelCase()}Id_${e.$2.nameDefault}'.toCamelCase()}';
-    //   }
-    //   if (e.$2 is AForeignKey) {
-    //     if (e.$2.dartType.isDartCoreList) {
-    //       return null;
-    //     }
-    //     return '\$${'${e.$1.join('_').toCamelCase()}Id_${e.$2.nameDefault}'.toCamelCase()}';
-    //   }
-    //   if (ps != null) return '$ps.${e.$2.nameDefault}';
-    //   if (e.$2 is AColumn && (e.$2 as AColumn).converter != null) {
-    //     if ((e.$2 as AColumn).dartType.toString().contains('DateTime')) {
-    //       return 'this.${e.$2.defaultSuffix}.millisecondsSinceEpoch';
-    //     }
-    //     return 'const ${(e.$2 as AColumn).converter}().toJson(this.${e.$2.nameDefault})';
-    //   }
-    //   return 'this.${e.$2.nameDefault}';
-    // }).where((e) => e != null);
 
     return [
       ...foreignKeys.where((e) => !e.dartType.isDartCoreList).map(
