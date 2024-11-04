@@ -540,23 +540,19 @@ extension AEntityBase on AEntity {
         'PRIMARY KEY (${primaryKeys.expand(
               (e) => e.expanded2(),
             ).map(
-              (e) => e.fieldNameFull,
+              (e) => e.args.fieldNames.join('_').toSnakeCase(),
             ).toList().join(',')})',
       for (final k in foreignKeys)
         k.rawCreateForeign(
           k.entityParent!.primaryKeys
               .expand((e) => e.expanded2())
               .map(
-                (m) => primaryKeys
-                        .map((e) => e.nameDefault)
-                        .contains(k.nameDefault)
-                    ? m.fieldNameFull
-                    : m.fieldNameFull2(k.nameDefault),
+                (m) => m.args.fieldNames.join('_').toSnakeCase(),
               )
               .join(','),
           k.entityParent!.primaryKeys
               .expand((e) => e.expanded2())
-              .map((e) => e.fieldNameFullForForeign)
+              .map((e) => e.args.fieldNames.sublist(1).join('_').toSnakeCase())
               .join(','),
         ),
     ].where((e) => e != null);

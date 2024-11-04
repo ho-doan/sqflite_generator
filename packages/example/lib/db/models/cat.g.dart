@@ -18,8 +18,8 @@ extension CatQuery on Cat {
 			parent_id INTEGER,
 			child_id INTEGER,
 			birth INTEGER,
-			FOREIGN KEY (parent_cat_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (child_cat_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (parent_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (child_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =

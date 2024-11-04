@@ -31,9 +31,9 @@ extension BillQuery on Bill {
 			time INTEGER,
 			PRIMARY KEY (product_id,client_id,client_product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (client_id,client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (parent_parent_product_id,parent_parent_client_id,parent_parent_bill_product_id) REFERENCES Bill (bill_product_id,bill_client_id,bill_client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (parent_client_client_id,parent_client_parent_client_product_id) REFERENCES Client (id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (client_id,client_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (parent_product_id,parent_client_id,parent_client_product_id) REFERENCES Bill (product_id,client_id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (parent_client_id,parent_client_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =

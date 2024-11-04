@@ -30,7 +30,7 @@ extension BillMQuery on BillM {
 			details_key INTEGER PRIMARY KEY AUTOINCREMENT,
 			details_parent_key INTEGER,
 			details_name TEXT NOT NULL,
-			FOREIGN KEY (parent_details_bill_m_key) REFERENCES BillM (bill_detail_bill_m_key) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (details_parent_key) REFERENCES BillM (parent_key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''',
       'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
       'DROP TABLE BillDetail;',
@@ -276,7 +276,7 @@ extension BillDetailQuery on BillDetail {
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
 			parent_key INTEGER,
 			name TEXT NOT NULL,
-			FOREIGN KEY (parent_bill_m_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (parent_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
