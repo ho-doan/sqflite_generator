@@ -86,7 +86,7 @@ class AEntity {
 // TODO(hodoan): check
   String get rawFromDB {
     return [
-      for (final e in allss())
+      for (final e in allsss())
         // if (e.$2 is AForeignKey)
         //   {
         //     if (!e.$2.dartType.isDartCoreList)
@@ -94,22 +94,22 @@ class AEntity {
         //     else
         //       '${e.$2.nameDefault}: lst.map((e)=>${(e.$2 as AForeignKey).entityParent?.className}.fromDB(e,[])).toList()'
         //   }
-        if (e.$2 is AIndex)
-          '${e.$2.nameDefault}: json[\'\${childName}${e.$2.nameFromDB}\'] as ${e.$2.dartType}'
-        else if (e.$2 is AColumn)
+        if (e is AIndex)
+          '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}'
+        else if (e is AColumn)
           () {
-            if (e.$2.dartType.toString().contains('DateTime')) {
-              return '${e.$2.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.$2.nameFromDB}\'] as int? ?? -1,)';
-            } else if (e.$2.dartType.isDartCoreBool) {
-              return '${e.$2.nameDefault}: (json[\'\${childName}${e.$2.nameFromDB}\'] as int?) == 1';
-            } else if (e.$2 is AColumn && (e.$2 as AColumn).converter != null) {
-              return '${e.$2.nameDefault}: const ${(e.$2 as AColumn).converter}().fromJson(json[\'\${childName}${e.$2.nameFromDB}\'] as String?)';
+            if (e.dartType.toString().contains('DateTime')) {
+              return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.nameFromDB}\'] as int? ?? -1,)';
+            } else if (e.dartType.isDartCoreBool) {
+              return '${e.nameDefault}: (json[\'\${childName}${e.nameFromDB}\'] as int?) == 1';
+            } else if (e.converter != null) {
+              return '${e.nameDefault}: const ${(e).converter}().fromJson(json[\'\${childName}${e.nameFromDB}\'] as String?)';
             } else {
-              return '${e.$2.nameDefault}: json[\'\${childName}${e.$2.nameFromDB}\'] as ${e.$2.dartType}';
+              return '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}';
             }
           }()
-        else if (e.$2 is APrimaryKey && e.$2.parentClassName.isEmpty)
-          '${e.$2.nameDefault}: json[\'${e.$2.nameFromDB}\'] as ${e.$2.dartType}',
+        else if (e is APrimaryKey && e.args.parentClassNames.sublist(1).isEmpty)
+          '${e.nameDefault}: json[\'${e.nameFromDB}\'] as ${e.dartType}',
 
       for (final key in primaryKeys.where(
           (e) => foreignKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
@@ -337,6 +337,7 @@ class AEntity {
 }
 
 extension AEntityBase on AEntity {
+  @Deprecated('use allsss')
   List<(List<String>, AProperty)> allss([List<String> parents = const []]) {
     final pp = [
       if (parents.isEmpty) className,
@@ -409,6 +410,35 @@ extension AEntityBase on AEntity {
     return alls;
   }
 
+  List<AProperty> allsss() {
+    if (parentClassName.length > (9 / 3)) return [];
+    final alls = [
+      for (final e in aPs)
+        if (e is APrimaryKey &&
+
+            /// primary key of child self
+            /// ```
+            /// class A{
+            ///   @primaryKey
+            ///   final A? child;
+            /// }
+            /// ```
+            /// result [true]
+            !e.args.parentClassNames.sublist(1).contains(className)) ...[
+          for (final f in e.expanded2()) f,
+        ] else if (e is AColumn)
+          e
+        else if (e is AIndex)
+          e,
+
+      // else if (e is AForeignKey)
+      //   ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
+      //       <(List<String>, AProperty)>[]),
+    ];
+    return alls;
+  }
+
+  @Deprecated('use allssForChild2')
   List<(List<String>, AProperty)> allssForChild(
       [AEntity? parent, int step = 0]) {
     if (parentClassName.length > (9 / 3)) return [];
@@ -416,17 +446,15 @@ extension AEntityBase on AEntity {
       return parent.allss().where((e) => e.$2 is! AForeignKey).toList();
     }
     final alls = [
-      // if(parents!=null)
-      // for(final key in parents)
-      // ([],key),
       for (final e in aPs)
         if (e is APrimaryKey) ...[
           ...[
             for (final f in e.expanded2())
 
               /// primary key of child self not foreign key && type entity
-              if (f.entityParent == null && f.parentClassName.isEmpty)
-                ([f.nameToDB], f)
+              if (f.entityParent == null &&
+                  f.args.parentClassNames.sublist(1).isEmpty)
+                (f.args.fieldNames, f)
               else if (f.entityParent == null &&
                       f.parentClassName.length == step
                   // &&
@@ -447,9 +475,38 @@ extension AEntityBase on AEntity {
         ] else if (e is AIndex) ...[
           ([e.className, e.nameDefault], e),
         ]
-      // else if (e is AForeignKey)
-      //   ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
-      //       <(List<String>, AProperty)>[]),
+    ];
+    return alls;
+  }
+
+  List<AProperty> allssForChild2([AEntity? parent, int step = 0]) {
+    if (parentClassName.length > (9 / 3)) return [];
+    if (parent != null && parent.className == className) {
+      return parent.allsss().where((e) => e is! AForeignKey).toList();
+    }
+    final alls = [
+      for (final e in aPs)
+        if (e is APrimaryKey) ...[
+          ...[
+            for (final f in e.expanded2())
+
+              /// primary key of child self not foreign key && type entity
+              if (f.entityParent == null &&
+                  f.args.parentClassNames.sublist(1).isEmpty)
+                f
+              else if (f.entityParent == null &&
+                      f.args.parentClassNames.sublist(1).length == step
+                  // &&
+                  // pp.length == 1
+                  )
+                () {
+                  return f;
+                }()
+          ],
+        ] else if (e is AColumn)
+          e
+        else if (e is AIndex)
+          e
     ];
     return alls;
   }
@@ -526,7 +583,7 @@ extension AEntityBase on AEntity {
   // TODO(hodoan): doing
   String rawDebug([AColumn? ps, String? newName]) {
     // final all = aPss(false);
-    final all = allss();
+    final all = allsss();
     return all.join(',\n');
   }
 

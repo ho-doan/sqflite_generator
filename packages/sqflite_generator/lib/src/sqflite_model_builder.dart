@@ -94,23 +94,23 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..modifier = FieldModifier.constant
             ..static = true,
         ),
-        for (final item in entity.allss())
+        for (final item in entity.allsss())
           Field(
             (f) => f
-              ..name = item.$2.args.fieldNames.join('_').toCamelCase()
-              ..type = refer('${entity.setClassName}<${item.$2.typeSelect}>')
+              ..name = item.args.fieldNames.join('_').toCamelCase()
+              ..type = refer('${entity.setClassName}<${item.typeSelect}>')
               ..docs.addAll([
-                if (item.$2 is AColumn &&
-                    item.$2.alters.any((e) => e.type == AlterTypeGen.drop))
+                if (item is AColumn &&
+                    item.alters.any((e) => e.type == AlterTypeGen.drop))
                   '@Deprecated(\'no such column\')'
               ])
               ..assignment = Code('''${entity.setClassName}(
-              name: '${item.$2.args.fieldNames.join('_').toSnakeCase()}',
+              name: '${item.args.fieldNames.join('_').toSnakeCase()}',
               nameCast: '${[
-                item.$2.args.parentClassNames.first,
-                ...item.$2.args.fieldNames
+                item.args.parentClassNames.first,
+                ...item.args.fieldNames
               ].join('_').toSnakeCase()}',
-              model: '${item.$2.args.parentClassNames.first.toSnakeCase()}',
+              model: '${item.args.parentClassNames.first.toSnakeCase()}',
               )''')
               ..modifier = FieldModifier.constant
               ..static = true,
@@ -120,10 +120,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..name = entity.defaultSelectClass
             ..type = refer('Set<${entity.setClassName}>')
             ..assignment = Code('''{${[
-              for (final e in entity.allss())
-                if (!(e.$2 is AColumn &&
-                    e.$2.alters.any((e) => e.type == AlterTypeGen.drop)))
-                  '${entity.extensionName}.${e.$1.sublist(1).join('_').toCamelCase()}',
+              for (final e in entity.allsss())
+                if (!(e is AColumn &&
+                    e.alters.any((e) => e.type == AlterTypeGen.drop)))
+                  '${entity.extensionName}.${e.args.fieldNames.join('_').toCamelCase()}',
               for (final f in fieldList)
                 // for (final aExtend in classBuilderListExtends)
                 for (final field in (classBuilderListExtends
@@ -304,29 +304,30 @@ void generatorListClass(
                 ..methods.addAll(
                   [
                     for (final item in e.entityParent!
-                        .allssForChild(parent, nameDefaults.length + 1))
+                        .allssForChild2(parent, nameDefaults.length + 1))
                       Method(
                         (f) => f
-                          ..name = (item.$1.sublist(1)).join('_').toCamelCase()
-                          ..returns = refer('$name2<${item.$2.typeSelect}>')
+                          ..name = item.args.fieldNames
+                              .sublist(1)
+                              .join('_')
+                              .toCamelCase()
+                          ..returns = refer('$name2<${item.typeSelect}>')
                           ..docs.addAll([
-                            if (item.$2 is AColumn &&
-                                item.$2.alters
+                            if (item is AColumn &&
+                                item.alters
                                     .any((e) => e.type == AlterTypeGen.drop))
                               '@Deprecated(\'no such column\')'
-                          ])
-                          ..docs.addAll([
-                            '// $item',
                           ])
                           ..lambda = true
                           ..type = MethodType.getter
                           ..body = Code('''const $name2(
-                            name: '${item.$2.nameToDB}',
+                            name: '${item.nameToDB}',
                             nameCast: '${[
-                            ...item.$1.sublist(0, item.$1.length - 1),
-                            item.$2.nameToDB
+                            ...item.args.parentClassNames
+                                .sublist(nameDefaults.length + 1),
+                            item.nameToDB
                           ].join('_').toSnakeCase()}',
-                            model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
+                            model: '${item.args.parentClassNames.sublist(nameDefaults.length + 1).join('_').toSnakeCase()}',
                             )'''),
                       ),
                   ],

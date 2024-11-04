@@ -17,10 +17,10 @@ extension ProductQuery on Product {
 	)''';
 
   static const String debug =
-      '''([Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [id], step: 1), parentClassName: []),
-([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [lastName], step: 1), parentClassName: []),
-([Product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [firstName], step: 1), parentClassName: []),
-([Product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [Product], fieldNames: [blocked], step: 1), parentClassName: [])''';
+      '''nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [id], step: 1), parentClassName: [],
+nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [lastName], step: 1), parentClassName: [],
+nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [firstName], step: 1), parentClassName: [],
+nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [Product], fieldNames: [blocked], step: 1), parentClassName: []''';
 
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
