@@ -31,17 +31,18 @@ class AlterDBGen {
 }
 
 class AProperty {
+  final APropertyArgs args;
   final String? name;
   final int version;
   final String nameDefault;
   final DartType dartType;
-  final bool rawFromDB;
   final String className;
   final int step;
   final List<AlterDBGen> alters;
   final List<String> parentClassName;
 
   const AProperty({
+    required this.args,
     required this.parentClassName,
     this.name,
     this.alters = const [],
@@ -50,7 +51,6 @@ class AProperty {
     required this.nameDefault,
     required this.dartType,
     required this.className,
-    this.rawFromDB = false,
   });
   String get typeSelect {
     if (dartType.isDartCoreInt) return 'int';
@@ -78,7 +78,7 @@ class AProperty {
   toString() =>
       'nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
       ' _sqlType: $_sqlType, _isNull: $_isNull'
-      'rawFromDB: $rawFromDB, parentClassName: $parentClassName';
+      'args: $args, parentClassName: $parentClassName';
 
   /// @primaryKey
   /// @ForeignKey(name: 'clientId')
@@ -90,14 +90,13 @@ class AProperty {
   /// @ForeignKey(name: 'clientId')
   /// ```
   /// * [autoId] = true
-  String rawCreate(
-    String? name, {
+  String rawCreate({
     bool isId = false,
     bool autoId = false,
     bool isIds = false,
   }) {
     return [
-      name ?? nameToDB.toSnakeCase(),
+      args.fieldNames.join('_').toSnakeCase(),
       _sqlType,
       if (isId && !isIds) 'PRIMARY KEY',
       if (autoId && !isIds) 'AUTOINCREMENT',
@@ -230,4 +229,37 @@ extension Aps on AProperty {
 
   String selectField([String? child]) =>
       '\'\${childName}${className.$rm.toSnakeCase()}.$nameToDB as \${childName}$nameFromDB\'';
+}
+
+class APropertyArgs {
+  final List<String> parentClassNames;
+  final List<String> fieldNames;
+  final int step;
+
+  const APropertyArgs({
+    required this.parentClassNames,
+    required this.fieldNames,
+    required this.step,
+  });
+
+  APropertyArgs copyWithByEntity({
+    required String parentClassName,
+  }) =>
+      APropertyArgs(
+        parentClassNames: [...parentClassNames, parentClassName],
+        fieldNames: fieldNames,
+        step: step + 1,
+      );
+  APropertyArgs copyWithByElement({
+    required String fieldName,
+  }) =>
+      APropertyArgs(
+        parentClassNames: parentClassNames,
+        fieldNames: [...fieldNames, fieldName],
+        step: step,
+      );
+
+  @override
+  String toString() =>
+      'APropertyArgs(parentClassName: $parentClassNames, fieldNames: $fieldNames, step: $step)';
 }

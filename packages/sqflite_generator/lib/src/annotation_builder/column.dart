@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
-import 'package:sqflite_generator/src/annotation_builder/entity.dart';
 import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
 import 'package:sqflite_generator/src/annotation_builder/index.dart';
 import 'package:sqflite_generator/src/annotation_builder/primary_key.dart';
@@ -13,12 +12,12 @@ final _checker = const TypeChecker.fromRuntime(Column);
 class AColumn extends AProperty {
   final String? converter;
   const AColumn._({
+    required super.args,
     required super.parentClassName,
     required this.converter,
     super.alters,
     super.name,
     required super.version,
-    super.rawFromDB,
     required super.dartType,
     required super.nameDefault,
     required super.className,
@@ -28,11 +27,13 @@ class AColumn extends AProperty {
     FieldElement element,
     String className,
     List<String> parentClassName,
+    APropertyArgs args,
     int step,
   ) {
     final type = element.type;
 
     return AColumn._(
+      args: args.copyWithByElement(fieldName: element.displayName),
       parentClassName: parentClassName,
       alters: AColumnX._alters(element),
       converter: AColumnX._type(element),
@@ -41,12 +42,6 @@ class AColumn extends AProperty {
       version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
-      // TODO(hodoan): check parentClassName
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, [], step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
   }
@@ -54,10 +49,12 @@ class AColumn extends AProperty {
     ParameterElement element,
     String className,
     List<String> parentClassName,
+    APropertyArgs args,
     int step,
   ) {
     final type = element.type;
     return AColumn._(
+      args: args.copyWithByElement(fieldName: element.displayName),
       parentClassName: parentClassName,
       alters: AColumnX._alters(element),
       converter: AColumnX._type(element),
@@ -66,12 +63,6 @@ class AColumn extends AProperty {
       version: AColumnX._version(element),
       dartType: type,
       nameDefault: element.displayName,
-      // TODO(hodoan): check parentClassName
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, [], step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
   }
@@ -83,6 +74,7 @@ extension AColumnX on AColumn {
     List<FieldElement> fields,
     String className,
     List<String> parentClassName,
+    APropertyArgs args,
     List<ParameterElement> cons,
     List<APrimaryKey> primaries,
     List<AIndex> indies,
@@ -107,12 +99,26 @@ extension AColumnX on AColumn {
     }
     return [
       ...columns
-          .map((e) =>
-              AColumn.fromConsElement(e, className, parentClassName, step + 1))
+          .map(
+            (e) => AColumn.fromConsElement(
+              e,
+              className,
+              parentClassName,
+              args,
+              step + 1,
+            ),
+          )
           .toList(),
       ...aColumns
-          .map((e) =>
-              AColumn.fromElement(e, className, parentClassName, step + 1))
+          .map(
+            (e) => AColumn.fromElement(
+              e,
+              className,
+              parentClassName,
+              args,
+              step + 1,
+            ),
+          )
           .toList(),
     ];
   }

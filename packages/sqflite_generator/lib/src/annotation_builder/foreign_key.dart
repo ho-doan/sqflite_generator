@@ -18,10 +18,10 @@ class AForeignKey extends AProperty {
   final AEntity? entityParent;
 
   const AForeignKey._({
+    required super.args,
     super.name,
     required super.parentClassName,
     required super.version,
-    super.rawFromDB,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,
     required this.entityParent,
@@ -36,6 +36,7 @@ class AForeignKey extends AProperty {
     FieldElement? parentElement,
     String className,
     List<String> parentClassName,
+    APropertyArgs args,
     int step,
   ) {
     AEntity? aEntity;
@@ -54,6 +55,7 @@ class AForeignKey extends AProperty {
       if (pElement != null) {
         aEntity = AEntity.of(
           pElement as ClassElement,
+          args.copyWithByElement(fieldName: element.displayName),
           [
             ...parentClassName,
             if (parentClassName.isEmpty) element.displayName else className,
@@ -64,6 +66,7 @@ class AForeignKey extends AProperty {
     } else {
       aEntity = AEntity.of(
         element.type.element as ClassElement,
+        args.copyWithByElement(fieldName: element.displayName),
         [
           ...parentClassName,
           if (parentClassName.isEmpty) element.displayName else className,
@@ -72,6 +75,7 @@ class AForeignKey extends AProperty {
       );
     }
     return AForeignKey._(
+      args: args.copyWithByElement(fieldName: element.displayName),
       parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
@@ -81,12 +85,6 @@ class AForeignKey extends AProperty {
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
-      // TODO(hodoan): check parentClassName
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, [], step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
   }
@@ -94,15 +92,18 @@ class AForeignKey extends AProperty {
     SuperFormalParameterElement element,
     String className,
     List<String> parentClassName,
+    APropertyArgs args,
     int step,
   ) {
     return AForeignKey._(
+      args: args,
       parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
       entityParent: AEntity.of(
         element.type.element as ClassElement,
+        args,
         parentClassName,
         step + 1,
       ),
@@ -110,12 +111,6 @@ class AForeignKey extends AProperty {
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
-      // TODO(hodoan): check parentClassName
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, [], step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
   }
@@ -165,6 +160,7 @@ extension AForeignKeyX on AForeignKey {
           ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(
     int step,
+    APropertyArgs args,
     List<FieldElement> fields,
     String className,
     List<String> parentClassName,
@@ -177,6 +173,7 @@ extension AForeignKeyX on AForeignKey {
                 e,
                 className,
                 parentClassName,
+                args,
                 step + 1,
               ))
           .toList(),
@@ -187,6 +184,7 @@ extension AForeignKeyX on AForeignKey {
                 e,
                 className,
                 parentClassName,
+                args,
                 step + 1,
               ))
           .toList()

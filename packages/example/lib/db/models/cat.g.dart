@@ -15,27 +15,27 @@ extension CatQuery on Cat {
 
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Cat(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			parent_cat_id INTEGER,
-			child_cat_id INTEGER,
+			parent_id INTEGER,
+			child_id INTEGER,
 			birth INTEGER,
 			FOREIGN KEY (parent_cat_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
 			FOREIGN KEY (child_cat_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
-      '''([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
-([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])''';
+      '''([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: []),
+([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
 
-// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: [])
   static const $CatSetArgs<int> id = $CatSetArgs(
     name: 'id',
     nameCast: 'cat_id',
     model: 'cat',
   );
 
-// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [])
   static const $CatSetArgs<String> birth = $CatSetArgs(
     name: 'birth',
     nameCast: 'cat_birth',
@@ -135,9 +135,9 @@ birth)
        VALUES(?, ?, ?, ?)''', [
       id,
       this.birth?.millisecondsSinceEpoch,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [parent, id], step: 2), parentClassName: [parent]
       parent?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [child, id], step: 2), parentClassName: [child]
       child?.id,
     ]);
     return $id;
@@ -198,10 +198,10 @@ WHERE cat.id = ?
         'id': this.id,
         'birth': this.birth?.millisecondsSinceEpoch,
 
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [parent, id], step: 2), parentClassName: [parent]
         'parent_cat_id': this.parent?.id,
 
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [child]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [child, id], step: 2), parentClassName: [child]
         'child_cat_id': this.child?.id
       };
 }
@@ -239,14 +239,14 @@ class _$$$CatSetArgs<T> extends $CatSetArgs<T> {
 class _$$CatSetArgs {
   const _$$CatSetArgs();
 
-// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: [])
   _$$$CatSetArgs<int> get id => const _$$$CatSetArgs(
         name: 'id',
         nameCast: 'cat_id',
         model: 'cat',
       );
 
-// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [])
   _$$$CatSetArgs<String> get birth => const _$$$CatSetArgs(
         name: 'birth',
         nameCast: 'cat_birth',

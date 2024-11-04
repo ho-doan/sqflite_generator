@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:sqflite_generator/src/annotation_builder/property.dart';
 
 import '../annotation_builder/entity.dart';
 
@@ -62,8 +63,13 @@ extension DartTypeX on DartType {
     if (element != null && element is ClassElement) {
       final parent = AEntity.of(
         element as ClassElement,
-        parentClassName,
-        step + 1,
+        // TODO(hodoan): fix this
+        APropertyArgs(
+          parentClassNames: parentClassName,
+          fieldNames: [],
+          step: step + 1,
+        ),
+        [],
       );
       return parent?.primaryKeys.first.dartType.typeSql(
         step + 1,

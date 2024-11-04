@@ -23,11 +23,11 @@ extension BillQuery on Bill {
 			product_id INTEGER,
 			client_id INTEGER,
 			client_product_id INTEGER,
-			parent_parent_product_id INTEGER,
-			parent_parent_client_id INTEGER,
-			parent_parent_bill_product_id INTEGER,
-			parent_client_client_id INTEGER,
-			parent_client_parent_client_product_id INTEGER,
+			parent_product_id INTEGER,
+			parent_client_id INTEGER,
+			parent_client_product_id INTEGER,
+			parent_client_id INTEGER,
+			parent_client_product_id INTEGER,
 			time INTEGER,
 			PRIMARY KEY (product_id,client_id,client_product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
@@ -37,35 +37,35 @@ extension BillQuery on Bill {
 	)''';
 
   static const String debug =
-      '''([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product]),
-([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client]),
-([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client]),
-([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])''';
+      '''([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product]),
+([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client]),
+([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [client, product, id], step: 3), parentClassName: [client, Client]),
+([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill], fieldNames: [time], step: 1), parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
 
-// ([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product])
+// ([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product])
   static const $BillSetArgs<int> productId = $BillSetArgs(
     name: 'id',
     nameCast: 'bill_product_id',
     model: 'bill_product',
   );
 
-// ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client])
+// ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client])
   static const $BillSetArgs<int> clientId = $BillSetArgs(
     name: 'id',
     nameCast: 'bill_client_id',
     model: 'bill_client',
   );
 
-// ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client])
+// ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [client, product, id], step: 3), parentClassName: [client, Client])
   static const $BillSetArgs<int> clientProductId = $BillSetArgs(
     name: 'id',
     nameCast: 'bill_client_product_id',
     model: 'bill_client_product',
   );
 
-// ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill], fieldNames: [time], step: 1), parentClassName: [])
   static const $BillSetArgs<String> time = $BillSetArgs(
     name: 'time',
     nameCast: 'bill_time',
@@ -108,7 +108,7 @@ extension BillQuery on Bill {
           .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
-  static Future<List<Bill>> getAll<T>(
+  static Future<List<Bill>> getAll(
     Database database, {
     Set<$BillSetArgs>? select,
     Set<WhereResult>? where,
@@ -197,15 +197,15 @@ time)
       client?.id,
       client?.product?.id,
       this.time?.millisecondsSinceEpoch,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Product], fieldNames: [parent, product, id], step: 3), parentClassName: [parent, Bill]
       parent?.product?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client], fieldNames: [parent, client, id], step: 3), parentClassName: [parent, Bill]
       parent?.client?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill, Client]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client, Product], fieldNames: [parent, client, product, id], step: 4), parentClassName: [parent, Bill, Client]
       parent?.client?.product?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [parentClient, id], step: 2), parentClassName: [parentClient]
       parentClient?.id,
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient, Client]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [parentClient, product, id], step: 3), parentClassName: [parentClient, Client]
       parentClient?.product?.id,
     ]);
     return $id;
@@ -282,20 +282,20 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
         'client_product_id': this.client?.product?.id,
         'time': this.time?.millisecondsSinceEpoch,
 
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Product], fieldNames: [parent, product, id], step: 3), parentClassName: [parent, Bill]
         'parent_parent_bill_product_id': this.parent?.product?.id,
 
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client], fieldNames: [parent, client, id], step: 3), parentClassName: [parent, Bill]
         'parent_parent_bill_client_id': this.parent?.client?.id,
 
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent, Bill, Client]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client, Product], fieldNames: [parent, client, product, id], step: 4), parentClassName: [parent, Bill, Client]
         'parent_parent_bill_client_product_id':
             this.parent?.client?.product?.id,
 
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [parentClient, id], step: 2), parentClassName: [parentClient]
         'parent_client_client_id': this.parentClient?.id,
 
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parentClient, Client]
+// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [parentClient, product, id], step: 3), parentClassName: [parentClient, Client]
         'parent_client_parent_client_client_product_id':
             this.parentClient?.product?.id
       };
@@ -354,28 +354,28 @@ class _$$$BillSetArgs<T> extends $BillSetArgs<T> {
 class _$$ProductSetArgs {
   const _$$ProductSetArgs();
 
-// ([product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product])
+// ([product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product])
   _$$$ProductSetArgs<int> get id => const _$$$ProductSetArgs(
         name: 'id',
         nameCast: 'product_id',
         model: 'product',
       );
 
-// ([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
+// ([Product, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, lastName], step: 2), parentClassName: [product])
   _$$$ProductSetArgs<String> get lastName => const _$$$ProductSetArgs(
         name: 'last_name',
         nameCast: 'product_last_name',
         model: 'product',
       );
 
-// ([Product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [product])
+// ([Product, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, firstName], step: 2), parentClassName: [product])
   _$$$ProductSetArgs<String> get firstName => const _$$$ProductSetArgs(
         name: 'first_name',
         nameCast: 'product_first_name',
         model: 'product',
       );
 
-// ([Product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [product])
+// ([Product, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, blocked], step: 2), parentClassName: [product])
   _$$$ProductSetArgs<bool> get blocked => const _$$$ProductSetArgs(
         name: 'blocked',
         nameCast: 'product_blocked',
@@ -386,28 +386,28 @@ class _$$ProductSetArgs {
 class _$$ClientSetArgs {
   const _$$ClientSetArgs();
 
-// ([client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client])
+// ([client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client])
   _$$$ClientSetArgs<int> get id => const _$$$ClientSetArgs(
         name: 'id',
         nameCast: 'client_id',
         model: 'client',
       );
 
-// ([Client, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [client])
+// ([Client, firstName], nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, firstName], step: 2), parentClassName: [client])
   _$$$ClientSetArgs<String> get firstName => const _$$$ClientSetArgs(
         name: 'first_name',
         nameCast: 'client_first_name',
         model: 'client',
       );
 
-// ([Client, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: rawFromDB: false, parentClassName: [client])
+// ([Client, lastName], nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, lastName], step: 2), parentClassName: [client])
   _$$$ClientSetArgs<String> get lastName => const _$$$ClientSetArgs(
         name: 'last_name',
         nameCast: 'client_last_name',
         model: 'client',
       );
 
-// ([Client, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLrawFromDB: false, parentClassName: [client])
+// ([Client, blocked], nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, blocked], step: 2), parentClassName: [client])
   _$$$ClientSetArgs<bool> get blocked => const _$$$ClientSetArgs(
         name: 'blocked',
         nameCast: 'client_blocked',
@@ -418,28 +418,28 @@ class _$$ClientSetArgs {
 class _$$BillSetArgs {
   const _$$BillSetArgs();
 
-// ([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [product])
+// ([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product])
   _$$$BillSetArgs<int> get productId => const _$$$BillSetArgs(
         name: 'id',
         nameCast: 'bill_product_id',
         model: 'bill_product',
       );
 
-// ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client])
+// ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client])
   _$$$BillSetArgs<int> get clientId => const _$$$BillSetArgs(
         name: 'id',
         nameCast: 'bill_client_id',
         model: 'bill_client',
       );
 
-// ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [client, Client])
+// ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [client, product, id], step: 3), parentClassName: [client, Client])
   _$$$BillSetArgs<int> get clientProductId => const _$$$BillSetArgs(
         name: 'id',
         nameCast: 'bill_client_product_id',
         model: 'bill_client_product',
       );
 
-// ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill], fieldNames: [time], step: 1), parentClassName: [])
   _$$$BillSetArgs<String> get time => const _$$$BillSetArgs(
         name: 'time',
         nameCast: 'bill_time',

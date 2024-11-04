@@ -9,6 +9,7 @@ import 'package:sqflite_generator/src/annotation_builder/primary_key.dart';
 import 'package:sqflite_generator/src/annotation_builder/property.dart';
 
 class AEntity {
+  final APropertyArgs args;
   final List<AColumn> columns;
   final List<AForeignKey> foreignKeys;
   final List<APrimaryKey> primaryKeys;
@@ -240,6 +241,7 @@ class AEntity {
   }
 
   const AEntity._({
+    required this.args,
     this.parentClassName = const [],
     required this.columns,
     required this.foreignKeys,
@@ -251,15 +253,23 @@ class AEntity {
 
   static AEntity? of(
     ClassElement element,
+    APropertyArgs args,
     List<String> parentClassName, [
     int step = 0,
   ]) {
     if (step > 9) return null;
-    return AEntity._fromElement(element, parentClassName, step);
+    return AEntity._fromElement(
+        element,
+        args.copyWithByEntity(
+          parentClassName: element.displayName,
+        ),
+        parentClassName,
+        step);
   }
 
   factory AEntity._fromElement(
     ClassElement element,
+    APropertyArgs args,
     List<String> parentClassName,
     int step,
   ) {
@@ -282,12 +292,14 @@ class AEntity {
     ];
     final indies = AIndexX.fields(
       fields,
+      args,
       element.displayName,
       parentClassName,
       step + 1,
     );
     final fores = AForeignKeyX.fields(
       step + 1,
+      args,
       fields,
       element.displayName,
       parentClassName,
@@ -296,6 +308,7 @@ class AEntity {
 
     final primaries = APrimaryKeyX.fields(
       fields,
+      args,
       element.displayName,
       parentClassName,
       step + 1,
@@ -311,11 +324,13 @@ class AEntity {
         fields,
         element.displayName,
         parentClassName,
+        args,
         [...fs, ...ss],
         primaries,
         indies,
         fores,
       ),
+      args: args,
       foreignKeys: fores,
       primaryKeys: primaries,
       indices: indies,
@@ -493,7 +508,6 @@ extension AEntityBase on AEntity {
             !e.parentClassName.contains(className)) ...[
           ...e.expanded2().map(
                 (e) => e.rawCreate(
-                  e.fieldNameFull,
                   // e.name2 ?? e.name,
                   autoId: e.auto,
                   isId: true,
@@ -501,9 +515,9 @@ extension AEntityBase on AEntity {
                 ),
               ),
         ] else if (e is AColumn) ...[
-          e.rawCreate(e.name),
+          e.rawCreate(),
         ] else if (e is AIndex) ...[
-          e.rawCreate(e.name),
+          e.rawCreate(),
         ] else if (e is AForeignKey &&
 
             /// foreign key of child self not primary key
@@ -518,9 +532,7 @@ extension AEntityBase on AEntity {
             !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)) ...[
           ...e.entityParent!.primaryKeys.expand(
             (f) => f.expanded2().map(
-                  (k) => k.rawCreate(
-                    k.fieldNameFull2(e.nameDefault),
-                  ),
+                  (k) => k.rawCreate(),
                 ),
           ),
         ],

@@ -14,6 +14,7 @@ class APrimaryKey extends AProperty {
   final AForeignKey? foreignKey;
 
   const APrimaryKey._({
+    required super.args,
     required this.foreignKey,
     required super.parentClassName,
     required this.entityParent,
@@ -21,7 +22,6 @@ class APrimaryKey extends AProperty {
     this.auto = true,
     super.name,
     required super.version,
-    super.rawFromDB,
     required super.nameDefault,
     required super.dartType,
     required super.className,
@@ -29,6 +29,7 @@ class APrimaryKey extends AProperty {
 
   factory APrimaryKey.fromElement(
     FieldElement element,
+    APropertyArgs args,
     String className,
     List<String> parentClassName,
     int step,
@@ -36,6 +37,7 @@ class APrimaryKey extends AProperty {
     AForeignKey? foreignKey,
   ) {
     return APrimaryKey._(
+      args: args.copyWithByElement(fieldName: element.displayName),
       foreignKey: foreignKey,
       parentClassName: parentClassName,
       entityParent: entityParent,
@@ -45,12 +47,6 @@ class APrimaryKey extends AProperty {
       version: APrimaryKeyX._version(element),
       nameDefault: element.displayName,
       dartType: element.type,
-      // TODO(hodoan): check parentClassName
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, [], step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
   }
@@ -59,6 +55,7 @@ class APrimaryKey extends AProperty {
 extension APrimaryKeyX on APrimaryKey {
   static List<APrimaryKey> fields(
     List<FieldElement> fields,
+    APropertyArgs args,
     String className,
     List<String> parentClassName,
     int step,
@@ -68,6 +65,7 @@ extension APrimaryKeyX on APrimaryKey {
       final foreignKey = fores?.of(e.displayName);
       return APrimaryKey.fromElement(
         e,
+        args,
         className,
         parentClassName,
         step,

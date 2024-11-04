@@ -20,7 +20,14 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
     if (_parsedElementCheckSet.contains(element)) return null;
     _parsedElementCheckSet.add(element);
 
-    final entity = AEntity.of(element, [])!;
+    final entity = AEntity.of(
+        element,
+        APropertyArgs(
+          parentClassNames: [],
+          fieldNames: [],
+          step: 0,
+        ),
+        [])!;
 
     final classSetBuilder = Class(
       (c) => c

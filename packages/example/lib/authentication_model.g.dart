@@ -13,30 +13,30 @@ extension BillMQuery on BillM {
 
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillM(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			details_bill_detail_key INTEGER,
+			details_key INTEGER,
 			name TEXT NOT NULL,
 			memos TEXT NOT NULL
 	)''';
 
   static const String debug =
-      '''([BillM, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
-([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: []),
-([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
+      '''([BillM, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: []),
+([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: []),
+([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
-			bill_detail_key INTEGER PRIMARY KEY AUTOINCREMENT,
-			parent_details_bill_m_key INTEGER,
-			name TEXT NOT NULL,
+			details_key INTEGER PRIMARY KEY AUTOINCREMENT,
+			details_parent_key INTEGER,
+			details_name TEXT NOT NULL,
 			FOREIGN KEY (parent_details_bill_m_key) REFERENCES BillM (bill_detail_bill_m_key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''',
       'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
       'DROP TABLE BillDetail;',
       '''CREATE TABLE IF NOT EXISTS BillM_new(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			details_bill_detail_key INTEGER,
+			details_key INTEGER,
 			name TEXT NOT NULL,
 			memos TEXT NOT NULL
 	)''',
@@ -49,14 +49,14 @@ extension BillMQuery on BillM {
     ]
   };
 
-// ([BillM, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([BillM, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: [])
   static const $BillMSetArgs<int> key = $BillMSetArgs(
     name: 'key',
     nameCast: 'bill_m_key',
     model: 'bill_m',
   );
 
-// ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])
+// ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: [])
   static const $BillMSetArgs<String> name = $BillMSetArgs(
     name: 'name',
     nameCast: 'bill_m_name',
@@ -64,7 +64,7 @@ extension BillMQuery on BillM {
   );
 
   @Deprecated('no such column')
-// ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])
+// ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: [])
   static const $BillMSetArgs<String> memos = $BillMSetArgs(
     name: 'memos',
     nameCast: 'bill_m_memos',
@@ -252,14 +252,14 @@ class _$$$BillDetailSetArgs<T> extends $BillMSetArgs<T> {
 class _$$BillDetailSetArgs {
   const _$$BillDetailSetArgs();
 
-// ([details, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [details])
+// ([details, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM, BillDetail], fieldNames: [details, key], step: 2), parentClassName: [details])
   _$$$BillDetailSetArgs<int> get key => const _$$$BillDetailSetArgs(
         name: 'key',
         nameCast: 'details_key',
         model: 'details',
       );
 
-// ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [details])
+// ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM, BillDetail], fieldNames: [details, name], step: 2), parentClassName: [details])
   _$$$BillDetailSetArgs<String> get name => const _$$$BillDetailSetArgs(
         name: 'name',
         nameCast: 'bill_detail_name',
@@ -274,25 +274,25 @@ extension BillDetailQuery on BillDetail {
 
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillDetail(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			parent_bill_m_key INTEGER,
+			parent_key INTEGER,
 			name TEXT NOT NULL,
 			FOREIGN KEY (parent_bill_m_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
-      '''([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: []),
-([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])''';
+      '''([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: []),
+([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: [])''';
 
   static const Map<int, List<String>> alter = {};
 
-// ([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [])
+// ([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: [])
   static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
     name: 'key',
     nameCast: 'bill_detail_key',
     model: 'bill_detail',
   );
 
-// ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [])
+// ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: [])
   static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
     name: 'name',
     nameCast: 'bill_detail_name',
@@ -389,7 +389,7 @@ name)
        VALUES(?, ?, ?)''', [
       key,
       this.name,
-// nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]
+// nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, key], step: 2), parentClassName: [parent]
       parent?.key,
     ]);
     return $id;
@@ -449,7 +449,7 @@ WHERE bill_detail.key = ?
         'key': this.key,
         'name': this.name,
 
-// nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent]
+// nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, key], step: 2), parentClassName: [parent]
         'parent_bill_m_key': this.parent?.key
       };
 }
@@ -487,14 +487,14 @@ class _$$$BillMSetArgs<T> extends $BillDetailSetArgs<T> {
 class _$$BillMSetArgs {
   const _$$BillMSetArgs();
 
-// ([parent, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: rawFromDB: false, parentClassName: [parent])
+// ([parent, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, key], step: 2), parentClassName: [parent])
   _$$$BillMSetArgs<int> get key => const _$$$BillMSetArgs(
         name: 'key',
         nameCast: 'parent_key',
         model: 'parent',
       );
 
-// ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent])
+// ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, name], step: 2), parentClassName: [parent])
   _$$$BillMSetArgs<String> get name => const _$$$BillMSetArgs(
         name: 'name',
         nameCast: 'bill_m_name',
@@ -502,7 +502,7 @@ class _$$BillMSetArgs {
       );
 
   @Deprecated('no such column')
-// ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLrawFromDB: false, parentClassName: [parent])
+// ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, memos], step: 2), parentClassName: [parent])
   _$$$BillMSetArgs<String> get memos => const _$$$BillMSetArgs(
         name: 'memos',
         nameCast: 'bill_m_memos',
