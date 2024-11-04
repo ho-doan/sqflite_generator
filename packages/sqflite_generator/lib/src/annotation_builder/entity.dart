@@ -479,10 +479,14 @@ extension AEntityBase on AEntity {
     return alls;
   }
 
-  List<AProperty> allssForChild2([AEntity? parent, int step = 0]) {
+  List<(AProperty, bool)> allssForChild2([AEntity? parent, int step = 0]) {
     if (parentClassName.length > (9 / 3)) return [];
     if (parent != null && parent.className == className) {
-      return parent.allsss().where((e) => e is! AForeignKey).toList();
+      return parent
+          .allsss()
+          .where((e) => e is! AForeignKey)
+          .map((e) => (e, true))
+          .toList();
     }
     final alls = [
       for (final e in aPs)
@@ -493,20 +497,20 @@ extension AEntityBase on AEntity {
               /// primary key of child self not foreign key && type entity
               if (f.entityParent == null &&
                   f.args.parentClassNames.sublist(1).isEmpty)
-                f
+                (f, false)
               else if (f.entityParent == null &&
                       f.args.parentClassNames.sublist(1).length == step
                   // &&
                   // pp.length == 1
                   )
                 () {
-                  return f;
+                  return (f, false);
                 }()
           ],
         ] else if (e is AColumn)
-          e
+          (e, false)
         else if (e is AIndex)
-          e
+          (e, false)
     ];
     return alls;
   }

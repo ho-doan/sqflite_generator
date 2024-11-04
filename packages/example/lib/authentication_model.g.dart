@@ -250,17 +250,17 @@ class _$$$BillDetailSetArgs<T> extends $BillMSetArgs<T> {
 class _$$BillDetailSetArgs {
   const _$$BillDetailSetArgs();
 
-// ([details, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM, BillDetail], fieldNames: [details, key], step: 2), parentClassName: [details])
+// (nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM, BillDetail], fieldNames: [details, key], step: 2), parentClassName: [details], false)
   _$$$BillDetailSetArgs<int> get key => const _$$$BillDetailSetArgs(
-        name: 'key',
-        nameCast: 'details_key',
-        model: 'details',
+        name: 'details_key',
+        nameCast: 'bill_detail_details_key',
+        model: 'bill_detail',
       );
 
-// ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM, BillDetail], fieldNames: [details, name], step: 2), parentClassName: [details])
+// (nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM, BillDetail], fieldNames: [details, name], step: 2), parentClassName: [details], false)
   _$$$BillDetailSetArgs<String> get name => const _$$$BillDetailSetArgs(
-        name: 'name',
-        nameCast: 'bill_detail_name',
+        name: 'details_name',
+        nameCast: 'bill_detail_details_name',
         model: 'bill_detail',
       );
 }
@@ -479,25 +479,25 @@ class _$$$BillMSetArgs<T> extends $BillDetailSetArgs<T> {
 class _$$BillMSetArgs {
   const _$$BillMSetArgs();
 
-// ([parent, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, key], step: 2), parentClassName: [parent])
+// (nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, key], step: 2), parentClassName: [parent], false)
   _$$$BillMSetArgs<int> get key => const _$$$BillMSetArgs(
-        name: 'key',
-        nameCast: 'parent_key',
-        model: 'parent',
+        name: 'parent_key',
+        nameCast: 'bill_m_parent_key',
+        model: 'bill_m',
       );
 
-// ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, name], step: 2), parentClassName: [parent])
+// (nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, name], step: 2), parentClassName: [parent], false)
   _$$$BillMSetArgs<String> get name => const _$$$BillMSetArgs(
-        name: 'name',
-        nameCast: 'bill_m_name',
+        name: 'parent_name',
+        nameCast: 'bill_m_parent_name',
         model: 'bill_m',
       );
 
   @Deprecated('no such column')
-// ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, memos], step: 2), parentClassName: [parent])
+// (nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, memos], step: 2), parentClassName: [parent], false)
   _$$$BillMSetArgs<String> get memos => const _$$$BillMSetArgs(
-        name: 'memos',
-        nameCast: 'bill_m_memos',
+        name: 'parent_memos',
+        nameCast: 'bill_m_parent_memos',
         model: 'bill_m',
       );
 }

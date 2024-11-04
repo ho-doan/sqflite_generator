@@ -307,27 +307,27 @@ void generatorListClass(
                         .allssForChild2(parent, nameDefaults.length + 1))
                       Method(
                         (f) => f
-                          ..name = item.args.fieldNames
+                          ..name = item.$1.args.fieldNames
                               .sublist(1)
                               .join('_')
                               .toCamelCase()
-                          ..returns = refer('$name2<${item.typeSelect}>')
+                          ..returns = refer('$name2<${item.$1.typeSelect}>')
                           ..docs.addAll([
-                            if (item is AColumn &&
-                                item.alters
+                            if (item.$1 is AColumn &&
+                                item.$1.alters
                                     .any((e) => e.type == AlterTypeGen.drop))
                               '@Deprecated(\'no such column\')'
                           ])
                           ..lambda = true
                           ..type = MethodType.getter
                           ..body = Code('''const $name2(
-                            name: '${item.nameToDB}',
+                            name: '${item.$1.nameToDB}',
                             nameCast: '${[
-                            ...item.args.parentClassNames
+                            ...item.$1.args.parentClassNames
                                 .sublist(nameDefaults.length + 1),
-                            item.nameToDB
+                            item.$1.nameToDB
                           ].join('_').toSnakeCase()}',
-                            model: '${item.args.parentClassNames.sublist(nameDefaults.length + 1).join('_').toSnakeCase()}',
+                            model: '${item.$1.args.parentClassNames.sublist(nameDefaults.length + 1).join('_').toSnakeCase()}',
                             )'''),
                       ),
                   ],
@@ -343,10 +343,7 @@ void generatorListClass(
       fieldList.add(
         Field(
           (f) => f
-            ..name = '${[
-              ...nameDefaults,
-              e.nameDefault,
-            ].join('_').toCamelCase()}\$\$'
+            ..name = '${e.args.fieldNames.join('_').toCamelCase()}\$\$'
             ..modifier = FieldModifier.constant
             ..type = refer(name)
             ..assignment = Code('$name()')
@@ -407,6 +404,7 @@ void generatorListClassFore(
             ),
           ],
         );
+        // TODO(hodoan): check
         classBuilderListExtends.add(
           (
             e.nameDefault,
@@ -416,14 +414,19 @@ void generatorListClassFore(
                 ..methods.addAll(
                   [
                     for (final item in e.entityParent!
-                        .allssForChild(parent, nameDefaults.length + 1))
+                        .allssForChild2(parent, nameDefaults.length + 1))
                       Method(
                         (f) => f
-                          ..name = (item.$1.sublist(1)).join('_').toCamelCase()
-                          ..returns = refer('$name2<${item.$2.typeSelect}>')
+                          ..name = item.$2
+                              ? item.$1.args.fieldNames.join('_').toCamelCase()
+                              : item.$1.args.fieldNames
+                                  .sublist(1)
+                                  .join('_')
+                                  .toCamelCase()
+                          ..returns = refer('$name2<${item.$1.typeSelect}>')
                           ..docs.addAll([
-                            if (item.$2 is AColumn &&
-                                item.$2.alters
+                            if (item.$1 is AColumn &&
+                                item.$1.alters
                                     .any((e) => e.type == AlterTypeGen.drop))
                               '@Deprecated(\'no such column\')'
                           ])
@@ -433,12 +436,15 @@ void generatorListClassFore(
                           ..lambda = true
                           ..type = MethodType.getter
                           ..body = Code('''const $name2(
-                            name: '${item.$2.nameToDB}',
+                            name: '${item.$1.args.fieldNames.join('_').toSnakeCase()}',
                             nameCast: '${[
-                            ...item.$1.sublist(0, item.$1.length - 1),
-                            item.$2.nameToDB
+                            if (item.$2)
+                              entity.className
+                            else
+                              item.$1.className,
+                            ...item.$1.args.fieldNames
                           ].join('_').toSnakeCase()}',
-                            model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
+                            model: '${item.$2 ? parent.className.toSnakeCase() : item.$1.args.parentClassNames.sublist(nameDefaults.length + 1).join('_').toSnakeCase()}',
                             )'''),
                       ),
                   ],
@@ -453,10 +459,7 @@ void generatorListClassFore(
       fieldList.add(
         Field(
           (f) => f
-            ..name = '${[
-              ...nameDefaults,
-              e.nameDefault,
-            ].join('_').toCamelCase()}\$\$'
+            ..name = '${e.args.fieldNames.join('_').toCamelCase()}\$\$'
             ..modifier = FieldModifier.constant
             ..type = refer(name)
             ..assignment = Code('$name()')

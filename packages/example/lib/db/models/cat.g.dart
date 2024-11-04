@@ -234,14 +234,14 @@ class _$$$CatSetArgs<T> extends $CatSetArgs<T> {
 class _$$CatSetArgs {
   const _$$CatSetArgs();
 
-// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: [])
+// (nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: [], true)
   _$$$CatSetArgs<int> get id => const _$$$CatSetArgs(
         name: 'id',
         nameCast: 'cat_id',
         model: 'cat',
       );
 
-// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [])
+// (nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [], true)
   _$$$CatSetArgs<String> get birth => const _$$$CatSetArgs(
         name: 'birth',
         nameCast: 'cat_birth',
