@@ -163,7 +163,7 @@ memos)
 
   Future<int> update(Database database) async {
     return await database
-        .update('BillM', toDB(), where: "key = ?", whereArgs: [key]);
+        .update('BillM', toDB(), where: "key = ?", whereArgs: [this.key]);
   }
 
 // TODO(hodoan): check
@@ -179,12 +179,13 @@ ${$createSelect(select)}
  LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill_m.key
 WHERE bill_m.key = ?
 ''', [key]) as List<Map>);
+// TODO(hodoan): check
     return res.isNotEmpty ? BillM.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
-    await database
-        .rawQuery('''DELETE FROM BillM bill_m WHERE bill_m.key = ?''', [key]);
+    await database.rawQuery(
+        '''DELETE FROM BillM bill_m WHERE bill_m.key = ?''', [this.key]);
   }
 
   static Future<void> deleteById(
@@ -394,7 +395,7 @@ name)
   Future<int> update(Database database) async {
     await parent?.update(database);
     return await database
-        .update('BillDetail', toDB(), where: "key = ?", whereArgs: [key]);
+        .update('BillDetail', toDB(), where: "key = ?", whereArgs: [this.key]);
   }
 
 // TODO(hodoan): check
@@ -410,13 +411,14 @@ ${$createSelect(select)}
  LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill
 WHERE bill_detail.key = ?
 ''', [key]) as List<Map>);
+// TODO(hodoan): check
     return res.isNotEmpty ? BillDetail.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE FROM BillDetail bill_detail WHERE bill_detail.key = ?''',
-        [key]);
+        [this.key]);
   }
 
   static Future<void> deleteById(

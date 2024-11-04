@@ -144,7 +144,7 @@ blocked)
 
   Future<int> update(Database database) async {
     return await database
-        .update('Product', toDB(), where: "id = ?", whereArgs: [id]);
+        .update('Product', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
 // TODO(hodoan): check
@@ -159,12 +159,13 @@ ${$createSelect(select)}
  FROM Product product
 WHERE product.id = ?
 ''', [id]) as List<Map>);
+// TODO(hodoan): check
     return res.isNotEmpty ? Product.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
-    await database
-        .rawQuery('''DELETE FROM Product product WHERE product.id = ?''', [id]);
+    await database.rawQuery(
+        '''DELETE FROM Product product WHERE product.id = ?''', [this.id]);
   }
 
   static Future<void> deleteById(

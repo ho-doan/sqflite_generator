@@ -210,7 +210,11 @@ time)
     await parentClient?.update(database);
     return await database.update('Bill', toDB(),
         where: "product_id = ? AND client_id = ? AND client_product_id = ?",
-        whereArgs: [product?.id, client?.id, client?.product?.id]);
+        whereArgs: [
+          this.product?.id,
+          this.client?.id,
+          this.client?.product?.id
+        ]);
   }
 
 // TODO(hodoan): check
@@ -231,13 +235,14 @@ ${$createSelect(select)}
  LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
 WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
+// TODO(hodoan): check
     return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
-        [product?.id, client?.id, client?.product?.id]);
+        [this.product?.id, this.client?.id, this.client?.product?.id]);
   }
 
   static Future<void> deleteById(

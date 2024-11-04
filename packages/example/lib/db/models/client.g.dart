@@ -168,7 +168,8 @@ blocked)
   Future<int> update(Database database) async {
     await product.update(database);
     return await database.update('Client', toDB(),
-        where: "id = ? AND product_id = ?", whereArgs: [id, product?.id]);
+        where: "id = ? AND product_id = ?",
+        whereArgs: [this.id, this.product?.id]);
   }
 
 // TODO(hodoan): check
@@ -185,13 +186,14 @@ ${$createSelect(select)}
  LEFT JOIN Product product ON product.id = client.product
 WHERE client.id = ? AND client.product_id = ?
 ''', [id, productId]) as List<Map>);
+// TODO(hodoan): check
     return res.isNotEmpty ? Client.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE FROM Client client WHERE client.id = ? AND client.product_id = ?''',
-        [id, product?.id]);
+        [this.id, this.product?.id]);
   }
 
   static Future<void> deleteById(

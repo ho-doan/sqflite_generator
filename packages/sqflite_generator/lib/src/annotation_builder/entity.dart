@@ -222,6 +222,7 @@ class AEntity {
       '\'\'\',',
       _whereStaticArgs,
       ') as List<Map>);',
+      '// TODO(hodoan): check',
       'return res.isNotEmpty? $classType.fromDB(res.first,res) : null;'
     ].join('\n');
   }
@@ -339,41 +340,6 @@ class AEntity {
 }
 
 extension AEntityBase on AEntity {
-  /// using for gen select args
-  // List<KeyModel> _expandedForeignKeysAllForSelect() {
-  //   final lst = <KeyModel>[];
-  //   final self = KeyModel.ofForeignKeys(
-  //     foreignKeys,
-  //     className,
-  //     children: _expandedPrimaryKeysWithoutFore,
-  //   );
-  //   if (self != null) {
-  //     lst.add(self);
-  //   }
-  //   for (final item in foreignKeys) {
-  //     lst.add(
-  //       KeyModel.foreignKey(
-  //         item,
-  //         className: className,
-  //         children: _expandedPrimaryKeys(null, item.nameDefault),
-  //       ),
-  //     );
-  //     if (!(item.entityParent?.className == className)) {
-  //       lst.addAll([
-  //         for (final e
-  //             in item.entityParent?._expandedColumns(className) ?? <KeyModel>[])
-  //           KeyModel.cloneOfChild(e),
-  //       ]);
-  //       lst.addAll([
-  //         for (final e
-  //             in item.entityParent?._expandedIndices(className) ?? <KeyModel>[])
-  //           KeyModel.cloneOfChild(e),
-  //       ]);
-  //     }
-  //   }
-  //   return lst;
-  // }
-
   List<(List<String>, AProperty)> allss([List<String> parents = const []]) {
     final pp = [
       if (parents.isEmpty) className,
@@ -560,37 +526,6 @@ extension AEntityBase on AEntity {
     return 'CREATE TABLE IF NOT EXISTS $className${newName ?? ''}(\n\t\t\t${alls.join(',\n\t\t\t')}\n\t)';
   }
 
-  /// using parent call child
-  List<APkEx> aPssNoKey(String fieldName) {
-    return [
-      for (final e in aPs)
-        if (e is AColumn || e is AIndex)
-          APkEx(
-            parentClassName: parentClassName,
-            pk: null,
-            property: e,
-            nameCast: e.nameFromDB,
-            name: '${fieldName}_${e.nameToDB}'.toSnakeCase(),
-            model: className,
-            children: [],
-          )
-      // else if (e is AForeignKey)
-      //   ...() {
-      //     final f2 = fKWithoutPK(e);
-      //     if (f2 == null) {
-      //       // if (f2.className == className) {
-      //       final lst = e.entityParent?.primaryKeys
-      //               .map((f) => f.expanded(e.nameDefault)) ??
-      //           [];
-      //       final lst2 = lst.expand((e) => e.expanded()).toList();
-      //       return lst2.where((e) => e.pk?.entityParent == null).toList();
-      //     }
-      //     // Fore && PrimaryKey
-      //     return <APkEx>[];
-      //   }()
-    ];
-  }
-
   // TODO(hodoan): doing
   String rawDebug([AColumn? ps, String? newName]) {
     // final all = aPss(false);
@@ -603,39 +538,6 @@ extension AEntityBase on AEntity {
       return null;
     }
     return f;
-  }
-}
-
-class APkEx {
-  final APrimaryKey? pk;
-  final AForeignKey? fk;
-  final AProperty property;
-  final String nameCast;
-  final String name;
-  final String? name2;
-  final String? nameSelf;
-  final List<String> parentClassName;
-  final String model;
-  final List<APkEx> children;
-
-  const APkEx({
-    required this.pk,
-    this.fk,
-    this.nameSelf,
-    required this.property,
-    required this.nameCast,
-    required this.name,
-    this.name2,
-    required this.model,
-    required this.children,
-    required this.parentClassName,
-  });
-
-  @override
-  String toString() {
-    return 'APkEx(nameCast: $nameCast, name: $name, name2: $name2, model: $model, '
-        'children: $children, property: $property,'
-        ' pk: ${pk?.runtimeType.toString()}, nameSelf: $nameSelf, parentClassName: $parentClassName, fk: $fk)';
   }
 }
 
@@ -777,75 +679,6 @@ extension AQuery on AEntity {
       ...columns,
       ...indices,
     ];
-    // return {
-    //   for (final e in primaryKeys) e.nameDefault: e,
-    //   for (final e in foreignKeys) e.nameDefault: e,
-    //   for (final e in columns) e.nameDefault: e,
-    //   for (final e in indices) e.nameDefault: e,
-    // }.values.toList();
-  }
-
-  /// using [aMPallSet]
-  @Deprecated('using [aMPallSet]')
-  List<({String name, String? field, AProperty p, String nameCast})>
-      get aPsAll {
-    return [
-      for (final item in aPs)
-        if (item is AForeignKey) ...[
-          for (final sItem in item.entityParent?.aPs ?? <AProperty>[])
-            if (!sItem.dartType.toString().contains(className))
-              () {
-                return (sItem is AForeignKey)
-                    ? (
-                        name: '${() {
-                          if (sItem.className.toLowerCase() ==
-                              item.nameDefault.toLowerCase()) {
-                            return sItem.className;
-                          }
-                          return '${sItem.className}_${item.nameDefault}';
-                        }()}_${sItem.nameDefault}'
-                            .toCamelCase(),
-                        p: sItem,
-                        field: sItem.className.contains(className)
-                            ? item.nameDefault.toSnakeCase()
-                            : null,
-                        nameCast: sItem.nameFromDB,
-                      )
-                    : (
-                        name: '${() {
-                          if (sItem.className.toLowerCase() ==
-                              item.nameDefault.toLowerCase()) {
-                            return sItem.className;
-                          }
-                          return '${sItem.className}_${item.nameDefault}';
-                        }()}_${sItem.nameDefault}'
-                            .toCamelCase(),
-                        p: sItem,
-                        field: sItem.className.contains(className)
-                            ? item.nameDefault.toSnakeCase()
-                            : null,
-                        nameCast: sItem.nameFromDB,
-                      );
-              }()
-        ] else
-          (
-            name: item.nameDefault,
-            p: item,
-            field: null,
-            nameCast: item.nameFromDB,
-          ),
-    ];
-  }
-
-  List<({String name, String? field, AProperty p})> get aPsPri {
-    return [
-      for (final item in aPs)
-        if (item is APrimaryKey) (name: item.nameDefault, p: item, field: null),
-    ];
-  }
-
-  List<String> get $check {
-    return [for (final item in aPsAll) '${item.name} == true'];
   }
 }
 
@@ -1032,15 +865,6 @@ extension AFields on AEntity {
         ),
       ];
 
-  List<Field> get selectFields => [
-        for (final item in aPsAll)
-          Field(
-            (f) => f
-              ..name = item.name
-              ..modifier = FieldModifier.final$
-              ..type = refer('bool?'),
-          )
-      ];
   List<Field> get queryFields => [
         Field(
           (f) => f
@@ -1055,16 +879,6 @@ extension AFields on AEntity {
             ..type = refer('String'),
         ),
       ];
-  // TODO(hodoan): check
-  @Deprecated('using [keys]')
-  List<AProperty> get keys {
-    return [
-      for (final item in primaryKeys)
-        foreignKeys
-                .firstWhereOrNull((e) => e.nameDefault == item.nameDefault) ??
-            item
-    ];
-  }
 
   List<(String, APrimaryKey)> get keysNew {
     return [
@@ -1092,8 +906,7 @@ extension AFields on AEntity {
 
   List<String> get _whereArgs {
     return [
-      for (final key in keysNew)
-        key.$2.fieldNameFull3(null).toDotCase().replaceAll('.', '?.'),
+      for (final key in keysNew) 'this.${key.$2.args.fieldNames.join('?.')}',
     ];
   }
 
@@ -1103,7 +916,7 @@ extension AFields on AEntity {
   List<String> get _whereDB {
     return [
       for (final key in keysNew)
-        '${className.toSnakeCase()}.${key.$2.fieldNameFull} = ?'
+        '${className.toSnakeCase()}.${key.$2.args.fieldNames.join('_')} = ?'
     ];
   }
 

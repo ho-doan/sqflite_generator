@@ -144,7 +144,7 @@ birth)
     await parent?.update(database);
     await child?.update(database);
     return await database
-        .update('Cat', toDB(), where: "id = ?", whereArgs: [id]);
+        .update('Cat', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
 // TODO(hodoan): check
@@ -161,11 +161,13 @@ ${$createSelect(select)}
  LEFT JOIN Cat child_cat ON child_cat.id = cat.cat
 WHERE cat.id = ?
 ''', [id]) as List<Map>);
+// TODO(hodoan): check
     return res.isNotEmpty ? Cat.fromDB(res.first, res) : null;
   }
 
   Future<void> delete(Database database) async {
-    await database.rawQuery('''DELETE FROM Cat cat WHERE cat.id = ?''', [id]);
+    await database
+        .rawQuery('''DELETE FROM Cat cat WHERE cat.id = ?''', [this.id]);
   }
 
   static Future<void> deleteById(
