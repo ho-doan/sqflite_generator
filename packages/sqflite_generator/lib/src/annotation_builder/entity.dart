@@ -229,7 +229,7 @@ class AEntity {
 
   String delete(bool isStatic) {
     return [
-      'await database.rawQuery(\'\'\'DELETE FROM $className ${className.toSnakeCase()} WHERE ${_whereDB.join(' AND ')}\'\'\',',
+      'await database.rawQuery(\'\'\'DELETE * FROM $className ${className.toSnakeCase()} WHERE ${_whereDB.join(' AND ')}\'\'\',',
       isStatic ? _whereStaticArgs : _whereArgs,
       ');'
     ].join('');
@@ -736,7 +736,7 @@ extension AParam on AEntity {
   List<Parameter> get keysRequiredArgs => [
         for (final key in keysNew)
           Parameter((p) => p
-            ..name = key.$2.fieldNameFull3(null).toCamelCase()
+            ..name = key.$2.args.fieldNames.join('_').toCamelCase()
             ..type = refer(key.$2.dartType.toString()))
       ];
   List<Parameter> get setOptionalArgs => [
@@ -921,6 +921,9 @@ extension AFields on AEntity {
   }
 
   List<String> get _whereDBUpdate {
-    return [for (final key in keysNew) '${key.$2.fieldNameFull} = ?'];
+    return [
+      for (final key in keysNew)
+        '${key.$2.args.fieldNames.join('_').toSnakeCase()} = ?'
+    ];
   }
 }

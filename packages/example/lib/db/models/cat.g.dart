@@ -167,14 +167,14 @@ WHERE cat.id = ?
 
   Future<void> delete(Database database) async {
     await database
-        .rawQuery('''DELETE FROM Cat cat WHERE cat.id = ?''', [this.id]);
+        .rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [this.id]);
   }
 
   static Future<void> deleteById(
     Database database,
     int? id,
   ) async {
-    await database.rawQuery('''DELETE FROM Cat cat WHERE cat.id = ?''', [id]);
+    await database.rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [id]);
   }
 
   static Future<void> deleteAll(Database database) async {

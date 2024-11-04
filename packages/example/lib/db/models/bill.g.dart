@@ -241,7 +241,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
+        '''DELETE * FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
         [this.product?.id, this.client?.id, this.client?.product?.id]);
   }
 
@@ -252,7 +252,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
     int? clientProductId,
   ) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
+        '''DELETE * FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
         [productId, clientId, clientProductId]);
   }
 

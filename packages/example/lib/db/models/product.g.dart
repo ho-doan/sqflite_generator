@@ -165,15 +165,15 @@ WHERE product.id = ?
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Product product WHERE product.id = ?''', [this.id]);
+        '''DELETE * FROM Product product WHERE product.id = ?''', [this.id]);
   }
 
   static Future<void> deleteById(
     Database database,
     int? id,
   ) async {
-    await database
-        .rawQuery('''DELETE FROM Product product WHERE product.id = ?''', [id]);
+    await database.rawQuery(
+        '''DELETE * FROM Product product WHERE product.id = ?''', [id]);
   }
 
   static Future<void> deleteAll(Database database) async {

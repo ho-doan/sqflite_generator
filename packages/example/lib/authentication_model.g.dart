@@ -185,7 +185,7 @@ WHERE bill_m.key = ?
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM BillM bill_m WHERE bill_m.key = ?''', [this.key]);
+        '''DELETE * FROM BillM bill_m WHERE bill_m.key = ?''', [this.key]);
   }
 
   static Future<void> deleteById(
@@ -193,7 +193,7 @@ WHERE bill_m.key = ?
     int? key,
   ) async {
     await database
-        .rawQuery('''DELETE FROM BillM bill_m WHERE bill_m.key = ?''', [key]);
+        .rawQuery('''DELETE * FROM BillM bill_m WHERE bill_m.key = ?''', [key]);
   }
 
   static Future<void> deleteAll(Database database) async {
@@ -417,7 +417,7 @@ WHERE bill_detail.key = ?
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM BillDetail bill_detail WHERE bill_detail.key = ?''',
+        '''DELETE * FROM BillDetail bill_detail WHERE bill_detail.key = ?''',
         [this.key]);
   }
 
@@ -426,7 +426,7 @@ WHERE bill_detail.key = ?
     int? key,
   ) async {
     await database.rawQuery(
-        '''DELETE FROM BillDetail bill_detail WHERE bill_detail.key = ?''',
+        '''DELETE * FROM BillDetail bill_detail WHERE bill_detail.key = ?''',
         [key]);
   }
 
