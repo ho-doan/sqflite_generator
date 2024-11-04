@@ -39,6 +39,7 @@ class AProperty {
   final String className;
   final int step;
   final List<AlterDBGen> alters;
+  @Deprecated('use args.class')
   final List<String> parentClassName;
 
   const AProperty({
@@ -128,102 +129,6 @@ extension StringXm on String {
 }
 
 extension Aps on AProperty {
-  /// [fieldName] is null for primary key self
-  String _fieldNameFull(String? fieldName) {
-    if (parentClassName.length > 1) {
-      return [
-        if (fieldName != null) fieldName,
-        ...parentClassName.sublist(0, parentClassName.length - 1),
-        className,
-        nameDefault
-      ].join('_');
-    } else if (parentClassName.isNotEmpty) {
-      return [
-        if (fieldName != null) fieldName,
-        className,
-        nameDefault,
-      ].join('_');
-    }
-    return nameDefault;
-  }
-
-  String fieldNameFull3(String? fieldName) {
-    if (parentClassName.length > 1) {
-      return [
-        if (fieldName != null) fieldName,
-        // ...parentClassName,
-        parentClassName.last,
-        className,
-        nameDefault
-      ].join('_');
-    } else if (parentClassName.isNotEmpty) {
-      return [
-        if (fieldName != null) fieldName,
-        className,
-        nameDefault,
-      ].join('_');
-    }
-    return nameDefault;
-  }
-
-  List<String> fieldNameFull4(String? fieldName) {
-    if (parentClassName.length > 1) {
-      return [
-        if (fieldName != null) fieldName,
-        parentClassName.first,
-        ...parentClassName.sublist(2),
-        // parentClassName.last,
-        className,
-        nameDefault
-      ].map((e) => e.toCamelCase()).toList();
-    } else if (parentClassName.isNotEmpty) {
-      return [
-        if (fieldName != null) fieldName,
-        // ...parentClassName,
-        ...parentClassName,
-        // className,
-        nameDefault,
-      ];
-    }
-    return [nameDefault];
-  }
-
-  List<String> fieldNameFull5(String? fieldName) {
-    if (parentClassName.length > 1) {
-      return [
-        if (fieldName != null) fieldName,
-        parentClassName.first,
-        ...parentClassName.sublist(1),
-        // parentClassName.last,
-        className,
-        nameDefault
-      ].map((e) => e.toCamelCase()).toList();
-    } else if (parentClassName.isNotEmpty) {
-      return [
-        if (fieldName != null) fieldName,
-        // ...parentClassName,
-        ...parentClassName,
-        className,
-        nameDefault,
-      ];
-    }
-    return [nameDefault];
-  }
-
-  String get _fieldNameFullForForeign {
-    if (parentClassName.length > 1) {
-      return [...parentClassName.sublist(1), className, nameDefault].join('_');
-    }
-    return nameDefault;
-  }
-
-  String get fieldNameFull => _fieldNameFull(null).toSnakeCase();
-
-  String fieldNameFull2(String fieldName) =>
-      _fieldNameFull(fieldName).toSnakeCase();
-
-  String get fieldNameFullForForeign => _fieldNameFullForForeign.toSnakeCase();
-
   String get fieldSuffix => '${name ?? nameDefault}${dartType.fieldSuffix}';
   String get defaultSuffix => '$nameDefault${dartType.fieldSuffix}';
 

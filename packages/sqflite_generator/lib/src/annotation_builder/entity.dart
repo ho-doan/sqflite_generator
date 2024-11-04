@@ -468,7 +468,7 @@ extension AEntityBase on AEntity {
             /// }
             /// ```
             /// result [true]
-            !e.parentClassName.contains(className)) ...[
+            !e.args.parentClassNames.sublist(1).contains(className)) ...[
           ...e.expanded2().map(
                 (e) => e.rawCreate(
                   // e.name2 ?? e.name,
@@ -890,7 +890,8 @@ extension AFields on AEntity {
             /// }
             /// ```
             /// result [true]
-            !e.parentClassName
+            !e.args.parentClassNames
+                .sublist(1)
                 .map((e) => e.toCamelCase())
                 .contains(className.toCamelCase())) ...[
           ...[

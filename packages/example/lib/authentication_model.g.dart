@@ -28,7 +28,6 @@ extension BillMQuery on BillM {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
-			details_key INTEGER PRIMARY KEY AUTOINCREMENT,
 			details_parent_key INTEGER,
 			details_name TEXT NOT NULL,
 			FOREIGN KEY (details_parent_key) REFERENCES BillM (parent_key) ON UPDATE NO ACTION ON DELETE NO ACTION
