@@ -42,30 +42,27 @@ extension BillQuery on Bill {
 ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [client, product, id], step: 3), parentClassName: [client, Client]),
 ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill], fieldNames: [time], step: 1), parentClassName: [])''';
 
+// TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-// ([Bill, product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product])
   static const $BillSetArgs<int> productId = $BillSetArgs(
-    name: 'id',
+    name: 'product_id',
     nameCast: 'bill_product_id',
-    model: 'bill_product',
+    model: 'bill',
   );
 
-// ([Bill, client, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client])
   static const $BillSetArgs<int> clientId = $BillSetArgs(
-    name: 'id',
+    name: 'client_id',
     nameCast: 'bill_client_id',
-    model: 'bill_client',
+    model: 'bill',
   );
 
-// ([Bill, client, Product, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [client, product, id], step: 3), parentClassName: [client, Client])
   static const $BillSetArgs<int> clientProductId = $BillSetArgs(
-    name: 'id',
+    name: 'client_product_id',
     nameCast: 'bill_client_product_id',
-    model: 'bill_client_product',
+    model: 'bill',
   );
 
-// ([Bill, time], nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill], fieldNames: [time], step: 1), parentClassName: [])
   static const $BillSetArgs<String> time = $BillSetArgs(
     name: 'time',
     nameCast: 'bill_time',

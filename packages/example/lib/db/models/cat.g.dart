@@ -26,16 +26,15 @@ extension CatQuery on Cat {
       '''([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: []),
 ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [])''';
 
+// TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-// ([Cat, id], nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: [])
   static const $CatSetArgs<int> id = $CatSetArgs(
     name: 'id',
     nameCast: 'cat_id',
     model: 'cat',
   );
 
-// ([Cat, birth], nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [])
   static const $CatSetArgs<String> birth = $CatSetArgs(
     name: 'birth',
     nameCast: 'cat_birth',

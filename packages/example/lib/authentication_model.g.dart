@@ -23,6 +23,7 @@ extension BillMQuery on BillM {
 ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: []),
 ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: [])''';
 
+// TODO(hodoan): check
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
@@ -49,14 +50,12 @@ extension BillMQuery on BillM {
     ]
   };
 
-// ([BillM, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: [])
   static const $BillMSetArgs<int> key = $BillMSetArgs(
     name: 'key',
     nameCast: 'bill_m_key',
     model: 'bill_m',
   );
 
-// ([BillM, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: [])
   static const $BillMSetArgs<String> name = $BillMSetArgs(
     name: 'name',
     nameCast: 'bill_m_name',
@@ -64,7 +63,6 @@ extension BillMQuery on BillM {
   );
 
   @Deprecated('no such column')
-// ([BillM, memos], nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: [])
   static const $BillMSetArgs<String> memos = $BillMSetArgs(
     name: 'memos',
     nameCast: 'bill_m_memos',
@@ -283,16 +281,15 @@ extension BillDetailQuery on BillDetail {
       '''([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: []),
 ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: [])''';
 
+// TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-// ([BillDetail, key], nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: [])
   static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
     name: 'key',
     nameCast: 'bill_detail_key',
     model: 'bill_detail',
   );
 
-// ([BillDetail, name], nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: [])
   static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
     name: 'name',
     nameCast: 'bill_detail_name',

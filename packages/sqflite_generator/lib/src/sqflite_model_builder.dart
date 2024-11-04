@@ -89,6 +89,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           (f) => f
             ..name = 'alter'
             ..type = refer('Map<int,List<String>>')
+            ..docs.add('// TODO(hodoan): check')
             ..assignment = Code("""${entity.rawAlterTable}""")
             ..modifier = FieldModifier.constant
             ..static = true,
@@ -96,23 +97,20 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         for (final item in entity.allss())
           Field(
             (f) => f
-              ..name = (item.$1.sublist(1)).join('_').toCamelCase()
+              ..name = item.$2.args.fieldNames.join('_').toCamelCase()
               ..type = refer('${entity.setClassName}<${item.$2.typeSelect}>')
               ..docs.addAll([
                 if (item.$2 is AColumn &&
                     item.$2.alters.any((e) => e.type == AlterTypeGen.drop))
                   '@Deprecated(\'no such column\')'
               ])
-              ..docs.addAll([
-                '// $item',
-              ])
               ..assignment = Code('''${entity.setClassName}(
-              name: '${item.$2.nameToDB}',
+              name: '${item.$2.args.fieldNames.join('_').toSnakeCase()}',
               nameCast: '${[
-                ...item.$1.sublist(0, item.$1.length - 1),
-                item.$2.nameToDB
+                item.$2.args.parentClassNames.first,
+                ...item.$2.args.fieldNames
               ].join('_').toSnakeCase()}',
-              model: '${item.$1.sublist(0, item.$1.length - 1).join('_').toSnakeCase()}',
+              model: '${item.$2.args.parentClassNames.first.toSnakeCase()}',
               )''')
               ..modifier = FieldModifier.constant
               ..static = true,

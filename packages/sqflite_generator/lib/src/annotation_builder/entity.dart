@@ -690,8 +690,7 @@ extension AInsert on AEntity {
     }
 
     final fieldsValue = [
-      for (final key in keysNew)
-        key.$2.fieldNameFull3(null).toDotCase().replaceAll('.', '?.'),
+      for (final key in keysNew) key.$2.args.fieldNames.join('?.'),
       for (final item in columns)
         if (item.dartType.toString().contains('DateTime'))
           'this.${item.defaultSuffix}.millisecondsSinceEpoch'
