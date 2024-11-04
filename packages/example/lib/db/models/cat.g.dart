@@ -196,12 +196,8 @@ WHERE cat.id = ?
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'birth': this.birth?.millisecondsSinceEpoch,
-
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [parent, id], step: 2), parentClassName: [parent]
-        'parent_cat_id': this.parent?.id,
-
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat, Cat], fieldNames: [child, id], step: 2), parentClassName: [child]
-        'child_cat_id': this.child?.id
+        'parent_id': this.parent?.id,
+        'child_id': this.child?.id
       };
 }
 

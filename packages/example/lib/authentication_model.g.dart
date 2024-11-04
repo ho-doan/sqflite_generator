@@ -443,13 +443,8 @@ WHERE bill_detail.key = ?
           key: json['bill_detail_key'] as int?,
           name: json['${childName}bill_detail_name'] as String,
           parent: BillM.fromDB(json, lst, 'parent_'));
-  Map<String, dynamic> $toDB() => {
-        'key': this.key,
-        'name': this.name,
-
-// nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail, BillM], fieldNames: [parent, key], step: 2), parentClassName: [parent]
-        'parent_bill_m_key': this.parent?.key
-      };
+  Map<String, dynamic> $toDB() =>
+      {'key': this.key, 'name': this.name, 'parent_key': this.parent?.key};
 }
 
 class $BillDetailSetArgs<T> extends WhereModel<T> {

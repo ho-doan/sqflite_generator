@@ -21,7 +21,7 @@ class Bill extends EntityQuery {
   final Bill? parent;
 
   @ForeignKey(name: 'Client')
-  final Client? parentClient;
+  final Client? clientParent;
 
   @column
   final DateTime? time;
@@ -30,7 +30,7 @@ class Bill extends EntityQuery {
     this.client,
     this.time,
     this.parent,
-    this.parentClient,
+    this.clientParent,
     required this.product,
   });
 

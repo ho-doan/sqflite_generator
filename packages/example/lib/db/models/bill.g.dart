@@ -17,7 +17,7 @@ extension BillQuery on Bill {
 
   static const _$$BillSetArgs parent$$ = _$$BillSetArgs();
 
-  static const _$$ClientSetArgs parentClient$$ = _$$ClientSetArgs();
+  static const _$$ClientSetArgs clientParent$$ = _$$ClientSetArgs();
 
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Bill(
 			product_id INTEGER,
@@ -26,14 +26,14 @@ extension BillQuery on Bill {
 			parent_product_id INTEGER,
 			parent_client_id INTEGER,
 			parent_client_product_id INTEGER,
-			parent_client_id INTEGER,
-			parent_client_product_id INTEGER,
+			client_parent_id INTEGER,
+			client_parent_product_id INTEGER,
 			time INTEGER,
 			PRIMARY KEY (product_id,client_id,client_product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
 			FOREIGN KEY (client_id,client_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
 			FOREIGN KEY (parent_product_id,parent_client_id,parent_client_product_id) REFERENCES Bill (product_id,client_id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (parent_client_id,parent_client_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (client_parent_id,client_parent_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
   static const String debug =
@@ -90,10 +90,10 @@ extension BillQuery on Bill {
     BillQuery.parent$$.clientId,
     BillQuery.parent$$.clientProductId,
     BillQuery.parent$$.time,
-    BillQuery.parentClient$$.id,
-    BillQuery.parentClient$$.firstName,
-    BillQuery.parentClient$$.lastName,
-    BillQuery.parentClient$$.blocked,
+    BillQuery.clientParent$$.id,
+    BillQuery.clientParent$$.firstName,
+    BillQuery.clientParent$$.lastName,
+    BillQuery.clientParent$$.blocked,
   };
 
 // TODO(hodoan): check
@@ -131,7 +131,7 @@ extension BillQuery on Bill {
  LEFT JOIN Product product ON product.id = bill.product
  LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
- LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
+ LEFT JOIN Client client_parent_client ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -180,7 +180,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     await product?.insert(database);
     await client?.insert(database);
     await parent?.insert(database);
-    await parentClient?.insert(database);
+    await clientParent?.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Bill (product,
 client,
@@ -197,8 +197,8 @@ time)
       parent?.product?.id,
       parent?.client?.id,
       parent?.client?.product?.id,
-      parentClient?.id,
-      parentClient?.product?.id,
+      clientParent?.id,
+      clientParent?.product?.id,
     ]);
     return $id;
   }
@@ -207,7 +207,7 @@ time)
     await product?.update(database);
     await client?.update(database);
     await parent?.update(database);
-    await parentClient?.update(database);
+    await clientParent?.update(database);
     return await database.update('Bill', toDB(),
         where: "product_id = ? AND client_id = ? AND client_product_id = ?",
         whereArgs: [
@@ -232,7 +232,7 @@ ${$createSelect(select)}
  LEFT JOIN Product product ON product.id = bill.product
  LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
- LEFT JOIN Client parent_client_client ON parent_client_client.id = bill.client AND parent_client_client.product = bill.client
+ LEFT JOIN Client client_parent_client ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
 WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
 // TODO(hodoan): check
@@ -272,29 +272,17 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
           product: Product.fromDB(json, lst, 'product_'),
           client: Client.fromDB(json, lst, 'client_'),
           parent: Bill.fromDB(json, lst, 'parent_'),
-          parentClient: Client.fromDB(json, lst, 'parent_client_'));
+          clientParent: Client.fromDB(json, lst, 'client_parent_'));
   Map<String, dynamic> $toDB() => {
         'product_id': this.product?.id,
         'client_id': this.client?.id,
         'client_product_id': this.client?.product?.id,
         'time': this.time?.millisecondsSinceEpoch,
-
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Product], fieldNames: [parent, product, id], step: 3), parentClassName: [parent, Bill]
-        'parent_parent_bill_product_id': this.parent?.product?.id,
-
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client], fieldNames: [parent, client, id], step: 3), parentClassName: [parent, Bill]
-        'parent_parent_bill_client_id': this.parent?.client?.id,
-
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Bill, Client, Product], fieldNames: [parent, client, product, id], step: 4), parentClassName: [parent, Bill, Client]
-        'parent_parent_bill_client_product_id':
-            this.parent?.client?.product?.id,
-
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [parentClient, id], step: 2), parentClassName: [parentClient]
-        'parent_client_client_id': this.parentClient?.id,
-
-// nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [parentClient, product, id], step: 3), parentClassName: [parentClient, Client]
-        'parent_client_parent_client_client_product_id':
-            this.parentClient?.product?.id
+        'parent_product_id': this.parent?.product?.id,
+        'parent_client_id': this.parent?.client?.id,
+        'parent_client_product_id': this.parent?.client?.product?.id,
+        'client_parent_id': this.clientParent?.id,
+        'client_parent_product_id': this.clientParent?.product?.id
       };
 }
 

@@ -114,7 +114,7 @@ class AEntity {
       for (final key in primaryKeys.where(
           (e) => foreignKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
         '${key.nameDefault}: ${key.entityParent?.className}'
-            '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\')',
+            '.fromDB(json,lst,\'${key.args.fieldNames.join('_').toSnakeCase()}_\')',
       for (final key in foreignKeys.where((e) =>
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
         if (key.dartType.isDartCoreList)
@@ -144,7 +144,7 @@ class AEntity {
   String get rawToDB {
     return [
       for (final item in keysNew)
-        '\'${item.$2.fieldNameFull}\': this.${item.$2.fieldNameFull4(null).join('?.')}',
+        '\'${item.$2.args.fieldNames.join('_').toSnakeCase()}\': this.${item.$2.args.fieldNames.join('?.')}',
       for (final item in indices)
         '\'${item.nameToDB}\': this.${item.nameDefault}',
       for (final item in columns)
@@ -161,10 +161,7 @@ class AEntity {
         if (!k.dartType.isDartCoreList)
           for (final key
               in k.entityParent!.primaryKeys.expand((e) => e.expanded2()))
-            '\n// $key\n \'${[
-              if (key.parentClassName.length > 1) k.nameDefault,
-              ...key.fieldNameFull5(null)
-            ].join('_').toSnakeCase()}\': this.${key.fieldNameFull4(null).join('?.')}',
+            '\'${key.args.fieldNames.join('_').toSnakeCase()}\': this.${key.args.fieldNames.join('?.')}',
     ].join(',\n');
   }
 
@@ -193,7 +190,7 @@ class AEntity {
       "''';",
       "if (kDebugMode) { print('get all $className \$sql'); }",
       'final mapList = (await database.rawQuery(sql) as List<Map>);',
-      'return mapList.groupBy(((m) => [${keysNew.map((e) => 'm[$extensionName.${e.$2.fieldNameFull.toCamelCase()}.nameCast]').join(',')}]))'
+      'return mapList.groupBy(((m) => [${keysNew.map((e) => 'm[$extensionName.${e.$2.args.fieldNames.join('_').toCamelCase()}.nameCast]').join(',')}]))'
           '.values.map((e)=>$classType.fromDB(e.first,e)).toList();',
     ].join('\n');
   }
