@@ -60,7 +60,8 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Cat cat
-
+${CatSetArgs.$parent.leftJoin('cat')}
+${CatSetArgs.$child.leftJoin('cat')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -110,7 +111,7 @@ cat,
 birth) 
        VALUES(?, ?, ?, ?)''', [
       id,
-      this.birth?.millisecondsSinceEpoch,
+      birth?.millisecondsSinceEpoch,
       parent?.id,
       child?.id,
     ]);
@@ -121,7 +122,7 @@ birth)
     await parent?.update(database);
     await child?.update(database);
     return await database
-        .update('Cat', toDB(), where: "id = ?", whereArgs: [this.id]);
+        .update('Cat', toDB(), where: "id = ?", whereArgs: [id]);
   }
 
 // TODO(hodoan): check
@@ -134,6 +135,8 @@ birth)
 SELECT 
 ${$createSelect(select)}
  FROM Cat cat
+${CatSetArgs.$parent.leftJoin('cat')}
+${CatSetArgs.$child.leftJoin('cat')}
 WHERE cat.id = ?
 ''', [id]) as List<Map>);
 // TODO(hodoan): check
@@ -141,8 +144,7 @@ WHERE cat.id = ?
   }
 
   Future<void> delete(Database database) async {
-    await database
-        .rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [this.id]);
+    await database.rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [id]);
   }
 
   static Future<void> deleteById(
@@ -169,10 +171,10 @@ WHERE cat.id = ?
           parent: Cat.fromDB(json, lst, 'parent_'),
           child: Cat.fromDB(json, lst, 'child_'));
   Map<String, dynamic> $toDB() => {
-        'id': this.id,
-        'birth': this.birth?.millisecondsSinceEpoch,
-        'parent_id': this.parent?.id,
-        'child_id': this.child?.id
+        'id': id,
+        'birth': birth?.millisecondsSinceEpoch,
+        'parent_id': parent?.id,
+        'child_id': child?.id
       };
 }
 
@@ -202,10 +204,13 @@ class CatSetArgs<T> {
     model: 'cat',
   );
 
+  static const CatSetArgs<CatSet> $parent = CatSetArgs<CatSet>('parent_');
+
+  static const CatSetArgs<CatSet> $child = CatSetArgs<CatSet>('child_');
+
   String leftJoin(String parentModel) =>
       '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self}id''';
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: []
   $CatSetArgs<int, T> get $id => $CatSetArgs<int, T>(
         name: 'id',
         nameCast: 'cat_id',
@@ -213,13 +218,16 @@ class CatSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: []
   $CatSetArgs<String, T> get $birth => $CatSetArgs<String, T>(
         name: 'birth',
         nameCast: 'cat_birth',
         model: 'cat',
         self: this.self,
       );
+
+  CatSetArgs<T> get $$parent => CatSetArgs<T>('parent_');
+
+  CatSetArgs<T> get $$child => CatSetArgs<T>('child_');
 }
 
 class CatSet {

@@ -206,10 +206,12 @@ class BillMSetArgs<T> {
     model: 'bill_m',
   );
 
+  static const BillDetailSetArgs<BillDetailSet> $details =
+      BillDetailSetArgs<BillDetailSet>('details_');
+
   String leftJoin(String parentModel) =>
       '''LEFT JOIN BillM ${self}bill_m ON ${self}bill_m.key = $parentModel.${self}key''';
 
-// version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: []
   $BillMSetArgs<int, T> get $key => $BillMSetArgs<int, T>(
         name: 'key',
         nameCast: 'bill_m_key',
@@ -217,7 +219,6 @@ class BillMSetArgs<T> {
         self: this.self,
       );
 
-// version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: []
   $BillMSetArgs<String, T> get $name => $BillMSetArgs<String, T>(
         name: 'name',
         nameCast: 'bill_m_name',
@@ -225,7 +226,6 @@ class BillMSetArgs<T> {
         self: this.self,
       );
 
-// version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: []
   @Deprecated('no such column')
   $BillMSetArgs<String, T> get $memos => $BillMSetArgs<String, T>(
         name: 'memos',
@@ -233,6 +233,8 @@ class BillMSetArgs<T> {
         model: 'bill_m',
         self: this.self,
       );
+
+  BillDetailSetArgs<T> get $$details => BillDetailSetArgs<T>('details_');
 }
 
 class BillMSet {
@@ -292,7 +294,7 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
-
+${BillDetailSetArgs.$parent.leftJoin('bill_detail')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -363,7 +365,7 @@ name)
 SELECT 
 ${$createSelect(select)}
  FROM BillDetail bill_detail
-
+${BillDetailSetArgs.$parent.leftJoin('bill_detail')}
 WHERE bill_detail.key = ?
 ''', [key]) as List<Map>);
 // TODO(hodoan): check
@@ -430,10 +432,12 @@ class BillDetailSetArgs<T> {
     model: 'bill_detail',
   );
 
+  static const BillMSetArgs<BillMSet> $parent =
+      BillMSetArgs<BillMSet>('parent_');
+
   String leftJoin(String parentModel) =>
       '''LEFT JOIN BillDetail ${self}bill_detail ON ${self}bill_detail.key = $parentModel.${self}key''';
 
-// version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: []
   $BillDetailSetArgs<int, T> get $key => $BillDetailSetArgs<int, T>(
         name: 'key',
         nameCast: 'bill_detail_key',
@@ -441,13 +445,14 @@ class BillDetailSetArgs<T> {
         self: this.self,
       );
 
-// version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: []
   $BillDetailSetArgs<String, T> get $name => $BillDetailSetArgs<String, T>(
         name: 'name',
         nameCast: 'bill_detail_name',
         model: 'bill_detail',
         self: this.self,
       );
+
+  BillMSetArgs<T> get $$parent => BillMSetArgs<T>('parent_');
 }
 
 class BillDetailSet {

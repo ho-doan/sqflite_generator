@@ -74,6 +74,8 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
     final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
 ${BillSetArgs.$product.leftJoin('bill')}
 ${BillSetArgs.$client.leftJoin('bill')}
+${BillSetArgs.$parent.leftJoin('bill')}
+${BillSetArgs.$clientParent.leftJoin('bill')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -134,13 +136,13 @@ time)
        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''', [
       product?.id,
       client?.id,
-      client?.product?.id,
-      this.time?.millisecondsSinceEpoch,
+      client?.product.id,
+      time?.millisecondsSinceEpoch,
       parent?.product?.id,
       parent?.client?.id,
-      parent?.client?.product?.id,
+      parent?.client?.product.id,
       clientParent?.id,
-      clientParent?.product?.id,
+      clientParent?.product.id,
     ]);
     return $id;
   }
@@ -152,11 +154,7 @@ time)
     await clientParent?.update(database);
     return await database.update('Bill', toDB(),
         where: "product_id = ? AND client_id = ? AND client_product_id = ?",
-        whereArgs: [
-          this.product?.id,
-          this.client?.id,
-          this.client?.product?.id
-        ]);
+        whereArgs: [product?.id, client?.id, client?.product.id]);
   }
 
 // TODO(hodoan): check
@@ -173,6 +171,8 @@ ${$createSelect(select)}
  FROM Bill bill
 ${BillSetArgs.$product.leftJoin('bill')}
 ${BillSetArgs.$client.leftJoin('bill')}
+${BillSetArgs.$parent.leftJoin('bill')}
+${BillSetArgs.$clientParent.leftJoin('bill')}
 WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
 // TODO(hodoan): check
@@ -182,7 +182,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE * FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
-        [this.product?.id, this.client?.id, this.client?.product?.id]);
+        [product?.id, client?.id, client?.product.id]);
   }
 
   static Future<void> deleteById(
@@ -214,15 +214,15 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
           parent: Bill.fromDB(json, lst, 'parent_'),
           clientParent: Client.fromDB(json, lst, 'client_parent_'));
   Map<String, dynamic> $toDB() => {
-        'product_id': this.product?.id,
-        'client_id': this.client?.id,
-        'client_product_id': this.client?.product?.id,
-        'time': this.time?.millisecondsSinceEpoch,
-        'parent_product_id': this.parent?.product?.id,
-        'parent_client_id': this.parent?.client?.id,
-        'parent_client_product_id': this.parent?.client?.product?.id,
-        'client_parent_id': this.clientParent?.id,
-        'client_parent_product_id': this.clientParent?.product?.id
+        'product_id': product?.id,
+        'client_id': client?.id,
+        'client_product_id': client?.product.id,
+        'time': time?.millisecondsSinceEpoch,
+        'parent_product_id': parent?.product?.id,
+        'parent_client_id': parent?.client?.id,
+        'parent_client_product_id': parent?.client?.product.id,
+        'client_parent_id': clientParent?.id,
+        'client_parent_product_id': clientParent?.product.id
       };
 }
 
@@ -240,7 +240,6 @@ class BillSetArgs<T> {
 
   final String self;
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   static const ProductSetArgs<BillSet> $product =
       ProductSetArgs<BillSet>('product_');
 
@@ -251,7 +250,6 @@ class BillSetArgs<T> {
     model: 'bill',
   );
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client]
   static const ClientSetArgs<BillSet> $client =
       ClientSetArgs<BillSet>('client_');
 
@@ -275,13 +273,16 @@ class BillSetArgs<T> {
     model: 'bill',
   );
 
+  static const BillSetArgs<BillSet> $parent = BillSetArgs<BillSet>('parent_');
+
+  static const ClientSetArgs<ClientSet> $clientParent =
+      ClientSetArgs<ClientSet>('client_parent_');
+
   String leftJoin(String parentModel) =>
       '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self}product_id AND ${self}bill.client_id = $parentModel.${self}client_id AND ${self}bill.client_product_id = $parentModel.${self}client_product_id''';
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   ProductSetArgs<T> get $$product => ProductSetArgs<T>('product_');
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   $BillSetArgs<int, T> get $productId => $BillSetArgs<int, T>(
         name: 'product_id',
         nameCast: 'bill_product_id',
@@ -289,10 +290,8 @@ class BillSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client]
   ClientSetArgs<T> get $$client => ClientSetArgs<T>('client_');
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client]
   $BillSetArgs<int, T> get $clientId => $BillSetArgs<int, T>(
         name: 'client_id',
         nameCast: 'bill_client_id',
@@ -300,7 +299,6 @@ class BillSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [client, product, id], step: 3), parentClassName: [client, Client]
   $BillSetArgs<int, T> get $clientProductId => $BillSetArgs<int, T>(
         name: 'client_product_id',
         nameCast: 'bill_client_product_id',
@@ -308,13 +306,16 @@ class BillSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill], fieldNames: [time], step: 1), parentClassName: []
   $BillSetArgs<String, T> get $time => $BillSetArgs<String, T>(
         name: 'time',
         nameCast: 'bill_time',
         model: 'bill',
         self: this.self,
       );
+
+  BillSetArgs<T> get $$parent => BillSetArgs<T>('parent_');
+
+  ClientSetArgs<T> get $$clientParent => ClientSetArgs<T>('client_parent_');
 }
 
 class BillSet {

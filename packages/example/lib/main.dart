@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:example/authentication_model.dart';
 import 'package:example/db/models/bill.dart';
-import 'package:example/db/models/client.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart' hide Column;

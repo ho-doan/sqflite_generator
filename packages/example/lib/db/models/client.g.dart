@@ -121,10 +121,10 @@ last_name,
 blocked) 
        VALUES(?, ?, ?, ?, ?)''', [
       id,
-      product?.id,
-      this.firstName,
-      this.lastName,
-      this.blocked,
+      product.id,
+      firstName,
+      lastName,
+      blocked,
     ]);
     return $id;
   }
@@ -132,8 +132,7 @@ blocked)
   Future<int> update(Database database) async {
     await product.update(database);
     return await database.update('Client', toDB(),
-        where: "id = ? AND product_id = ?",
-        whereArgs: [this.id, this.product?.id]);
+        where: "id = ? AND product_id = ?", whereArgs: [id, product.id]);
   }
 
 // TODO(hodoan): check
@@ -157,7 +156,7 @@ WHERE client.id = ? AND client.product_id = ?
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE * FROM Client client WHERE client.id = ? AND client.product_id = ?''',
-        [this.id, this.product?.id]);
+        [id, product.id]);
   }
 
   static Future<void> deleteById(
@@ -186,11 +185,11 @@ WHERE client.id = ? AND client.product_id = ?
           blocked: (json['${childName}client_blocked'] as int?) == 1,
           product: Product.fromDB(json, lst, 'product_'));
   Map<String, dynamic> $toDB() => {
-        'id': this.id,
-        'product_id': this.product?.id,
-        'first_name': this.firstName,
-        'last_name': this.lastName,
-        'blocked': (this.blocked ?? false) ? 1 : 0
+        'id': id,
+        'product_id': product.id,
+        'first_name': firstName,
+        'last_name': lastName,
+        'blocked': (blocked) ? 1 : 0
       };
 }
 
@@ -215,7 +214,6 @@ class ClientSetArgs<T> {
     model: 'client',
   );
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   static const ProductSetArgs<ClientSet> $product =
       ProductSetArgs<ClientSet>('product_');
 
@@ -250,7 +248,6 @@ class ClientSetArgs<T> {
   String leftJoin(String parentModel) =>
       '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self}id AND ${self}client.product_id = $parentModel.${self}product_id''';
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client], fieldNames: [id], step: 1), parentClassName: []
   $ClientSetArgs<int, T> get $id => $ClientSetArgs<int, T>(
         name: 'id',
         nameCast: 'client_id',
@@ -258,10 +255,8 @@ class ClientSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   ProductSetArgs<T> get $$product => ProductSetArgs<T>('product_');
 
-// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   $ClientSetArgs<int, T> get $productId => $ClientSetArgs<int, T>(
         name: 'product_id',
         nameCast: 'client_product_id',
@@ -269,7 +264,6 @@ class ClientSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Client], fieldNames: [firstName], step: 1), parentClassName: []
   $ClientSetArgs<String, T> get $firstName => $ClientSetArgs<String, T>(
         name: 'first_name',
         nameCast: 'client_first_name',
@@ -277,7 +271,6 @@ class ClientSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Client], fieldNames: [lastName], step: 1), parentClassName: []
   $ClientSetArgs<String, T> get $lastName => $ClientSetArgs<String, T>(
         name: 'last_name',
         nameCast: 'client_last_name',
@@ -285,7 +278,6 @@ class ClientSetArgs<T> {
         self: this.self,
       );
 
-// version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [Client], fieldNames: [blocked], step: 1), parentClassName: []
   $ClientSetArgs<bool, T> get $blocked => $ClientSetArgs<bool, T>(
         name: 'blocked',
         nameCast: 'client_blocked',

@@ -80,16 +80,17 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..returns =
                       refer('${item.args.parentClassNames.last}SetArgs<T>')
                   ..docs.addAll([
-                    '// $item',
                     if (item is AColumn &&
                         item.alters.any((e) => e.type == AlterTypeGen.drop))
                       '@Deprecated(\'no such column\')'
                   ])
                   ..type = MethodType.getter
                   ..lambda = true
-                  ..body = Code('''${item.args.parentClassNames.last}SetArgs<T>(
-              '${item.args.fieldNames.first.toSnakeCase()}_'
-              )'''),
+                  ..body = Code(
+                    '''${item.args.parentClassNames.last}SetArgs<T>(
+                  '${item.args.fieldNames.first.toSnakeCase()}_'
+                  )''',
+                  ),
               ),
             Method(
               (f) => f
@@ -98,7 +99,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                 ..returns =
                     refer('${entity.setClassName}<${item.typeSelect},T>')
                 ..docs.addAll([
-                  '// $item',
                   if (item is AColumn &&
                       item.alters.any((e) => e.type == AlterTypeGen.drop))
                     '@Deprecated(\'no such column\')'
@@ -114,7 +114,29 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
               self: this.self,
               )'''),
             ),
-          ]
+          ],
+          for (final item in entity.foreignKeys)
+            if (!entity.primaryKeys.any(
+              (e) => e.nameDefault == item.nameDefault,
+            )) ...[
+              Method(
+                (f) => f
+                  ..name = '\$\$${item.args.fieldNames.first}'
+                  ..returns = refer('${item.entityParent!.className}SetArgs<T>')
+                  ..docs.addAll([
+                    if (item is AColumn &&
+                        item.alters.any((e) => e.type == AlterTypeGen.drop))
+                      '@Deprecated(\'no such column\')'
+                  ])
+                  ..type = MethodType.getter
+                  ..lambda = true
+                  ..body = Code(
+                    '''${item.entityParent!.className}SetArgs<T>(
+                  '${item.args.fieldNames.first.toSnakeCase()}_'
+                  )''',
+                  ),
+              ),
+            ]
         ])
         ..fields.addAll([
           for (final item in entity.allsss()) ...[
@@ -125,7 +147,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..type = refer(
                       '${item.args.parentClassNames.last}SetArgs<${entity.setClassNameExternal2}>')
                   ..docs.addAll([
-                    '// $item',
                     if (item is AColumn &&
                         item.alters.any((e) => e.type == AlterTypeGen.drop))
                       '@Deprecated(\'no such column\')'
@@ -159,7 +180,30 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                 ..modifier = FieldModifier.constant
                 ..static = true,
             ),
-          ]
+          ],
+          for (final item in entity.foreignKeys)
+            if (!entity.primaryKeys.any(
+              (e) => e.nameDefault == item.nameDefault,
+            )) ...[
+              Field(
+                (f) => f
+                  ..name = '\$${item.args.fieldNames.first}'
+                  ..type = refer(
+                      '${item.entityParent!.className}SetArgs<${item.entityParent!.setClassNameExternal2}>')
+                  ..docs.addAll([
+                    if (item is AColumn &&
+                        item.alters.any((e) => e.type == AlterTypeGen.drop))
+                      '@Deprecated(\'no such column\')'
+                  ])
+                  ..modifier = FieldModifier.constant
+                  ..static = true
+                  ..assignment = Code(
+                    '''${item.entityParent!.className}SetArgs<${item.entityParent!.setClassNameExternal2}>(
+                  '${item.args.fieldNames.first.toSnakeCase()}_'
+                  )''',
+                  ),
+              ),
+            ],
         ])
         ..constructors.add(
           Constructor((c) => c
