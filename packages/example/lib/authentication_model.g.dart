@@ -63,7 +63,7 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
- LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill_m = bill_m.key
+ LEFT JOIN BillDetail details_bill_m ON details_bill_detail.bill_m = bill_m.key
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -131,7 +131,7 @@ memos)
 SELECT 
 ${$createSelect(select)}
  FROM BillM bill_m
- LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill_m = bill_m.key
+ LEFT JOIN BillDetail details_bill_m ON details_bill_detail.bill_m = bill_m.key
 WHERE bill_m.key = ?
 ''', [key]) as List<Map>);
 // TODO(hodoan): check
@@ -292,7 +292,7 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
- LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill_m
+ LEFT JOIN BillM parent_bill_detail ON bill_m.key = bill_detail.bill_m
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -363,7 +363,7 @@ name)
 SELECT 
 ${$createSelect(select)}
  FROM BillDetail bill_detail
- LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill_m
+ LEFT JOIN BillM parent_bill_detail ON bill_m.key = bill_detail.bill_m
 WHERE bill_detail.key = ?
 ''', [key]) as List<Map>);
 // TODO(hodoan): check

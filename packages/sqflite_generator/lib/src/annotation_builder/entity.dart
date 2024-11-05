@@ -713,13 +713,13 @@ extension AQuery on AEntity {
             final property = e.entityParent?.aPs.firstWhereOrNull(
                 (e) => e.dartType.toString().$rq == className);
             return property != null
-                ? ' LEFT JOIN ${e.entityParent?.name} ${'${e.nameDefault}_${e.joinAsStr(foreignKeys.duplicated(e)).toSnakeCase()}'}'
+                ? ' LEFT JOIN ${e.entityParent?.name} ${'${e.args.fieldNames.join('_').toSnakeCase()}_${e.args.parentClassNames.last.toSnakeCase()}'}'
                     ' ON ${'${e.nameDefault}_${e.joinAsStr(foreignKeys.duplicated(e)).toSnakeCase()}'}.${property.nameToDB}'
                     ' = ${className.toSnakeCase()}.${primaryKeys.first.nameToDB}'
                 : '';
           }()
         else
-          ' LEFT JOIN ${e.entityParent?.name} ${e.joinAsStr(foreignKeys.duplicated(e))}'
+          ' LEFT JOIN ${e.entityParent?.name} ${e.args.fieldNames.join('_').toSnakeCase()}_${e.args.parentClassNames.last.toSnakeCase()}'
               ' ON '
               '${e.entityParent?.primaryKeys.map((f) => '${e.joinAsStr(foreignKeys.duplicated(e))}.'
                   // TODO(hodoan): aforeignkeys

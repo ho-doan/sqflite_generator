@@ -69,7 +69,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: cli
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Client client
- LEFT JOIN Product product ON product.id = client.product
+ LEFT JOIN Product product_client ON product.id = client.product
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -149,7 +149,7 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Client client
- LEFT JOIN Product product ON product.id = client.product
+ LEFT JOIN Product product_client ON product.id = client.product
 WHERE client.id = ? AND client.product_id = ?
 ''', [id, productId]) as List<Map>);
 // TODO(hodoan): check

@@ -74,10 +74,10 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
- LEFT JOIN Product product ON product.id = bill.product
- LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
+ LEFT JOIN Product product_bill ON product.id = bill.product
+ LEFT JOIN Client client_bill ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
- LEFT JOIN Client client_parent_client ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
+ LEFT JOIN Client client_parent_bill ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -175,10 +175,10 @@ time)
 SELECT 
 ${$createSelect(select)}
  FROM Bill bill
- LEFT JOIN Product product ON product.id = bill.product
- LEFT JOIN Client client_client ON client_client.id = bill.client AND client_client.product = bill.client
+ LEFT JOIN Product product_bill ON product.id = bill.product
+ LEFT JOIN Client client_bill ON client_client.id = bill.client AND client_client.product = bill.client
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
- LEFT JOIN Client client_parent_client ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
+ LEFT JOIN Client client_parent_bill ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
 WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
 // TODO(hodoan): check
