@@ -234,16 +234,16 @@ class _$$$CatSetArgs<T> extends $CatSetArgs<T> {
 class _$$CatSetArgs {
   const _$$CatSetArgs();
 
-// (nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: [], true)
   _$$$CatSetArgs<int> get id => const _$$$CatSetArgs(
         name: 'id',
+        self: 'parent',
         nameCast: 'cat_id',
         model: 'cat',
       );
 
-// (nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: [], true)
   _$$$CatSetArgs<String> get birth => const _$$$CatSetArgs(
         name: 'birth',
+        self: 'parent',
         nameCast: 'cat_birth',
         model: 'cat',
       );

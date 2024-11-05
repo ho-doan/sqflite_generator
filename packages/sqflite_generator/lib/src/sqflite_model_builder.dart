@@ -404,7 +404,6 @@ void generatorListClassFore(
             ),
           ],
         );
-        // TODO(hodoan): check
         classBuilderListExtends.add(
           (
             e.nameDefault,
@@ -430,19 +429,23 @@ void generatorListClassFore(
                                     .any((e) => e.type == AlterTypeGen.drop))
                               '@Deprecated(\'no such column\')'
                           ])
-                          ..docs.addAll([
-                            '// $item',
-                          ])
                           ..lambda = true
                           ..type = MethodType.getter
                           ..body = Code('''const $name2(
                             name: '${item.$1.args.fieldNames.join('_').toSnakeCase()}',
+                            self: '${item.$2 ? e.nameDefault.toSnakeCase() : item.$1.args.fieldNames.sublist(
+                                    0,
+                                    item.$1.args.fieldNames.length - 1,
+                                  ).join('_').toSnakeCase()}',
                             nameCast: '${[
                             if (item.$2)
                               entity.className
                             else
                               item.$1.className,
-                            ...item.$1.args.fieldNames
+                            if (item.$2)
+                              ...item.$1.args.fieldNames
+                            else
+                              ...item.$1.args.fieldNames.sublist(1),
                           ].join('_').toSnakeCase()}',
                             model: '${item.$2 ? parent.className.toSnakeCase() : item.$1.args.parentClassNames.sublist(nameDefaults.length + 1).join('_').toSnakeCase()}',
                             )'''),
