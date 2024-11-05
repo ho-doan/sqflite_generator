@@ -77,7 +77,7 @@ class AProperty {
 
   @override
   toString() =>
-      'nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
+      'version: $version, nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
       ' _sqlType: $_sqlType, _isNull: $_isNull'
       'args: $args, parentClassName: $parentClassName';
 
@@ -91,13 +91,18 @@ class AProperty {
   /// @ForeignKey(name: 'clientId')
   /// ```
   /// * [autoId] = true
+  /// * [newName] is for rename table
   String rawCreate({
     bool isId = false,
     bool autoId = false,
     bool isIds = false,
+    String? newName,
   }) {
     return [
-      args.fieldNames.join('_').toSnakeCase(),
+      if (newName != null)
+        args.fieldNames.sublist(1).join('_').toSnakeCase()
+      else
+        args.fieldNames.join('_').toSnakeCase(),
       _sqlType,
       if (isId && !isIds) 'PRIMARY KEY',
       if (autoId && !isIds) 'AUTOINCREMENT',

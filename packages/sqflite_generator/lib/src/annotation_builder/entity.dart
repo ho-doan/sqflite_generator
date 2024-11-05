@@ -32,9 +32,9 @@ class AEntity {
 
   Map<int, List<String>> get rawAlterTable {
     final lst = [
-      ...primaryKeys.map((e) => e),
-      ...columns.map((e) => e),
-      ...indices.map((e) => e),
+      ...primaryKeys,
+      ...columns,
+      ...indices,
       ...foreignKeys.where((e) => !e.dartType.isDartCoreList).map((e) => e),
     ];
     final map = <int, List<String>>{};
@@ -68,7 +68,9 @@ class AEntity {
           for (final item in foreignKeys)
             if (item.entityParent != null) ...[
               "${item.entityParent!.extensionName}.createTable",
-              "'INSERT INTO ${item.entityParent!.className}(${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className}_new;'",
+              "'INSERT INTO ${item.entityParent!.className}(${item.entityParent!.rawCreateTablePS(null).map(
+                    (e) => e.args.fieldNames.join('_').toSnakeCase(),
+                  ).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className}_new;'",
               "'DROP TABLE ${item.entityParent!.className}_new;'",
             ],
         ];
@@ -518,7 +520,7 @@ extension AEntityBase on AEntity {
   /// [newName] is for rename table
   String rawCreateTable([AColumn? ps, String? newName]) {
     final alls = [
-      for (final e in aPs)
+      for (final e in aPs.where((e) => e.version < 2))
         if (e is APrimaryKey &&
 
             /// primary key of child self
@@ -529,19 +531,22 @@ extension AEntityBase on AEntity {
             /// }
             /// ```
             /// result [true]
-            !e.args.parentClassNames.sublist(1).contains(className)) ...[
+            !e.args.parentClassNames
+                .sublist(newName != null ? 0 : 1)
+                .contains(className)) ...[
+          /// default version is 1
           ...e.expanded2().map(
                 (e) => e.rawCreate(
-                  // e.name2 ?? e.name,
+                  newName: newName,
                   autoId: e.auto,
                   isId: true,
                   isIds: primaryKeys.length > 1,
                 ),
               ),
         ] else if (e is AColumn) ...[
-          e.rawCreate(),
+          e.rawCreate(newName: newName),
         ] else if (e is AIndex) ...[
-          e.rawCreate(),
+          e.rawCreate(newName: newName),
         ] else if (e is AForeignKey &&
 
             /// foreign key of child self not primary key
@@ -556,7 +561,7 @@ extension AEntityBase on AEntity {
             !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)) ...[
           ...e.entityParent!.primaryKeys.expand(
             (f) => f.expanded2().map(
-                  (k) => k.rawCreate(),
+                  (k) => k.rawCreate(newName: newName),
                 ),
           ),
         ],

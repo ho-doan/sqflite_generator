@@ -20,7 +20,7 @@ void main() {
         const MigrationModel(
           uidKey: 'uidV1-detail',
           sqlInsert:
-              '''INSERT INTO BillDetail(name, bill) VALUES('dt 1', 1),('dt 2', 1),('dt 3', 1),('dt 4', 1),('dt 5', 1),('dt 6', 2),('dt 7', 2),('dt 8', 2),('dt 9', 2);''',
+              '''INSERT INTO BillDetail(name, parent_key) VALUES('dt 1', 1),('dt 2', 1),('dt 3', 1),('dt 4', 1),('dt 5', 1),('dt 6', 2),('dt 7', 2),('dt 8', 2),('dt 9', 2);''',
         )
       ],
     );

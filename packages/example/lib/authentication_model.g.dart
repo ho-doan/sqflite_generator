@@ -14,37 +14,34 @@ extension BillMQuery on BillM {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillM(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
 			details_key INTEGER,
-			name TEXT NOT NULL,
-			memos TEXT NOT NULL
+			name TEXT NOT NULL
 	)''';
 
   static const String debug =
-      '''nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: [],
-nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: [],
-nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: []''';
+      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: [],
+version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: [],
+version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: []''';
 
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
     3: [
       '''CREATE TABLE IF NOT EXISTS BillDetail_new(
-			details_parent_key INTEGER,
-			details_name TEXT NOT NULL,
+			parent_key INTEGER,
+			name TEXT NOT NULL,
 			FOREIGN KEY (details_parent_key) REFERENCES BillM (parent_key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''',
-      'INSERT INTO BillDetail_new(key,name,bill)SELECT key,name,bill FROM BillDetail;',
+      'INSERT INTO BillDetail_new(key,name,bill_m)SELECT key,name,bill_m FROM BillDetail;',
       'DROP TABLE BillDetail;',
       '''CREATE TABLE IF NOT EXISTS BillM_new(
-			key INTEGER PRIMARY KEY AUTOINCREMENT,
-			details_key INTEGER,
-			name TEXT NOT NULL,
-			memos TEXT NOT NULL
+			key INTEGER,
+			TEXT NOT NULL
 	)''',
       'INSERT INTO BillM_new(key,name)SELECT key,name FROM BillM;',
       'DROP TABLE BillM;',
       'ALTER TABLE BillM_new RENAME TO BillM;',
       BillDetailQuery.createTable,
-      'INSERT INTO BillDetail(key,name,bill)SELECT key,name,bill FROM BillDetail_new;',
+      'INSERT INTO BillDetail(details_key,details_name,details_parent)SELECT key,name,bill_m FROM BillDetail_new;',
       'DROP TABLE BillDetail_new;'
     ]
   };
@@ -107,7 +104,7 @@ nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartT
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
- LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill_m.key
+ LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill_m = bill_m.key
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -175,7 +172,7 @@ memos)
 SELECT 
 ${$createSelect(select)}
  FROM BillM bill_m
- LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill_m.key
+ LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill_m = bill_m.key
 WHERE bill_m.key = ?
 ''', [key]) as List<Map>);
 // TODO(hodoan): check
@@ -274,8 +271,8 @@ extension BillDetailQuery on BillDetail {
 	)''';
 
   static const String debug =
-      '''nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: [],
-nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: []''';
+      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: [],
+version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: []''';
 
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
@@ -332,7 +329,7 @@ nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dar
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
- LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill
+ LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill_m
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -377,7 +374,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     await parent?.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO BillDetail (key,
-bill,
+bill_m,
 name) 
        VALUES(?, ?, ?)''', [
       key,
@@ -403,7 +400,7 @@ name)
 SELECT 
 ${$createSelect(select)}
  FROM BillDetail bill_detail
- LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill
+ LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill_m
 WHERE bill_detail.key = ?
 ''', [key]) as List<Map>);
 // TODO(hodoan): check
