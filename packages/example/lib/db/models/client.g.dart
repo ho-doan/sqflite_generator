@@ -38,12 +38,10 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: cli
   };
 
 // TODO(hodoan): check
-  static String $createSelect(
-    Set<WhereModel<dynamic, ClientSet>>? select, [
-    String childName = '',
-  ]) =>
+  static String $createSelect(Set<WhereModel<dynamic, ClientSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
-          .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
+          .map((e) =>
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Client>> getAll(
@@ -69,7 +67,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: cli
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Client client
- LEFT JOIN Product product_client ON product.id = client.product
+${ClientSetArgs.$product.leftJoin('client')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -149,7 +147,7 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Client client
- LEFT JOIN Product product_client ON product.id = client.product
+${ClientSetArgs.$product.leftJoin('client')}
 WHERE client.id = ? AND client.product_id = ?
 ''', [id, productId]) as List<Map>);
 // TODO(hodoan): check
@@ -219,7 +217,7 @@ class ClientSetArgs<T> {
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   static const ProductSetArgs<ClientSet> $product =
-      ProductSetArgs<ClientSet>('id');
+      ProductSetArgs<ClientSet>('product_');
 
   static const $ClientSetArgs<int, ClientSet> productId =
       $ClientSetArgs<int, ClientSet>(
@@ -249,6 +247,9 @@ class ClientSetArgs<T> {
     model: 'client',
   );
 
+  String leftJoin(String parentModel) =>
+      '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self}id AND ${self}client.product_id = $parentModel.${self}product_id''';
+
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client], fieldNames: [id], step: 1), parentClassName: []
   $ClientSetArgs<int, T> get $id => $ClientSetArgs<int, T>(
         name: 'id',
@@ -258,7 +259,7 @@ class ClientSetArgs<T> {
       );
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
-  ProductSetArgs<T> get $$product => ProductSetArgs<T>('id');
+  ProductSetArgs<T> get $$product => ProductSetArgs<T>('product_');
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   $ClientSetArgs<int, T> get $productId => $ClientSetArgs<int, T>(

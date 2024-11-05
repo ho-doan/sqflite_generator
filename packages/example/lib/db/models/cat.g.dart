@@ -31,12 +31,10 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
   };
 
 // TODO(hodoan): check
-  static String $createSelect(
-    Set<WhereModel<dynamic, CatSet>>? select, [
-    String childName = '',
-  ]) =>
+  static String $createSelect(Set<WhereModel<dynamic, CatSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
-          .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
+          .map((e) =>
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Cat>> getAll(
@@ -62,8 +60,7 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Cat cat
- LEFT JOIN Cat parent_cat ON parent_cat.id = cat.cat
- LEFT JOIN Cat child_cat ON child_cat.id = cat.cat
+
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -137,8 +134,6 @@ birth)
 SELECT 
 ${$createSelect(select)}
  FROM Cat cat
- LEFT JOIN Cat parent_cat ON parent_cat.id = cat.cat
- LEFT JOIN Cat child_cat ON child_cat.id = cat.cat
 WHERE cat.id = ?
 ''', [id]) as List<Map>);
 // TODO(hodoan): check
@@ -206,6 +201,9 @@ class CatSetArgs<T> {
     nameCast: 'cat_birth',
     model: 'cat',
   );
+
+  String leftJoin(String parentModel) =>
+      '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self}id''';
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: []
   $CatSetArgs<int, T> get $id => $CatSetArgs<int, T>(

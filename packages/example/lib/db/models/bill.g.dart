@@ -43,12 +43,10 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
   };
 
 // TODO(hodoan): check
-  static String $createSelect(
-    Set<WhereModel<dynamic, BillSet>>? select, [
-    String childName = '',
-  ]) =>
+  static String $createSelect(Set<WhereModel<dynamic, BillSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
-          .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
+          .map((e) =>
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Bill>> getAll(
@@ -74,10 +72,8 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
- LEFT JOIN Product product_bill ON product.id = bill.product
- LEFT JOIN Client client_bill ON client_client.id = bill.client AND client_client.product = bill.client
- LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
- LEFT JOIN Client client_parent_bill ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
+${BillSetArgs.$product.leftJoin('bill')}
+${BillSetArgs.$client.leftJoin('bill')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -175,10 +171,8 @@ time)
 SELECT 
 ${$createSelect(select)}
  FROM Bill bill
- LEFT JOIN Product product_bill ON product.id = bill.product
- LEFT JOIN Client client_bill ON client_client.id = bill.client AND client_client.product = bill.client
- LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
- LEFT JOIN Client client_parent_bill ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
+${BillSetArgs.$product.leftJoin('bill')}
+${BillSetArgs.$client.leftJoin('bill')}
 WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
 // TODO(hodoan): check
@@ -247,7 +241,8 @@ class BillSetArgs<T> {
   final String self;
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
-  static const ProductSetArgs<BillSet> $product = ProductSetArgs<BillSet>('id');
+  static const ProductSetArgs<BillSet> $product =
+      ProductSetArgs<BillSet>('product_');
 
   static const $BillSetArgs<int, BillSet> productId =
       $BillSetArgs<int, BillSet>(
@@ -257,7 +252,8 @@ class BillSetArgs<T> {
   );
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client]
-  static const ClientSetArgs<BillSet> $client = ClientSetArgs<BillSet>('id');
+  static const ClientSetArgs<BillSet> $client =
+      ClientSetArgs<BillSet>('client_');
 
   static const $BillSetArgs<int, BillSet> clientId = $BillSetArgs<int, BillSet>(
     name: 'client_id',
@@ -279,8 +275,11 @@ class BillSetArgs<T> {
     model: 'bill',
   );
 
+  String leftJoin(String parentModel) =>
+      '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self}product_id AND ${self}bill.client_id = $parentModel.${self}client_id AND ${self}bill.client_product_id = $parentModel.${self}client_product_id''';
+
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
-  ProductSetArgs<T> get $$product => ProductSetArgs<T>('id');
+  ProductSetArgs<T> get $$product => ProductSetArgs<T>('product_');
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2), parentClassName: [product]
   $BillSetArgs<int, T> get $productId => $BillSetArgs<int, T>(
@@ -291,7 +290,7 @@ class BillSetArgs<T> {
       );
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client]
-  ClientSetArgs<T> get $$client => ClientSetArgs<T>('id');
+  ClientSetArgs<T> get $$client => ClientSetArgs<T>('client_');
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2), parentClassName: [client]
   $BillSetArgs<int, T> get $clientId => $BillSetArgs<int, T>(

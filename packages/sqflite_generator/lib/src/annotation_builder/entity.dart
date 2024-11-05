@@ -340,79 +340,6 @@ class AEntity {
 }
 
 extension AEntityBase on AEntity {
-  @Deprecated('use allsss')
-  List<(List<String>, AProperty)> allss([List<String> parents = const []]) {
-    final pp = [
-      if (parents.isEmpty) className,
-      ...parents,
-    ];
-    if (parentClassName.length > (9 / 3)) return [];
-    final alls = [
-      for (final e in aPs)
-        if (e is APrimaryKey &&
-
-            /// primary key of child self
-            /// ```
-            /// class A{
-            ///   @primaryKey
-            ///   final A? child;
-            /// }
-            /// ```
-            /// result [true]
-            !e.parentClassName
-                .map((e) => e.toCamelCase())
-                .contains(className.toCamelCase())) ...[
-          ...[
-            for (final f in e.expanded2())
-
-              /// primary key of child self not foreign key && type entity
-              if (f.entityParent == null && f.parentClassName.isEmpty)
-                ([...pp, f.nameToDB], f)
-              else if (f.entityParent == null && f.parentClassName.length == 1
-                  // &&
-                  // pp.length == 1
-                  )
-                () {
-                  return (
-                    [
-                      ...pp,
-                      ...f.parentClassName,
-                      f.nameToDB,
-                    ],
-                    f,
-                  );
-                }()
-              else if (f.entityParent == null && f.parentClassName.length == 2
-                  // &&
-                  // pp.length == 1
-                  )
-                () {
-                  return (
-                    [
-                      ...pp,
-                      ...f.parentClassName.sublist(
-                        0,
-                        f.parentClassName.length - 1,
-                      ),
-                      f.className,
-                      f.nameToDB,
-                    ],
-                    f,
-                  );
-                }()
-          ],
-        ] else if (e is AColumn) ...[
-          ([...pp, e.nameDefault], e),
-        ] else if (e is AIndex) ...[
-          ([...pp, e.nameDefault], e),
-        ]
-      // else if (e is AForeignKey)
-      //   ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
-      //       <(List<String>, AProperty)>[]),
-    ];
-    return alls;
-  }
-
   List<AProperty> allsss() {
     if (parentClassName.length > (9 / 3)) return [];
     final alls = [
@@ -432,88 +359,10 @@ extension AEntityBase on AEntity {
         ] else if (e is AColumn)
           e
         else if (e is AIndex)
-          e,
-
-      // else if (e is AForeignKey)
-      //   ...(e.entityParent?.allss([...pp, e.nameDefault]) ??
-      //       <(List<String>, AProperty)>[]),
-    ];
-    return alls;
-  }
-
-  @Deprecated('use allssForChild2')
-  List<(List<String>, AProperty)> allssForChild(
-      [AEntity? parent, int step = 0]) {
-    if (parentClassName.length > (9 / 3)) return [];
-    if (parent != null && parent.className == className) {
-      return parent.allss().where((e) => e.$2 is! AForeignKey).toList();
-    }
-    final alls = [
-      for (final e in aPs)
-        if (e is APrimaryKey) ...[
-          ...[
-            for (final f in e.expanded2())
-
-              /// primary key of child self not foreign key && type entity
-              if (f.entityParent == null &&
-                  f.args.parentClassNames.sublist(1).isEmpty)
-                (f.args.fieldNames, f)
-              else if (f.entityParent == null &&
-                      f.parentClassName.length == step
-                  // &&
-                  // pp.length == 1
-                  )
-                () {
-                  return (
-                    [
-                      ...f.parentClassName,
-                      f.nameToDB,
-                    ],
-                    f,
-                  );
-                }()
-          ],
-        ] else if (e is AColumn) ...[
-          ([e.className, e.nameDefault], e),
-        ] else if (e is AIndex) ...[
-          ([e.className, e.nameDefault], e),
-        ]
-    ];
-    return alls;
-  }
-
-  List<(AProperty, bool)> allssForChild2([AEntity? parent, int step = 0]) {
-    if (parentClassName.length > (9 / 3)) return [];
-    if (parent != null && parent.className == className) {
-      return parent
-          .allsss()
-          .where((e) => e is! AForeignKey)
-          .map((e) => (e, true))
-          .toList();
-    }
-    final alls = [
-      for (final e in aPs)
-        if (e is APrimaryKey) ...[
-          ...[
-            for (final f in e.expanded2())
-
-              /// primary key of child self not foreign key && type entity
-              if (f.entityParent == null &&
-                  f.args.parentClassNames.sublist(1).isEmpty)
-                (f, false)
-              else if (f.entityParent == null &&
-                      f.args.parentClassNames.sublist(1).length == step
-                  // &&
-                  // pp.length == 1
-                  )
-                () {
-                  return (f, false);
-                }()
-          ],
-        ] else if (e is AColumn)
-          (e, false)
-        else if (e is AIndex)
-          (e, false)
+          e
+      // else if (e is AForeignKey &&
+      //     !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault))
+      //   e,
     ];
     return alls;
   }
@@ -713,26 +562,13 @@ extension AQuery on AEntity {
             final property = e.entityParent?.aPs.firstWhereOrNull(
                 (e) => e.dartType.toString().$rq == className);
             return property != null
-                ? ' LEFT JOIN ${e.entityParent?.name} ${'${e.args.fieldNames.join('_').toSnakeCase()}_${e.args.parentClassNames.last.toSnakeCase()}'}'
-                    ' ON ${'${e.nameDefault}_${e.joinAsStr(foreignKeys.duplicated(e)).toSnakeCase()}'}.${property.nameToDB}'
+                ? ' LEFT JOIN ${e.entityParent?.name} ${'${e.args.fieldNames.join('_').toSnakeCase()}_${e.className.toSnakeCase()}'}'
+                    ' ON ${'${e.args.fieldNames.join('_').toSnakeCase()}_${e.className.toSnakeCase()}'}.${property.nameToDB}'
                     ' = ${className.toSnakeCase()}.${primaryKeys.first.nameToDB}'
                 : '';
           }()
         else
-          ' LEFT JOIN ${e.entityParent?.name} ${e.args.fieldNames.join('_').toSnakeCase()}_${e.args.parentClassNames.last.toSnakeCase()}'
-              ' ON '
-              '${e.entityParent?.primaryKeys.map((f) => '${e.joinAsStr(foreignKeys.duplicated(e))}.'
-                  // TODO(hodoan): aforeignkeys
-                  '${() {
-                    final aPsChild = e.entityParent?.aPs ?? <AProperty>[];
-                    final fChild = aPsChild.firstWhereOrNull(
-                            (e) => e.nameDefault == f.nameDefault) ??
-                        f;
-                    return fChild.nameToDB;
-                  }()} '
-                  '= ${className.toSnakeCase()}.${e.name?.toSnakeCase()}').join(' AND ')}'
-      // '${e.joinAsStr(foreignKeys.duplicated(e))}.${e.entityParent?.primaryKeys.first.nameToDB}'
-      // ' = ${className.toSnakeCase()}.${e.name?.toSnakeCase()}'
+          '\${${e.args.parentClassNames.first}SetArgs.\$${e.nameDefault}.leftJoin(\'${className.toSnakeCase()}\')}'
     ];
   }
 

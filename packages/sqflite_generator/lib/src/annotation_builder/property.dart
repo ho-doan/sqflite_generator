@@ -173,3 +173,11 @@ class APropertyArgs {
   String toString() =>
       'APropertyArgs(parentClassName: $parentClassNames, fieldNames: $fieldNames, step: $step)';
 }
+
+extension APrs on APropertyArgs {
+  String fieldNamesNotLast(String? className) =>
+      '${fieldNames.sublist(0, fieldNames.length - 1).join('_').toSnakeCase()}_$className'
+          .toSnakeCase();
+  String fieldNamesOf(String? className) =>
+      '${fieldNames.join('_').toSnakeCase()}_$className'.toSnakeCase();
+}

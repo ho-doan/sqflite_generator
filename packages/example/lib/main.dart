@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:example/authentication_model.dart';
 import 'package:example/db/models/bill.dart';
+import 'package:example/db/models/client.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart' hide Column;
@@ -70,19 +71,29 @@ class _MyHomePageState extends State<MyHomePage> {
           BillSetArgs.clientId,
           BillSetArgs.clientProductId,
           BillSetArgs.time,
-          BillSetArgs.$client.$blocked
+          BillSetArgs.$client.$blocked,
+          BillSetArgs.$client.$$product.$firstName
+          // ClientSetArgs.firstName,
+          // ClientSetArgs.lastName,
+          // ClientSetArgs.blocked,
+          // ClientSetArgs.id,
+          // ClientSetArgs.productId,
+          // ClientSetArgs.$product.$firstName,
+          // ClientSetArgs.$product.$lastName,
+          // ClientSetArgs.$product.$id,
+          // ClientSetArgs.$product.$blocked,
         },
-        where: {
-          BillSetArgs.productId.equal(1),
-          // BillSetArgs.$product.$id.equal(1),
-        },
-        whereOr: [
-          {
-            BillSetArgs.productId.equal(1),
-            BillSetArgs.$product.$firstName.equal('1'),
-            BillSetArgs.$client.$$product.$lastName.likeContain('11'),
-          },
-        ],
+        // where: {
+        //   BillSetArgs.productId.equal(1),
+        //   // BillSetArgs.$product.$id.equal(1),
+        // },
+        // whereOr: [
+        //   {
+        //     BillSetArgs.productId.equal(1),
+        //     BillSetArgs.$product.$firstName.equal('1'),
+        //     BillSetArgs.$client.$$product.$lastName.likeContain('11'),
+        //   },
+        // ],
       ).then(
         (v) => setState(() => bills = v),
       );

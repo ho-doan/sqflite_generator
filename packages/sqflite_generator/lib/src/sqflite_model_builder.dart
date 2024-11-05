@@ -56,6 +56,22 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         ..types.addAll([refer('T')])
         ..fields.addAll(entity.setFieldsExternal)
         ..methods.addAll([
+          Method(
+            (m) => m
+              ..name = 'leftJoin'
+              ..returns = refer('String')
+              ..lambda = true
+              ..requiredParameters.add(Parameter(
+                (p) => p
+                  ..name = 'parentModel'
+                  ..type = refer('String'),
+              ))
+              ..body = Code(
+                  """'''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
+                for (final item in entity.keysNew)
+                  '\${self}${entity.className.toSnakeCase()}.${item.$2.args.fieldNames.join('_')} = \$parentModel.\${self}${item.$2.args.fieldNames.join('_')}'
+              ].join(' AND ')}'''"""),
+          ),
           for (final item in entity.allsss()) ...[
             if (item.args.parentClassNames.length == 2)
               Method(
@@ -72,7 +88,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..type = MethodType.getter
                   ..lambda = true
                   ..body = Code('''${item.args.parentClassNames.last}SetArgs<T>(
-              '${item.args.fieldNames.last.toSnakeCase()}'
+              '${item.args.fieldNames.first.toSnakeCase()}_'
               )'''),
               ),
             Method(
@@ -118,7 +134,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..modifier = FieldModifier.constant
                   ..assignment = Code(
                       '''${item.args.parentClassNames.last}SetArgs<${entity.setClassNameExternal2}>(
-              '${item.args.fieldNames.last.toSnakeCase()}'
+              '${item.args.fieldNames.first.toSnakeCase()}_'
               )'''),
               ),
             Field(
@@ -208,12 +224,11 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..static = true
             ..docs.add('// TODO(hodoan): check')
             ..body = Code('''((select??{}).isEmpty ? \$default : select!)
-            .map((e)=>'\$childName\${e.model}.\${e.name} as \${e.nameCast}')
+            .map((e)=>'\${'\${e.self}\${e.model}'.replaceFirst(RegExp('^_'), '')}.\${e.name} as \${e.nameCast}')
             .join(',')''')
             ..requiredParameters.addAll([
               entity.selectArgs,
             ])
-            ..optionalParameters.add(entity.selectChildArgs)
             ..returns = refer('String'),
         ),
         Method((m) => m

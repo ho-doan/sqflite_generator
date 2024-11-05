@@ -33,12 +33,10 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
   };
 
 // TODO(hodoan): check
-  static String $createSelect(
-    Set<WhereModel<dynamic, ProductSet>>? select, [
-    String childName = '',
-  ]) =>
+  static String $createSelect(Set<WhereModel<dynamic, ProductSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
-          .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
+          .map((e) =>
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Product>> getAll(
@@ -215,6 +213,9 @@ class ProductSetArgs<T> {
     nameCast: 'product_blocked',
     model: 'product',
   );
+
+  String leftJoin(String parentModel) =>
+      '''LEFT JOIN Product ${self}product ON ${self}product.id = $parentModel.${self}id''';
 
 // version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [id], step: 1), parentClassName: []
   $ProductSetArgs<int, T> get $id => $ProductSetArgs<int, T>(
