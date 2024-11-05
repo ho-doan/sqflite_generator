@@ -133,7 +133,7 @@ nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: 
  LEFT JOIN Bill parent_bill ON parent_bill.product = bill.bill AND parent_bill.client = bill.bill
  LEFT JOIN Client client_parent_client ON client_parent_client.id = bill.client AND client_parent_client.product = bill.client
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -290,14 +290,11 @@ class $BillSetArgs<T> extends WhereModel<T> {
   const $BillSetArgs({
     this.self = '',
     required this.name,
-    this.children = const [],
     required this.nameCast,
     required this.model,
-  }) : super(field: '$model.$name');
+  }) : super(field: '${self}_$model.$name');
 
   final String self;
-
-  final List<$BillSetArgs<T>> children;
 
   final String name;
 
@@ -310,7 +307,6 @@ class _$$$ProductSetArgs<T> extends $BillSetArgs<T> {
   const _$$$ProductSetArgs({
     super.self = '',
     required super.name,
-    super.children = const [],
     required super.nameCast,
     required super.model,
   });
@@ -320,7 +316,6 @@ class _$$$ClientSetArgs<T> extends $BillSetArgs<T> {
   const _$$$ClientSetArgs({
     super.self = '',
     required super.name,
-    super.children = const [],
     required super.nameCast,
     required super.model,
   });
@@ -330,7 +325,6 @@ class _$$$BillSetArgs<T> extends $BillSetArgs<T> {
   const _$$$BillSetArgs({
     super.self = '',
     required super.name,
-    super.children = const [],
     required super.nameCast,
     required super.model,
   });

@@ -109,7 +109,7 @@ nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartT
     final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
  LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill = bill_m.key
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -221,14 +221,11 @@ class $BillMSetArgs<T> extends WhereModel<T> {
   const $BillMSetArgs({
     this.self = '',
     required this.name,
-    this.children = const [],
     required this.nameCast,
     required this.model,
-  }) : super(field: '$model.$name');
+  }) : super(field: '${self}_$model.$name');
 
   final String self;
-
-  final List<$BillMSetArgs<T>> children;
 
   final String name;
 
@@ -241,7 +238,6 @@ class _$$$BillDetailSetArgs<T> extends $BillMSetArgs<T> {
   const _$$$BillDetailSetArgs({
     super.self = '',
     required super.name,
-    super.children = const [],
     required super.nameCast,
     required super.model,
   });
@@ -338,7 +334,7 @@ nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dar
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
  LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -450,14 +446,11 @@ class $BillDetailSetArgs<T> extends WhereModel<T> {
   const $BillDetailSetArgs({
     this.self = '',
     required this.name,
-    this.children = const [],
     required this.nameCast,
     required this.model,
-  }) : super(field: '$model.$name');
+  }) : super(field: '${self}_$model.$name');
 
   final String self;
-
-  final List<$BillDetailSetArgs<T>> children;
 
   final String name;
 
@@ -470,7 +463,6 @@ class _$$$BillMSetArgs<T> extends $BillDetailSetArgs<T> {
   const _$$$BillMSetArgs({
     super.self = '',
     required super.name,
-    super.children = const [],
     required super.nameCast,
     required super.model,
   });

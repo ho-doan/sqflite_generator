@@ -184,7 +184,7 @@ class AEntity {
       'final sql = \'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
       ...aFores,
       '\${whereStr.isNotEmpty ? whereStr : \'\'}',
-      "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field} \${e.type}').join(',')}' : ''}",
+      "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field.replaceFirst('^_', '')} \${e.type}').join(',')}' : ''}",
       "\${limit != null ? 'LIMIT \$limit' : ''}",
       "\${offset != null ? 'OFFSET \$offset' : ''}",
       "''';",
@@ -814,13 +814,6 @@ extension AParam on AEntity {
         ),
         Parameter(
           (f) => f
-            ..name = 'children'
-            ..named = true
-            ..defaultTo = Code('const []')
-            ..toThis = true,
-        ),
-        Parameter(
-          (f) => f
             ..name = 'nameCast'
             ..named = true
             ..required = true
@@ -847,13 +840,6 @@ extension AParam on AEntity {
             ..name = 'name'
             ..required = true
             ..named = true
-            ..toSuper = true,
-        ),
-        Parameter(
-          (f) => f
-            ..name = 'children'
-            ..named = true
-            ..defaultTo = Code('const []')
             ..toSuper = true,
         ),
         Parameter(
@@ -896,12 +882,6 @@ extension AFields on AEntity {
             ..name = 'self'
             ..modifier = FieldModifier.final$
             ..type = refer('String'),
-        ),
-        Field(
-          (f) => f
-            ..name = 'children'
-            ..modifier = FieldModifier.final$
-            ..type = refer('List<$setClassName<T>>'),
         ),
         Field(
           (f) => f

@@ -89,7 +89,7 @@ nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked
 
     final sql = '''SELECT ${$createSelect(select)} FROM Product product
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -202,14 +202,11 @@ class $ProductSetArgs<T> extends WhereModel<T> {
   const $ProductSetArgs({
     this.self = '',
     required this.name,
-    this.children = const [],
     required this.nameCast,
     required this.model,
-  }) : super(field: '$model.$name');
+  }) : super(field: '${self}_$model.$name');
 
   final String self;
-
-  final List<$ProductSetArgs<T>> children;
 
   final String name;
 

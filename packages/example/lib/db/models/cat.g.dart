@@ -85,7 +85,7 @@ nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType
  LEFT JOIN Cat parent_cat ON parent_cat.id = cat.cat
  LEFT JOIN Cat child_cat ON child_cat.id = cat.cat
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -205,14 +205,11 @@ class $CatSetArgs<T> extends WhereModel<T> {
   const $CatSetArgs({
     this.self = '',
     required this.name,
-    this.children = const [],
     required this.nameCast,
     required this.model,
-  }) : super(field: '$model.$name');
+  }) : super(field: '${self}_$model.$name');
 
   final String self;
-
-  final List<$CatSetArgs<T>> children;
 
   final String name;
 
@@ -225,7 +222,6 @@ class _$$$CatSetArgs<T> extends $CatSetArgs<T> {
   const _$$$CatSetArgs({
     super.self = '',
     required super.name,
-    super.children = const [],
     required super.nameCast,
     required super.model,
   });

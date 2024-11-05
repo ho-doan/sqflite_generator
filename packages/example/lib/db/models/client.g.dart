@@ -107,7 +107,7 @@ nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked,
     final sql = '''SELECT ${$createSelect(select)} FROM Client client
  LEFT JOIN Product product ON product.id = client.product
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -234,14 +234,11 @@ class $ClientSetArgs<T> extends WhereModel<T> {
   const $ClientSetArgs({
     this.self = '',
     required this.name,
-    this.children = const [],
     required this.nameCast,
     required this.model,
-  }) : super(field: '$model.$name');
+  }) : super(field: '${self}_$model.$name');
 
   final String self;
-
-  final List<$ClientSetArgs<T>> children;
 
   final String name;
 
@@ -254,7 +251,6 @@ class _$$$ProductSetArgs<T> extends $ClientSetArgs<T> {
   const _$$$ProductSetArgs({
     super.self = '',
     required super.name,
-    super.children = const [],
     required super.nameCast,
     required super.model,
   });

@@ -38,7 +38,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         ..constructors.add(
           Constructor((c) => c
             ..constant = true
-            ..initializers.add(Code('super(field: \'\$model.\$name\')'))
+            ..initializers
+                .add(Code('super(field: \'\${self}_\$model.\$name\')'))
             // ..body = Code('super(field: \'\$model.\$name\')')
             ..optionalParameters.addAll(entity.setOptionalArgs)),
         ),
