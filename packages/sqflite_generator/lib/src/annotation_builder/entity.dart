@@ -48,39 +48,40 @@ class AEntity {
       }
     }
     for (final item in lst) {
-      if (item is AColumn &&
-          item.alters.any((e) => e.type == AlterTypeGen.drop)) {
-        final version =
-            item.alters.firstWhere((e) => e.type == AlterTypeGen.drop).version;
+      // TODO(hodoan): check
+      // if (item is AColumn &&
+      //     item.alters.any((e) => e.type == AlterTypeGen.drop)) {
+      //   final version =
+      //       item.alters.firstWhere((e) => e.type == AlterTypeGen.drop).version;
 
-        final raws = <String>[
-          for (final item in foreignKeys)
-            if (item.entityParent != null) ...[
-              "'''${item.entityParent!.rawCreateTable(null, '_new')}'''",
-              "'INSERT INTO ${item.entityParent!.className}_new(${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className};'",
-              "'DROP TABLE ${item.entityParent!.className};'",
-              // "'ALTER TABLE ${item.entityParent!.className}_new RENAME TO ${item.entityParent!.className};'",
-            ],
-          "'''${rawCreateTable(item, '_new')}'''",
-          "'INSERT INTO ${className}_new(${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')})SELECT ${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')} FROM $className;'",
-          "'DROP TABLE $className;'",
-          "'ALTER TABLE ${className}_new RENAME TO $className;'",
-          for (final item in foreignKeys)
-            if (item.entityParent != null) ...[
-              "${item.entityParent!.extensionName}.createTable",
-              "'INSERT INTO ${item.entityParent!.className}(${item.entityParent!.rawCreateTablePS(null).map(
-                    (e) => e.args.fieldNames.join('_').toSnakeCase(),
-                  ).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className}_new;'",
-              "'DROP TABLE ${item.entityParent!.className}_new;'",
-            ],
-        ];
+      //   final raws = <String>[
+      //     for (final item in foreignKeys)
+      //       if (item.entityParent != null) ...[
+      //         "'''${item.entityParent!.rawCreateTable(null, '_new')}'''",
+      //         "'INSERT INTO ${item.entityParent!.className}_new(${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className};'",
+      //         "'DROP TABLE ${item.entityParent!.className};'",
+      //         // "'ALTER TABLE ${item.entityParent!.className}_new RENAME TO ${item.entityParent!.className};'",
+      //       ],
+      //     "'''${rawCreateTable(item, '_new')}'''",
+      //     "'INSERT INTO ${className}_new(${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')})SELECT ${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')} FROM $className;'",
+      //     "'DROP TABLE $className;'",
+      //     "'ALTER TABLE ${className}_new RENAME TO $className;'",
+      //     for (final item in foreignKeys)
+      //       if (item.entityParent != null) ...[
+      //         "${item.entityParent!.extensionName}.createTable",
+      //         "'INSERT INTO ${item.entityParent!.className}(${item.entityParent!.rawCreateTablePS(null).map(
+      //               (e) => e.args.fieldNames.join('_').toSnakeCase(),
+      //             ).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className}_new;'",
+      //         "'DROP TABLE ${item.entityParent!.className}_new;'",
+      //       ],
+      //   ];
 
-        if (map.containsKey(version)) {
-          map[version]!.addAll(raws);
-        } else {
-          map[version] = raws;
-        }
-      }
+      //   if (map.containsKey(version)) {
+      //     map[version]!.addAll(raws);
+      //   } else {
+      //     map[version] = raws;
+      //   }
+      // }
     }
     return map;
   }
@@ -186,13 +187,13 @@ class AEntity {
       'final sql = \'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
       ...aFores,
       '\${whereStr.isNotEmpty ? whereStr : \'\'}',
-      "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field.replaceFirst('^_', '')} \${e.type}').join(',')}' : ''}",
+      "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field.replaceFirst(RegExp('^_'), '')} \${e.type}').join(',')}' : ''}",
       "\${limit != null ? 'LIMIT \$limit' : ''}",
       "\${offset != null ? 'OFFSET \$offset' : ''}",
       "''';",
       "if (kDebugMode) { print('get all $className \$sql'); }",
       'final mapList = (await database.rawQuery(sql) as List<Map>);',
-      'return mapList.groupBy(((m) => [${keysNew.map((e) => 'm[$extensionName.${e.$2.args.fieldNames.join('_').toCamelCase()}.nameCast]').join(',')}]))'
+      'return mapList.groupBy(((m) => [${keysNew.map((e) => 'm[$setClassNameExternal.${e.$2.args.fieldNames.join('_').toCamelCase()}.nameCast]').join(',')}]))'
           '.values.map((e)=>$classType.fromDB(e.first,e)).toList();',
     ].join('\n');
   }
@@ -531,9 +532,7 @@ extension AEntityBase on AEntity {
             /// }
             /// ```
             /// result [true]
-            !e.args.parentClassNames
-                .sublist(newName != null ? 0 : 1)
-                .contains(className)) ...[
+            !e.args.parentClassNames.sublist(1).contains(className)) ...[
           /// default version is 1
           ...e.expanded2().map(
                 (e) => e.rawCreate(
@@ -694,6 +693,8 @@ extension AForeignKeyXYZ on List<AForeignKey> {
 
 extension AQuery on AEntity {
   String get setClassName => '\$${className}SetArgs';
+  String get setClassNameExternal => '${className}SetArgs';
+  String get setClassNameExternal2 => '${className}Set';
   String get defaultSelectClass => '\$default';
   List<String> get aFieldNames {
     return [
@@ -748,12 +749,12 @@ extension AQuery on AEntity {
 extension AParam on AEntity {
   Parameter get selectArgs => Parameter((p) => p
     ..name = 'select'
-    ..type = refer('Set<$setClassName>?')
+    ..type = refer('Set<WhereModel<dynamic, $setClassNameExternal2>>?')
     ..named = true
     ..required = false);
   Parameter get whereArgs => Parameter((p) => p
     ..name = 'where'
-    ..type = refer('Set<WhereResult>?')
+    ..type = refer('Set<WhereResult<dynamic, $setClassNameExternal2>>?')
     ..named = true
     ..required = false);
   Parameter get whereOrArgs => Parameter((p) => p
@@ -808,27 +809,34 @@ extension AParam on AEntity {
             ..name = 'self'
             ..defaultTo = Code('\'\'')
             ..named = true
-            ..toThis = true,
+            ..toSuper = true,
         ),
         Parameter(
           (f) => f
             ..name = 'name'
             ..required = true
             ..named = true
-            ..toThis = true,
+            ..toSuper = true,
         ),
         Parameter(
           (f) => f
             ..name = 'nameCast'
             ..named = true
             ..required = true
-            ..toThis = true,
+            ..toSuper = true,
         ),
         Parameter(
           (f) => f
             ..name = 'model'
             ..named = true
             ..required = true
+            ..toSuper = true,
+        ),
+      ];
+  List<Parameter> get setOptionalArgsExternal => [
+        Parameter(
+          (f) => f
+            ..name = 'self'
             ..toThis = true,
         ),
       ];
@@ -881,28 +889,10 @@ extension AParam on AEntity {
 }
 
 extension AFields on AEntity {
-  List<Field> get setFields => [
+  List<Field> get setFieldsExternal => [
         Field(
           (f) => f
             ..name = 'self'
-            ..modifier = FieldModifier.final$
-            ..type = refer('String'),
-        ),
-        Field(
-          (f) => f
-            ..name = 'name'
-            ..modifier = FieldModifier.final$
-            ..type = refer('String'),
-        ),
-        Field(
-          (f) => f
-            ..name = 'model'
-            ..modifier = FieldModifier.final$
-            ..type = refer('String'),
-        ),
-        Field(
-          (f) => f
-            ..name = 'nameCast'
             ..modifier = FieldModifier.final$
             ..type = refer('String'),
         ),

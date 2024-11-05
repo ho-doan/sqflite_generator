@@ -99,10 +99,10 @@ class AProperty {
     String? newName,
   }) {
     return [
-      if (newName != null)
-        args.fieldNames.sublist(1).join('_').toSnakeCase()
-      else
-        args.fieldNames.join('_').toSnakeCase(),
+      // if (newName != null)
+      //   args.fieldNames.sublist(1).join('_').toSnakeCase()
+      // else
+      args.fieldNames.join('_').toSnakeCase(),
       _sqlType,
       if (isId && !isIds) 'PRIMARY KEY',
       if (autoId && !isIds) 'AUTOINCREMENT',

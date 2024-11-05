@@ -9,10 +9,6 @@ part of 'cat.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 extension CatQuery on Cat {
-  static const _$$CatSetArgs parent$$ = _$$CatSetArgs();
-
-  static const _$$CatSetArgs child$$ = _$$CatSetArgs();
-
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Cat(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			parent_id INTEGER,
@@ -29,30 +25,14 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-  static const $CatSetArgs<int> id = $CatSetArgs(
-    name: 'id',
-    nameCast: 'cat_id',
-    model: 'cat',
-  );
-
-  static const $CatSetArgs<String> birth = $CatSetArgs(
-    name: 'birth',
-    nameCast: 'cat_birth',
-    model: 'cat',
-  );
-
-  static Set<$CatSetArgs> $default = {
-    CatQuery.id,
-    CatQuery.birth,
-    CatQuery.parent$$.id,
-    CatQuery.parent$$.birth,
-    CatQuery.child$$.id,
-    CatQuery.child$$.birth,
+  static Set<WhereModel<dynamic, CatSet>> $default = {
+    CatSetArgs.id,
+    CatSetArgs.birth,
   };
 
 // TODO(hodoan): check
   static String $createSelect(
-    Set<$CatSetArgs>? select, [
+    Set<WhereModel<dynamic, CatSet>>? select, [
     String childName = '',
   ]) =>
       ((select ?? {}).isEmpty ? $default : select!)
@@ -61,8 +41,8 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
 // TODO(hodoan): check
   static Future<List<Cat>> getAll(
     Database database, {
-    Set<$CatSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, CatSet>>? select,
+    Set<WhereResult<dynamic, CatSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$CatSetArgs>>? orderBy,
     int? limit,
@@ -85,7 +65,7 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
  LEFT JOIN Cat parent_cat ON parent_cat.id = cat.cat
  LEFT JOIN Cat child_cat ON child_cat.id = cat.cat
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -94,7 +74,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => [m[CatQuery.id.nameCast]]))
+        .groupBy(((m) => [m[CatSetArgs.id.nameCast]]))
         .values
         .map((e) => Cat.fromDB(e.first, e))
         .toList();
@@ -102,8 +82,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
 
   static Future<List<Cat>> top(
     Database database, {
-    Set<$CatSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, CatSet>>? select,
+    Set<WhereResult<dynamic, CatSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$CatSetArgs>>? orderBy,
     required int top,
@@ -151,7 +131,7 @@ birth)
   static Future<Cat?> getById(
     Database database,
     int? id, {
-    Set<$CatSetArgs>? select,
+    Set<WhereModel<dynamic, CatSet>>? select,
   }) async {
     final res = (await database.rawQuery('''
 SELECT 
@@ -201,46 +181,49 @@ WHERE cat.id = ?
       };
 }
 
-class $CatSetArgs<T> extends WhereModel<T> {
+class $CatSetArgs<T, M> extends WhereModel<T, M> {
   const $CatSetArgs({
-    this.self = '',
-    required this.name,
-    required this.nameCast,
-    required this.model,
-  }) : super(field: '${self}_$model.$name');
-
-  final String self;
-
-  final String name;
-
-  final String model;
-
-  final String nameCast;
-}
-
-class _$$$CatSetArgs<T> extends $CatSetArgs<T> {
-  const _$$$CatSetArgs({
     super.self = '',
     required super.name,
     required super.nameCast,
     required super.model,
-  });
+  }) : super(field: '${self}_$model.$name');
 }
 
-class _$$CatSetArgs {
-  const _$$CatSetArgs();
+class CatSetArgs<T> {
+  const CatSetArgs(this.self);
 
-  _$$$CatSetArgs<int> get id => const _$$$CatSetArgs(
+  final String self;
+
+  static const $CatSetArgs<int, CatSet> id = $CatSetArgs<int, CatSet>(
+    name: 'id',
+    nameCast: 'cat_id',
+    model: 'cat',
+  );
+
+  static const $CatSetArgs<String, CatSet> birth = $CatSetArgs<String, CatSet>(
+    name: 'birth',
+    nameCast: 'cat_birth',
+    model: 'cat',
+  );
+
+// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: []
+  $CatSetArgs<int, T> get $id => $CatSetArgs<int, T>(
         name: 'id',
-        self: 'parent',
         nameCast: 'cat_id',
         model: 'cat',
+        self: this.self,
       );
 
-  _$$$CatSetArgs<String> get birth => const _$$$CatSetArgs(
+// version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: []
+  $CatSetArgs<String, T> get $birth => $CatSetArgs<String, T>(
         name: 'birth',
-        self: 'parent',
         nameCast: 'cat_birth',
         model: 'cat',
+        self: this.self,
       );
+}
+
+class CatSet {
+  const CatSet();
 }

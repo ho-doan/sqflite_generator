@@ -26,8 +26,8 @@ class DBProvider {
     ClientQuery.getAll(
       _database,
       where: {
-        ClientQuery.lastName.equal('k'),
-        ClientQuery.product$$.blocked.equal(true)
+        ClientSetArgs.lastName.equal('k'),
+        ClientSetArgs.$product.$blocked.equal(true)
       },
     );
   }
@@ -61,7 +61,7 @@ class DBProvider {
 
     // var res = await db.rawQuery("SELECT * FROM Client WHERE blocked=1");
     var res = await ClientQuery.getAll(db, where: {
-      ClientQuery.blocked.equal(true),
+      ClientSetArgs.blocked.equal(true),
     });
 
     List<Client> list = res;
@@ -74,14 +74,14 @@ class DBProvider {
     return await ClientQuery.getAll(
       db,
       select: {
-        ClientQuery.id,
-        ClientQuery.blocked,
-        ClientQuery.product$$.lastName,
-        ClientQuery.productId,
+        ClientSetArgs.id,
+        ClientSetArgs.blocked,
+        ClientSetArgs.$product.$lastName,
+        ClientSetArgs.$product.$id,
       },
       where: {
-        ClientQuery.lastName.equal('k'),
-        ClientQuery.product$$.blocked.equal(true)
+        ClientSetArgs.lastName.equal('k'),
+        ClientSetArgs.$product.$blocked.equal(true)
       },
     );
   }

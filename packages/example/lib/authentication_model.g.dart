@@ -9,8 +9,6 @@ part of 'authentication_model.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 extension BillMQuery on BillM {
-  static const _$$BillDetailSetArgs details$$ = _$$BillDetailSetArgs();
-
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillM(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
 			details_key INTEGER,
@@ -25,56 +23,17 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
-    3: [
-      '''CREATE TABLE IF NOT EXISTS BillDetail_new(
-			parent_key INTEGER,
-			name TEXT NOT NULL,
-			FOREIGN KEY (details_parent_key) REFERENCES BillM (parent_key) ON UPDATE NO ACTION ON DELETE NO ACTION
-	)''',
-      'INSERT INTO BillDetail_new(key,name,bill_m)SELECT key,name,bill_m FROM BillDetail;',
-      'DROP TABLE BillDetail;',
-      '''CREATE TABLE IF NOT EXISTS BillM_new(
-			key INTEGER,
-			TEXT NOT NULL
-	)''',
-      'INSERT INTO BillM_new(key,name)SELECT key,name FROM BillM;',
-      'DROP TABLE BillM;',
-      'ALTER TABLE BillM_new RENAME TO BillM;',
-      BillDetailQuery.createTable,
-      'INSERT INTO BillDetail(details_key,details_name,details_parent)SELECT key,name,bill_m FROM BillDetail_new;',
-      'DROP TABLE BillDetail_new;'
-    ]
+    3: []
   };
 
-  static const $BillMSetArgs<int> key = $BillMSetArgs(
-    name: 'key',
-    nameCast: 'bill_m_key',
-    model: 'bill_m',
-  );
-
-  static const $BillMSetArgs<String> name = $BillMSetArgs(
-    name: 'name',
-    nameCast: 'bill_m_name',
-    model: 'bill_m',
-  );
-
-  @Deprecated('no such column')
-  static const $BillMSetArgs<String> memos = $BillMSetArgs(
-    name: 'memos',
-    nameCast: 'bill_m_memos',
-    model: 'bill_m',
-  );
-
-  static Set<$BillMSetArgs> $default = {
-    BillMQuery.key,
-    BillMQuery.name,
-    BillMQuery.details$$.key,
-    BillMQuery.details$$.name,
+  static Set<WhereModel<dynamic, BillMSet>> $default = {
+    BillMSetArgs.key,
+    BillMSetArgs.name,
   };
 
 // TODO(hodoan): check
   static String $createSelect(
-    Set<$BillMSetArgs>? select, [
+    Set<WhereModel<dynamic, BillMSet>>? select, [
     String childName = '',
   ]) =>
       ((select ?? {}).isEmpty ? $default : select!)
@@ -83,8 +42,8 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
 // TODO(hodoan): check
   static Future<List<BillM>> getAll(
     Database database, {
-    Set<$BillMSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, BillMSet>>? select,
+    Set<WhereResult<dynamic, BillMSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$BillMSetArgs>>? orderBy,
     int? limit,
@@ -106,7 +65,7 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
     final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
  LEFT JOIN BillDetail details_bill_detail ON details_bill_detail.bill_m = bill_m.key
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -115,7 +74,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => [m[BillMQuery.key.nameCast]]))
+        .groupBy(((m) => [m[BillMSetArgs.key.nameCast]]))
         .values
         .map((e) => BillM.fromDB(e.first, e))
         .toList();
@@ -123,8 +82,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
 
   static Future<List<BillM>> top(
     Database database, {
-    Set<$BillMSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, BillMSet>>? select,
+    Set<WhereResult<dynamic, BillMSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$BillMSetArgs>>? orderBy,
     required int top,
@@ -166,7 +125,7 @@ memos)
   static Future<BillM?> getById(
     Database database,
     int? key, {
-    Set<$BillMSetArgs>? select,
+    Set<WhereModel<dynamic, BillMSet>>? select,
   }) async {
     final res = (await database.rawQuery('''
 SELECT 
@@ -214,55 +173,74 @@ WHERE bill_m.key = ?
       };
 }
 
-class $BillMSetArgs<T> extends WhereModel<T> {
+class $BillMSetArgs<T, M> extends WhereModel<T, M> {
   const $BillMSetArgs({
-    this.self = '',
-    required this.name,
-    required this.nameCast,
-    required this.model,
-  }) : super(field: '${self}_$model.$name');
-
-  final String self;
-
-  final String name;
-
-  final String model;
-
-  final String nameCast;
-}
-
-class _$$$BillDetailSetArgs<T> extends $BillMSetArgs<T> {
-  const _$$$BillDetailSetArgs({
     super.self = '',
     required super.name,
     required super.nameCast,
     required super.model,
-  });
+  }) : super(field: '${self}_$model.$name');
 }
 
-class _$$BillDetailSetArgs {
-  const _$$BillDetailSetArgs();
+class BillMSetArgs<T> {
+  const BillMSetArgs(this.self);
 
-  _$$$BillDetailSetArgs<int> get key => const _$$$BillDetailSetArgs(
-        name: 'details_key',
-        self: 'details',
-        nameCast: 'bill_detail_key',
-        model: 'bill_detail',
+  final String self;
+
+  static const $BillMSetArgs<int, BillMSet> key = $BillMSetArgs<int, BillMSet>(
+    name: 'key',
+    nameCast: 'bill_m_key',
+    model: 'bill_m',
+  );
+
+  static const $BillMSetArgs<String, BillMSet> name =
+      $BillMSetArgs<String, BillMSet>(
+    name: 'name',
+    nameCast: 'bill_m_name',
+    model: 'bill_m',
+  );
+
+  @Deprecated('no such column')
+  static const $BillMSetArgs<String, BillMSet> memos =
+      $BillMSetArgs<String, BillMSet>(
+    name: 'memos',
+    nameCast: 'bill_m_memos',
+    model: 'bill_m',
+  );
+
+// version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: []
+  $BillMSetArgs<int, T> get $key => $BillMSetArgs<int, T>(
+        name: 'key',
+        nameCast: 'bill_m_key',
+        model: 'bill_m',
+        self: this.self,
       );
 
-  _$$$BillDetailSetArgs<String> get name => const _$$$BillDetailSetArgs(
-        name: 'details_name',
-        self: 'details',
-        nameCast: 'bill_detail_name',
-        model: 'bill_detail',
+// version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: []
+  $BillMSetArgs<String, T> get $name => $BillMSetArgs<String, T>(
+        name: 'name',
+        nameCast: 'bill_m_name',
+        model: 'bill_m',
+        self: this.self,
       );
+
+// version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: []
+  @Deprecated('no such column')
+  $BillMSetArgs<String, T> get $memos => $BillMSetArgs<String, T>(
+        name: 'memos',
+        nameCast: 'bill_m_memos',
+        model: 'bill_m',
+        self: this.self,
+      );
+}
+
+class BillMSet {
+  const BillMSet();
 }
 
 // ignore_for_file: library_private_types_in_public_api
 
 extension BillDetailQuery on BillDetail {
-  static const _$$BillMSetArgs parent$$ = _$$BillMSetArgs();
-
   static const String createTable = '''CREATE TABLE IF NOT EXISTS BillDetail(
 			key INTEGER PRIMARY KEY AUTOINCREMENT,
 			parent_key INTEGER,
@@ -277,29 +255,14 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-  static const $BillDetailSetArgs<int> key = $BillDetailSetArgs(
-    name: 'key',
-    nameCast: 'bill_detail_key',
-    model: 'bill_detail',
-  );
-
-  static const $BillDetailSetArgs<String> name = $BillDetailSetArgs(
-    name: 'name',
-    nameCast: 'bill_detail_name',
-    model: 'bill_detail',
-  );
-
-  static Set<$BillDetailSetArgs> $default = {
-    BillDetailQuery.key,
-    BillDetailQuery.name,
-    BillDetailQuery.parent$$.key,
-    BillDetailQuery.parent$$.name,
-    BillDetailQuery.parent$$.memos,
+  static Set<WhereModel<dynamic, BillDetailSet>> $default = {
+    BillDetailSetArgs.key,
+    BillDetailSetArgs.name,
   };
 
 // TODO(hodoan): check
   static String $createSelect(
-    Set<$BillDetailSetArgs>? select, [
+    Set<WhereModel<dynamic, BillDetailSet>>? select, [
     String childName = '',
   ]) =>
       ((select ?? {}).isEmpty ? $default : select!)
@@ -308,8 +271,8 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
 // TODO(hodoan): check
   static Future<List<BillDetail>> getAll(
     Database database, {
-    Set<$BillDetailSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, BillDetailSet>>? select,
+    Set<WhereResult<dynamic, BillDetailSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$BillDetailSetArgs>>? orderBy,
     int? limit,
@@ -331,7 +294,7 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
  LEFT JOIN BillM bill_m ON bill_m.key = bill_detail.bill_m
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -340,7 +303,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => [m[BillDetailQuery.key.nameCast]]))
+        .groupBy(((m) => [m[BillDetailSetArgs.key.nameCast]]))
         .values
         .map((e) => BillDetail.fromDB(e.first, e))
         .toList();
@@ -348,8 +311,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
 
   static Future<List<BillDetail>> top(
     Database database, {
-    Set<$BillDetailSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, BillDetailSet>>? select,
+    Set<WhereResult<dynamic, BillDetailSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$BillDetailSetArgs>>? orderBy,
     required int top,
@@ -394,7 +357,7 @@ name)
   static Future<BillDetail?> getById(
     Database database,
     int? key, {
-    Set<$BillDetailSetArgs>? select,
+    Set<WhereModel<dynamic, BillDetailSet>>? select,
   }) async {
     final res = (await database.rawQuery('''
 SELECT 
@@ -439,54 +402,51 @@ WHERE bill_detail.key = ?
       {'key': this.key, 'name': this.name, 'parent_key': this.parent?.key};
 }
 
-class $BillDetailSetArgs<T> extends WhereModel<T> {
+class $BillDetailSetArgs<T, M> extends WhereModel<T, M> {
   const $BillDetailSetArgs({
-    this.self = '',
-    required this.name,
-    required this.nameCast,
-    required this.model,
-  }) : super(field: '${self}_$model.$name');
-
-  final String self;
-
-  final String name;
-
-  final String model;
-
-  final String nameCast;
-}
-
-class _$$$BillMSetArgs<T> extends $BillDetailSetArgs<T> {
-  const _$$$BillMSetArgs({
     super.self = '',
     required super.name,
     required super.nameCast,
     required super.model,
-  });
+  }) : super(field: '${self}_$model.$name');
 }
 
-class _$$BillMSetArgs {
-  const _$$BillMSetArgs();
+class BillDetailSetArgs<T> {
+  const BillDetailSetArgs(this.self);
 
-  _$$$BillMSetArgs<int> get key => const _$$$BillMSetArgs(
-        name: 'parent_key',
-        self: 'parent',
-        nameCast: 'bill_m_key',
-        model: 'bill_m',
+  final String self;
+
+  static const $BillDetailSetArgs<int, BillDetailSet> key =
+      $BillDetailSetArgs<int, BillDetailSet>(
+    name: 'key',
+    nameCast: 'bill_detail_key',
+    model: 'bill_detail',
+  );
+
+  static const $BillDetailSetArgs<String, BillDetailSet> name =
+      $BillDetailSetArgs<String, BillDetailSet>(
+    name: 'name',
+    nameCast: 'bill_detail_name',
+    model: 'bill_detail',
+  );
+
+// version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: []
+  $BillDetailSetArgs<int, T> get $key => $BillDetailSetArgs<int, T>(
+        name: 'key',
+        nameCast: 'bill_detail_key',
+        model: 'bill_detail',
+        self: this.self,
       );
 
-  _$$$BillMSetArgs<String> get name => const _$$$BillMSetArgs(
-        name: 'parent_name',
-        self: 'parent',
-        nameCast: 'bill_m_name',
-        model: 'bill_m',
+// version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: []
+  $BillDetailSetArgs<String, T> get $name => $BillDetailSetArgs<String, T>(
+        name: 'name',
+        nameCast: 'bill_detail_name',
+        model: 'bill_detail',
+        self: this.self,
       );
+}
 
-  @Deprecated('no such column')
-  _$$$BillMSetArgs<String> get memos => const _$$$BillMSetArgs(
-        name: 'parent_memos',
-        self: 'parent',
-        nameCast: 'bill_m_memos',
-        model: 'bill_m',
-      );
+class BillDetailSet {
+  const BillDetailSet();
 }

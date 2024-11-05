@@ -25,40 +25,16 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-  static const $ProductSetArgs<int> id = $ProductSetArgs(
-    name: 'id',
-    nameCast: 'product_id',
-    model: 'product',
-  );
-
-  static const $ProductSetArgs<String> lastName = $ProductSetArgs(
-    name: 'last_name',
-    nameCast: 'product_last_name',
-    model: 'product',
-  );
-
-  static const $ProductSetArgs<String> firstName = $ProductSetArgs(
-    name: 'first_name',
-    nameCast: 'product_first_name',
-    model: 'product',
-  );
-
-  static const $ProductSetArgs<bool> blocked = $ProductSetArgs(
-    name: 'blocked',
-    nameCast: 'product_blocked',
-    model: 'product',
-  );
-
-  static Set<$ProductSetArgs> $default = {
-    ProductQuery.id,
-    ProductQuery.lastName,
-    ProductQuery.firstName,
-    ProductQuery.blocked,
+  static Set<WhereModel<dynamic, ProductSet>> $default = {
+    ProductSetArgs.id,
+    ProductSetArgs.lastName,
+    ProductSetArgs.firstName,
+    ProductSetArgs.blocked,
   };
 
 // TODO(hodoan): check
   static String $createSelect(
-    Set<$ProductSetArgs>? select, [
+    Set<WhereModel<dynamic, ProductSet>>? select, [
     String childName = '',
   ]) =>
       ((select ?? {}).isEmpty ? $default : select!)
@@ -67,8 +43,8 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
 // TODO(hodoan): check
   static Future<List<Product>> getAll(
     Database database, {
-    Set<$ProductSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, ProductSet>>? select,
+    Set<WhereResult<dynamic, ProductSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$ProductSetArgs>>? orderBy,
     int? limit,
@@ -89,7 +65,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
 
     final sql = '''SELECT ${$createSelect(select)} FROM Product product
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst('^_', '')} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -98,7 +74,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => [m[ProductQuery.id.nameCast]]))
+        .groupBy(((m) => [m[ProductSetArgs.id.nameCast]]))
         .values
         .map((e) => Product.fromDB(e.first, e))
         .toList();
@@ -106,8 +82,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
 
   static Future<List<Product>> top(
     Database database, {
-    Set<$ProductSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, ProductSet>>? select,
+    Set<WhereResult<dynamic, ProductSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$ProductSetArgs>>? orderBy,
     required int top,
@@ -151,7 +127,7 @@ blocked)
   static Future<Product?> getById(
     Database database,
     int? id, {
-    Set<$ProductSetArgs>? select,
+    Set<WhereModel<dynamic, ProductSet>>? select,
   }) async {
     final res = (await database.rawQuery('''
 SELECT 
@@ -198,19 +174,81 @@ WHERE product.id = ?
       };
 }
 
-class $ProductSetArgs<T> extends WhereModel<T> {
+class $ProductSetArgs<T, M> extends WhereModel<T, M> {
   const $ProductSetArgs({
-    this.self = '',
-    required this.name,
-    required this.nameCast,
-    required this.model,
+    super.self = '',
+    required super.name,
+    required super.nameCast,
+    required super.model,
   }) : super(field: '${self}_$model.$name');
+}
+
+class ProductSetArgs<T> {
+  const ProductSetArgs(this.self);
 
   final String self;
 
-  final String name;
+  static const $ProductSetArgs<int, ProductSet> id =
+      $ProductSetArgs<int, ProductSet>(
+    name: 'id',
+    nameCast: 'product_id',
+    model: 'product',
+  );
 
-  final String model;
+  static const $ProductSetArgs<String, ProductSet> lastName =
+      $ProductSetArgs<String, ProductSet>(
+    name: 'last_name',
+    nameCast: 'product_last_name',
+    model: 'product',
+  );
 
-  final String nameCast;
+  static const $ProductSetArgs<String, ProductSet> firstName =
+      $ProductSetArgs<String, ProductSet>(
+    name: 'first_name',
+    nameCast: 'product_first_name',
+    model: 'product',
+  );
+
+  static const $ProductSetArgs<bool, ProductSet> blocked =
+      $ProductSetArgs<bool, ProductSet>(
+    name: 'blocked',
+    nameCast: 'product_blocked',
+    model: 'product',
+  );
+
+// version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [id], step: 1), parentClassName: []
+  $ProductSetArgs<int, T> get $id => $ProductSetArgs<int, T>(
+        name: 'id',
+        nameCast: 'product_id',
+        model: 'product',
+        self: this.self,
+      );
+
+// version: -1, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: product_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [lastName], step: 1), parentClassName: []
+  $ProductSetArgs<String, T> get $lastName => $ProductSetArgs<String, T>(
+        name: 'last_name',
+        nameCast: 'product_last_name',
+        model: 'product',
+        self: this.self,
+      );
+
+// version: 1, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: product_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Product], fieldNames: [firstName], step: 1), parentClassName: []
+  $ProductSetArgs<String, T> get $firstName => $ProductSetArgs<String, T>(
+        name: 'first_name',
+        nameCast: 'product_first_name',
+        model: 'product',
+        self: this.self,
+      );
+
+// version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: product_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [Product], fieldNames: [blocked], step: 1), parentClassName: []
+  $ProductSetArgs<bool, T> get $blocked => $ProductSetArgs<bool, T>(
+        name: 'blocked',
+        nameCast: 'product_blocked',
+        model: 'product',
+        self: this.self,
+      );
+}
+
+class ProductSet {
+  const ProductSet();
 }

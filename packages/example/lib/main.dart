@@ -62,18 +62,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    final s = BillMQuery.key.equal(0);
     configSql().then((db) {
       BillQuery.getAll(
         db,
+        select: {
+          BillSetArgs.productId,
+          BillSetArgs.clientId,
+          BillSetArgs.clientProductId,
+          BillSetArgs.time,
+          BillSetArgs.$client.$blocked
+        },
         where: {
-          BillMQuery.key.equal(1),
+          BillSetArgs.productId.equal(1),
+          // BillSetArgs.$product.$id.equal(1),
         },
         whereOr: [
           {
-            BillQuery.productId.equal(1),
-            BillMQuery.name.equal('1'),
-            BillMQuery.key.lessThan(1),
+            BillSetArgs.productId.equal(1),
+            BillSetArgs.$product.$firstName.equal('1'),
+            BillSetArgs.$client.$$product.$lastName.likeContain('11'),
           },
         ],
       ).then(
