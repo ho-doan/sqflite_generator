@@ -60,8 +60,7 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Cat cat
-${CatSetArgs.$parent.leftJoin('cat')}
-${CatSetArgs.$child.leftJoin('cat')}
+${CatSetArgs('', '').leftJoin('cat')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -222,9 +221,10 @@ class CatSetArgs<T> {
   ]) =>
       step < 1
           ? [
-              '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self2}id''',
-              CatSetArgs.$parent.leftJoin(parentModel, step + 1),
-              CatSetArgs.$child.leftJoin(parentModel, step + 1)
+              if (self.isNotEmpty)
+                '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self2}id''',
+              $$parent.leftJoin(parentModel, step + 1),
+              $$child.leftJoin(parentModel, step + 1)
             ].join('\n')
           : '';
 

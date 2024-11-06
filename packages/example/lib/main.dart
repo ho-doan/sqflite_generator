@@ -66,11 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
       BillQuery.getAll(
         db,
         select: {
-          BillSetArgs.productId,
-          BillSetArgs.clientId,
-          BillSetArgs.clientProductId,
-          BillSetArgs.time,
-          BillSetArgs.$client.$blocked,
+          // BillSetArgs.productId,
+          // BillSetArgs.clientId,
+          // BillSetArgs.clientProductId,
+          // BillSetArgs.time,
+          // BillSetArgs.$client.$blocked,
+          BillSetArgs.$client.$$product.$firstName,
           BillSetArgs.$client.$$product.$firstName
           // ClientSetArgs.firstName,
           // ClientSetArgs.lastName,

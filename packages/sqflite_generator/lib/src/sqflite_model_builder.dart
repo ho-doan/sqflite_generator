@@ -73,14 +73,14 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..defaultTo = Code('0'),
               ))
               ..body = Code(
-                  """step < 1?['''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
+                  """step < 1?[if (self.isNotEmpty)'''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
                 for (final item in entity.keysNew)
                   '\${self}${entity.className.toSnakeCase()}.${item.$2.args.fieldNames.join('_')} = \$parentModel.\${self2}${item.$2.args.fieldNames.join('_')}'
               ].join(' AND ')}''',
               ${[
                 for (final item in entity.foreignKeys)
                   [
-                    '${entity.setClassNameExternal}.\$${item.nameDefault}.leftJoin(parentModel, step+${item.entityParent!.className == entity.className ? 1 : 0})',
+                    '\$\$${item.nameDefault}.leftJoin(parentModel, step+${item.entityParent!.className == entity.className ? 1 : 0})',
                   ].join('\n')
               ].join(',\n')}
               ].join('\\n'):''
@@ -103,8 +103,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..lambda = true
                   ..body = Code(
                     '''${item.args.parentClassNames.last}SetArgs<T>(
-                  '${item.args.parentClassNames.join('_').toSnakeCase()}_',
-                  '${item.args.parentClassNames.sublist(item.args.parentClassNames.length - 1).join('_').toSnakeCase()}_'
+                  '\${self}${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_',
+                  '${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_'
                   )''',
                   ),
               ),
@@ -173,8 +173,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..modifier = FieldModifier.constant
                   ..assignment = Code(
                       '''${item.args.parentClassNames.last}SetArgs<${entity.setClassNameExternal2}>(
-              '${item.args.parentClassNames.join('_').toSnakeCase()}_',
-              '${item.args.parentClassNames.sublist(item.args.parentClassNames.length - 1).join('_').toSnakeCase()}_'
+              '${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_',
+              '${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_'
               )'''),
               ),
             Field(

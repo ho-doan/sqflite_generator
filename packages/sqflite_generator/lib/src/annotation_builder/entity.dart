@@ -185,7 +185,7 @@ class AEntity {
         }
       ''',
       'final sql = \'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
-      ...aFores,
+      '\${$setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
       '\${whereStr.isNotEmpty ? whereStr : \'\'}',
       "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field.replaceFirst(RegExp('^_'), '')} \${e.type}').join(',')}' : ''}",
       "\${limit != null ? 'LIMIT \$limit' : ''}",

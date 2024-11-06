@@ -61,7 +61,7 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
- LEFT JOIN BillDetail details_bill_m ON details_bill_m.bill_m = bill_m.key
+${BillMSetArgs('', '').leftJoin('bill_m')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -220,8 +220,9 @@ class BillMSetArgs<T> {
   ]) =>
       step < 1
           ? [
-              '''LEFT JOIN BillM ${self}bill_m ON ${self}bill_m.key = $parentModel.${self2}key''',
-              BillMSetArgs.$details.leftJoin(parentModel, step + 0)
+              if (self.isNotEmpty)
+                '''LEFT JOIN BillM ${self}bill_m ON ${self}bill_m.key = $parentModel.${self2}key''',
+              $$details.leftJoin(parentModel, step + 0)
             ].join('\n')
           : '';
 
@@ -308,7 +309,7 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
-${BillDetailSetArgs.$parent.leftJoin('bill_detail')}
+${BillDetailSetArgs('', '').leftJoin('bill_detail')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -460,8 +461,9 @@ class BillDetailSetArgs<T> {
   ]) =>
       step < 1
           ? [
-              '''LEFT JOIN BillDetail ${self}bill_detail ON ${self}bill_detail.key = $parentModel.${self2}key''',
-              BillDetailSetArgs.$parent.leftJoin(parentModel, step + 0)
+              if (self.isNotEmpty)
+                '''LEFT JOIN BillDetail ${self}bill_detail ON ${self}bill_detail.key = $parentModel.${self2}key''',
+              $$parent.leftJoin(parentModel, step + 0)
             ].join('\n')
           : '';
 

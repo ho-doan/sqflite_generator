@@ -67,7 +67,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: cli
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Client client
-${ClientSetArgs.$product.leftJoin('client')}
+${ClientSetArgs('', '').leftJoin('client')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -222,7 +222,7 @@ class ClientSetArgs<T> {
 
 // APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2)
   static const ProductSetArgs<ClientSet> $product =
-      ProductSetArgs<ClientSet>('client_product_', 'product_');
+      ProductSetArgs<ClientSet>('product_', 'product_');
 
   static const $ClientSetArgs<int, ClientSet> productId =
       $ClientSetArgs<int, ClientSet>(
@@ -258,8 +258,9 @@ class ClientSetArgs<T> {
   ]) =>
       step < 1
           ? [
-              '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self2}id AND ${self}client.product_id = $parentModel.${self2}product_id''',
-              ClientSetArgs.$product.leftJoin(parentModel, step + 0)
+              if (self.isNotEmpty)
+                '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self2}id AND ${self}client.product_id = $parentModel.${self2}product_id''',
+              $$product.leftJoin(parentModel, step + 0)
             ].join('\n')
           : '';
 
@@ -272,7 +273,7 @@ class ClientSetArgs<T> {
 
 // APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2)
   ProductSetArgs<T> get $$product =>
-      ProductSetArgs<T>('client_product_', 'product_');
+      ProductSetArgs<T>('${self}product_', 'product_');
 
   $ClientSetArgs<int, T> get $productId => $ClientSetArgs<int, T>(
         name: 'product_id',

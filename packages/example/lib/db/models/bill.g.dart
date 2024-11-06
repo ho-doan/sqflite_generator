@@ -72,10 +72,7 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
-${BillSetArgs.$product.leftJoin('bill')}
-${BillSetArgs.$client.leftJoin('bill')}
-${BillSetArgs.$parent.leftJoin('bill')}
-${BillSetArgs.$clientParent.leftJoin('bill')}
+${BillSetArgs('', '').leftJoin('bill')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -251,7 +248,7 @@ class BillSetArgs<T> {
 
 // APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2)
   static const ProductSetArgs<BillSet> $product =
-      ProductSetArgs<BillSet>('bill_product_', 'product_');
+      ProductSetArgs<BillSet>('product_', 'product_');
 
   static const $BillSetArgs<int, BillSet> productId =
       $BillSetArgs<int, BillSet>(
@@ -262,7 +259,7 @@ class BillSetArgs<T> {
 
 // APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2)
   static const ClientSetArgs<BillSet> $client =
-      ClientSetArgs<BillSet>('bill_client_', 'client_');
+      ClientSetArgs<BillSet>('client_', 'client_');
 
   static const $BillSetArgs<int, BillSet> clientId = $BillSetArgs<int, BillSet>(
     name: 'client_id',
@@ -296,17 +293,18 @@ class BillSetArgs<T> {
   ]) =>
       step < 1
           ? [
-              '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self2}product_id AND ${self}bill.client_id = $parentModel.${self2}client_id AND ${self}bill.client_product_id = $parentModel.${self2}client_product_id''',
-              BillSetArgs.$product.leftJoin(parentModel, step + 0),
-              BillSetArgs.$client.leftJoin(parentModel, step + 0),
-              BillSetArgs.$parent.leftJoin(parentModel, step + 1),
-              BillSetArgs.$clientParent.leftJoin(parentModel, step + 0)
+              if (self.isNotEmpty)
+                '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self2}product_id AND ${self}bill.client_id = $parentModel.${self2}client_id AND ${self}bill.client_product_id = $parentModel.${self2}client_product_id''',
+              $$product.leftJoin(parentModel, step + 0),
+              $$client.leftJoin(parentModel, step + 0),
+              $$parent.leftJoin(parentModel, step + 1),
+              $$clientParent.leftJoin(parentModel, step + 0)
             ].join('\n')
           : '';
 
 // APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2)
   ProductSetArgs<T> get $$product =>
-      ProductSetArgs<T>('bill_product_', 'product_');
+      ProductSetArgs<T>('${self}product_', 'product_');
 
   $BillSetArgs<int, T> get $productId => $BillSetArgs<int, T>(
         name: 'product_id',
@@ -316,7 +314,8 @@ class BillSetArgs<T> {
       );
 
 // APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2)
-  ClientSetArgs<T> get $$client => ClientSetArgs<T>('bill_client_', 'client_');
+  ClientSetArgs<T> get $$client =>
+      ClientSetArgs<T>('${self}client_', 'client_');
 
   $BillSetArgs<int, T> get $clientId => $BillSetArgs<int, T>(
         name: 'client_id',

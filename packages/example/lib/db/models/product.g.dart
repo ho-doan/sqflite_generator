@@ -62,6 +62,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Product product
+${ProductSetArgs('', '').leftJoin('product')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -225,7 +226,8 @@ class ProductSetArgs<T> {
   ]) =>
       step < 1
           ? [
-              '''LEFT JOIN Product ${self}product ON ${self}product.id = $parentModel.${self2}id''',
+              if (self.isNotEmpty)
+                '''LEFT JOIN Product ${self}product ON ${self}product.id = $parentModel.${self2}id''',
             ].join('\n')
           : '';
 
