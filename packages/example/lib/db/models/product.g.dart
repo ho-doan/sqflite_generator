@@ -32,7 +32,6 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
     ProductSetArgs.blocked,
   };
 
-// TODO(hodoan): check
   static String $createSelect(Set<WhereModel<dynamic, ProductSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
@@ -62,7 +61,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Product product
-${ProductSetArgs('', '').leftJoin('product')}
+${const ProductSetArgs('', '').leftJoin('product')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -110,19 +109,18 @@ first_name,
 blocked) 
        VALUES(?, ?, ?, ?)''', [
       id,
-      this.lastName,
-      this.firstName,
-      this.blocked,
+      lastName,
+      firstName,
+      blocked,
     ]);
     return $id;
   }
 
   Future<int> update(Database database) async {
     return await database
-        .update('Product', toDB(), where: "id = ?", whereArgs: [this.id]);
+        .update('Product', toDB(), where: "id = ?", whereArgs: [id]);
   }
 
-// TODO(hodoan): check
   static Future<Product?> getById(
     Database database,
     int? id, {
@@ -141,7 +139,7 @@ WHERE product.id = ?
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE * FROM Product product WHERE product.id = ?''', [this.id]);
+        '''DELETE * FROM Product product WHERE product.id = ?''', [id]);
   }
 
   static Future<void> deleteById(
@@ -163,15 +161,15 @@ WHERE product.id = ?
     int childStep = 0,
   ]) =>
       Product(
-          id: json['product_id'] as int?,
+          id: json['${childName}product_id'] as int?,
           lastName: json['${childName}product_last_name'] as String?,
           firstName: json['${childName}product_first_name'] as String?,
           blocked: (json['${childName}product_blocked'] as int?) == 1);
   Map<String, dynamic> $toDB() => {
-        'id': this.id,
-        'last_name': this.lastName,
-        'first_name': this.firstName,
-        'blocked': (this.blocked ?? false) ? 1 : 0
+        'id': id,
+        'last_name': lastName,
+        'first_name': firstName,
+        'blocked': (blocked ?? false) ? 1 : 0
       };
 }
 

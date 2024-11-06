@@ -90,13 +90,6 @@ class AEntity {
   String get rawFromDB {
     return [
       for (final e in allsss())
-        // if (e.$2 is AForeignKey)
-        //   {
-        //     if (!e.$2.dartType.isDartCoreList)
-        //       '${e.$2.nameDefault}:${(e.$2 as AForeignKey).entityParent?.className}.fromDB(json,[])'
-        //     else
-        //       '${e.$2.nameDefault}: lst.map((e)=>${(e.$2 as AForeignKey).entityParent?.className}.fromDB(e,[])).toList()'
-        //   }
         if (e is AIndex)
           '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}'
         else if (e is AColumn)
@@ -112,7 +105,7 @@ class AEntity {
             }
           }()
         else if (e is APrimaryKey && e.args.parentClassNames.sublist(1).isEmpty)
-          '${e.nameDefault}: json[\'${e.nameFromDB}\'] as ${e.dartType}',
+          '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}',
       for (final key in primaryKeys.where(
           (e) => foreignKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
         '${key.nameDefault}: ${key.entityParent?.className}'
@@ -131,24 +124,23 @@ class AEntity {
   String get rawToDB {
     return [
       for (final item in keysNew)
-        '\'${item.$2.args.fieldNames.join('_').toSnakeCase()}\': this.${item.$2.args.fieldNames.join('?.')}',
-      for (final item in indices)
-        '\'${item.nameToDB}\': this.${item.nameDefault}',
+        '\'${item.$2.args.fieldNames.join('_').toSnakeCase()}\': ${item.$2.args.fieldNames.join('?.')}',
+      for (final item in indices) '\'${item.nameToDB}\': ${item.nameDefault}',
       for (final item in columns)
         if (item.dartType.toString().contains('DateTime'))
-          '\'${item.nameToDB}\': this.${item.nameDefault}?.millisecondsSinceEpoch'
+          '\'${item.nameToDB}\': ${item.nameDefault}?.millisecondsSinceEpoch'
         else if (item.dartType.isDartCoreBool)
-          '\'${item.nameToDB}\': (this.${item.nameDefault} ?? false) ? 1 : 0'
+          '\'${item.nameToDB}\': (${item.nameDefault} ?? false) ? 1 : 0'
         else if (item.converter != null)
-          '\'${item.nameToDB}\': const ${(item).converter}().toJson(this.${item.nameDefault})'
+          '\'${item.nameToDB}\': const ${(item).converter}().toJson(${item.nameDefault})'
         else
-          '\'${item.nameToDB}\':this.${item.nameDefault}',
+          '\'${item.nameToDB}\':${item.nameDefault}',
       for (final k in foreignKeys.where((e) =>
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
         if (!k.dartType.isDartCoreList)
           for (final key
               in k.entityParent!.primaryKeys.expand((e) => e.expanded2()))
-            '\'${key.args.fieldNames.join('_').toSnakeCase()}\': this.${key.args.fieldNames.join('?.')}',
+            '\'${key.args.fieldNames.join('_').toSnakeCase()}\': ${key.args.fieldNames.join('?.')}',
     ].join(',\n');
   }
 
@@ -169,7 +161,7 @@ class AEntity {
         }
       ''',
       'final sql = \'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
-      '\${$setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
+      '\${const $setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
       '\${whereStr.isNotEmpty ? whereStr : \'\'}',
       "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field.replaceFirst(RegExp('^_'), '')} \${e.type}').join(',')}' : ''}",
       "\${limit != null ? 'LIMIT \$limit' : ''}",
@@ -344,9 +336,6 @@ extension AEntityBase on AEntity {
           e
         else if (e is AIndex)
           e
-      // else if (e is AForeignKey &&
-      //     !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault))
-      //   e,
     ];
     return alls;
   }
@@ -498,11 +487,11 @@ extension AInsert on AEntity {
       for (final key in keysNew) key.$2.args.fieldNames.join('?.'),
       for (final item in columns)
         if (item.dartType.toString().contains('DateTime'))
-          'this.${item.defaultSuffix}.millisecondsSinceEpoch'
+          '${item.defaultSuffix}.millisecondsSinceEpoch'
         else if (item.converter != null)
-          'const ${item.converter}().toJson(this.${item.nameDefault})'
+          'const ${item.converter}().toJson(${item.nameDefault})'
         else
-          'this.${item.nameDefault}',
+          item.nameDefault,
       for (final k in foreignKeys.where((e) =>
           !e.dartType.isDartCoreList &&
           !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
@@ -767,7 +756,7 @@ extension AFields on AEntity {
 
   List<String> get _whereArgs {
     return [
-      for (final key in keysNew) 'this.${key.$2.args.fieldNames.join('?.')}',
+      for (final key in keysNew) key.$2.args.fieldNames.join('?.'),
     ];
   }
 

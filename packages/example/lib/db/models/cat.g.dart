@@ -30,7 +30,6 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
     CatSetArgs.birth,
   };
 
-// TODO(hodoan): check
   static String $createSelect(Set<WhereModel<dynamic, CatSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
@@ -60,7 +59,7 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Cat cat
-${CatSetArgs('', '').leftJoin('cat')}
+${const CatSetArgs('', '').leftJoin('cat')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -110,7 +109,7 @@ parent_id,
 child_id) 
        VALUES(?, ?, ?, ?)''', [
       id,
-      this.birth?.millisecondsSinceEpoch,
+      birth?.millisecondsSinceEpoch,
       parent?.id,
       child?.id,
     ]);
@@ -121,10 +120,9 @@ child_id)
     await parent?.update(database);
     await child?.update(database);
     return await database
-        .update('Cat', toDB(), where: "id = ?", whereArgs: [this.id]);
+        .update('Cat', toDB(), where: "id = ?", whereArgs: [id]);
   }
 
-// TODO(hodoan): check
   static Future<Cat?> getById(
     Database database,
     int? id, {
@@ -142,8 +140,7 @@ WHERE cat.id = ?
   }
 
   Future<void> delete(Database database) async {
-    await database
-        .rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [this.id]);
+    await database.rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [id]);
   }
 
   static Future<void> deleteById(
@@ -164,17 +161,17 @@ WHERE cat.id = ?
     int childStep = 0,
   ]) =>
       Cat(
-          id: json['cat_id'] as int?,
+          id: json['${childName}cat_id'] as int?,
           birth: DateTime.fromMillisecondsSinceEpoch(
             json['${childName}cat_birth'] as int? ?? -1,
           ),
           parent: childStep > 0 ? null : Cat.fromDB(json, lst, 'parent_', 1),
           child: childStep > 0 ? null : Cat.fromDB(json, lst, 'child_', 1));
   Map<String, dynamic> $toDB() => {
-        'id': this.id,
-        'birth': this.birth?.millisecondsSinceEpoch,
-        'parent_id': this.parent?.id,
-        'child_id': this.child?.id
+        'id': id,
+        'birth': birth?.millisecondsSinceEpoch,
+        'parent_id': parent?.id,
+        'child_id': child?.id
       };
 }
 

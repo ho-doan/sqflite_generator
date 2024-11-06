@@ -31,7 +31,6 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
     BillMSetArgs.name,
   };
 
-// TODO(hodoan): check
   static String $createSelect(Set<WhereModel<dynamic, BillMSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
@@ -61,7 +60,7 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillM bill_m
-${BillMSetArgs('', '').leftJoin('bill_m')}
+${const BillMSetArgs('', '').leftJoin('bill_m')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -108,18 +107,17 @@ name,
 memos) 
        VALUES(?, ?, ?)''', [
       key,
-      this.name,
-      const StringListConverter().toJson(this.memos),
+      name,
+      const StringListConverter().toJson(memos),
     ]);
     return $id;
   }
 
   Future<int> update(Database database) async {
     return await database
-        .update('BillM', toDB(), where: "key = ?", whereArgs: [this.key]);
+        .update('BillM', toDB(), where: "key = ?", whereArgs: [key]);
   }
 
-// TODO(hodoan): check
   static Future<BillM?> getById(
     Database database,
     int? key, {
@@ -137,8 +135,8 @@ WHERE bill_m.key = ?
   }
 
   Future<void> delete(Database database) async {
-    await database.rawQuery(
-        '''DELETE * FROM BillM bill_m WHERE bill_m.key = ?''', [this.key]);
+    await database
+        .rawQuery('''DELETE * FROM BillM bill_m WHERE bill_m.key = ?''', [key]);
   }
 
   static Future<void> deleteById(
@@ -160,15 +158,15 @@ WHERE bill_m.key = ?
     int childStep = 0,
   ]) =>
       BillM(
-          key: json['bill_m_key'] as int?,
+          key: json['${childName}bill_m_key'] as int?,
           name: json['${childName}bill_m_name'] as String,
           memos: const StringListConverter()
               .fromJson(json['${childName}bill_m_memos'] as String?),
           details: lst.map((e) => BillDetail.fromDB(e, [])).toList());
   Map<String, dynamic> $toDB() => {
-        'key': this.key,
-        'name': this.name,
-        'memos': const StringListConverter().toJson(this.memos)
+        'key': key,
+        'name': name,
+        'memos': const StringListConverter().toJson(memos)
       };
 }
 
@@ -277,7 +275,6 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
     BillDetailSetArgs.name,
   };
 
-// TODO(hodoan): check
   static String $createSelect(
           Set<WhereModel<dynamic, BillDetailSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
@@ -308,7 +305,7 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM BillDetail bill_detail
-${BillDetailSetArgs('', '').leftJoin('bill_detail')}
+${const BillDetailSetArgs('', '').leftJoin('bill_detail')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -357,7 +354,7 @@ name,
 parent_key) 
        VALUES(?, ?, ?)''', [
       key,
-      this.name,
+      name,
       parent?.key,
     ]);
     return $id;
@@ -366,10 +363,9 @@ parent_key)
   Future<int> update(Database database) async {
     await parent?.update(database);
     return await database
-        .update('BillDetail', toDB(), where: "key = ?", whereArgs: [this.key]);
+        .update('BillDetail', toDB(), where: "key = ?", whereArgs: [key]);
   }
 
-// TODO(hodoan): check
   static Future<BillDetail?> getById(
     Database database,
     int? key, {
@@ -389,7 +385,7 @@ WHERE bill_detail.key = ?
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE * FROM BillDetail bill_detail WHERE bill_detail.key = ?''',
-        [this.key]);
+        [key]);
   }
 
   static Future<void> deleteById(
@@ -412,11 +408,11 @@ WHERE bill_detail.key = ?
     int childStep = 0,
   ]) =>
       BillDetail(
-          key: json['bill_detail_key'] as int?,
+          key: json['${childName}bill_detail_key'] as int?,
           name: json['${childName}bill_detail_name'] as String,
           parent: BillM.fromDB(json, lst, 'parent_'));
   Map<String, dynamic> $toDB() =>
-      {'key': this.key, 'name': this.name, 'parent_key': this.parent?.key};
+      {'key': key, 'name': name, 'parent_key': parent?.key};
 }
 
 class $BillDetailSetArgs<T, M> extends WhereModel<T, M> {

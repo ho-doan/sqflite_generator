@@ -35,12 +35,14 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         ..types.addAll([refer('T'), refer('M')])
         ..extend = refer('WhereModel<T,M>')
         ..constructors.add(
-          Constructor((c) => c
-            ..constant = true
-            ..initializers
-                .add(Code('super(field: \'\${self}_\$model.\$name\')'))
-            // ..body = Code('super(field: \'\$model.\$name\')')
-            ..optionalParameters.addAll(entity.setOptionalArgs)),
+          Constructor(
+            (c) => c
+              ..constant = true
+              ..initializers.add(
+                Code('super(field: \'\${self}_\$model.\$name\')'),
+              )
+              ..optionalParameters.addAll(entity.setOptionalArgs),
+          ),
         ),
     );
     final classSetBuilderExternal2 = Class(
@@ -273,11 +275,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                 if (!(e is AColumn &&
                     e.alters.any((e) => e.type == AlterTypeGen.drop)))
                   '${entity.setClassNameExternal}.${e.args.fieldNames.join('_').toCamelCase()}',
-              // for (final f in fieldList)
-              //   // for (final aExtend in classBuilderListExtends)
-              //   for (final field in (classBuilderListExtends
-              //       .firstWhere((e) => e.$2.name == f.type?.symbol)).$2.methods)
-              //     '${entity.extensionName}.${f.name}.${field.name}'
             ].join(',')},}''')
             ..static = true,
         ),
@@ -288,7 +285,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..name = '\$createSelect'
             ..lambda = true
             ..static = true
-            ..docs.add('// TODO(hodoan): check')
             ..body = Code('''((select??{}).isEmpty ? \$default : select!)
             .map((e)=>'\${'\${e.self}\${e.model}'.replaceFirst(RegExp('^_'), '')}.\${e.name} as \${e.self}\${e.nameCast}')
             .join(',')''')
@@ -351,7 +347,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..name = 'getById'
           ..modifier = MethodModifier.async
           ..static = true
-          ..docs.add('// TODO(hodoan): check')
           ..body = Code(entity.rawFindOne)
           ..requiredParameters
               .addAll([entity.databaseArgs, ...entity.keysRequiredArgs])

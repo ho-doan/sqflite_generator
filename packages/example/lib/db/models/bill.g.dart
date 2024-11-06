@@ -42,7 +42,6 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
     BillSetArgs.time,
   };
 
-// TODO(hodoan): check
   static String $createSelect(Set<WhereModel<dynamic, BillSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
@@ -72,7 +71,7 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
-${BillSetArgs('', '').leftJoin('bill')}
+${const BillSetArgs('', '').leftJoin('bill')}
 ${whereStr.isNotEmpty ? whereStr : ''}
 ${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
@@ -82,15 +81,15 @@ ${offset != null ? 'OFFSET $offset' : ''}
       print('get all Bill $sql');
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
-    final lst = mapList.groupByDB(
-        ((m) => [
+    return mapList
+        .groupBy(((m) => [
               m[BillSetArgs.productId.nameCast],
               m[BillSetArgs.clientId.nameCast],
               m[BillSetArgs.clientProductId.nameCast]
-            ]),
-        ((e) => e.map((e) => e.toString()).join('_')));
-    print(lst);
-    return lst.values.map((e) => Bill.fromDB(e.first, e)).toList();
+            ]))
+        .values
+        .map((e) => Bill.fromDB(e.first, e))
+        .toList();
   }
 
   static Future<List<Bill>> top(
@@ -122,29 +121,6 @@ ${offset != null ? 'OFFSET $offset' : ''}
     await client?.insert(database);
     await parent?.insert(database);
     await clientParent?.insert(database);
-    print(
-      '''INSERT OR REPLACE INTO Bill (product_id,
-client_id,
-client_product_id,
-time,
-parent_product_id,
-parent_client_id,
-parent_client_product_id,
-client_parent_id,
-client_parent_product_id) 
-       VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ${[
-        product?.id,
-        client?.id,
-        client?.product?.id,
-        this.time?.millisecondsSinceEpoch,
-        parent?.product?.id,
-        parent?.client?.id,
-        parent?.client?.product?.id,
-        clientParent?.id,
-        clientParent?.product?.id,
-      ]}''',
-    );
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Bill (product_id,
 client_id,
@@ -159,7 +135,7 @@ client_parent_product_id)
       product?.id,
       client?.id,
       client?.product?.id,
-      this.time?.millisecondsSinceEpoch,
+      time?.millisecondsSinceEpoch,
       parent?.product?.id,
       parent?.client?.id,
       parent?.client?.product?.id,
@@ -176,14 +152,9 @@ client_parent_product_id)
     await clientParent?.update(database);
     return await database.update('Bill', toDB(),
         where: "product_id = ? AND client_id = ? AND client_product_id = ?",
-        whereArgs: [
-          this.product?.id,
-          this.client?.id,
-          this.client?.product?.id
-        ]);
+        whereArgs: [product?.id, client?.id, client?.product?.id]);
   }
 
-// TODO(hodoan): check
   static Future<Bill?> getById(
     Database database,
     int? productId,
@@ -205,7 +176,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE * FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
-        [this.product?.id, this.client?.id, this.client?.product?.id]);
+        [product?.id, client?.id, client?.product?.id]);
   }
 
   static Future<void> deleteById(
@@ -238,15 +209,15 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
           parent: childStep > 0 ? null : Bill.fromDB(json, lst, 'parent_', 1),
           clientParent: Client.fromDB(json, lst, 'client_parent_'));
   Map<String, dynamic> $toDB() => {
-        'product_id': this.product?.id,
-        'client_id': this.client?.id,
-        'client_product_id': this.client?.product?.id,
-        'time': this.time?.millisecondsSinceEpoch,
-        'parent_product_id': this.parent?.product?.id,
-        'parent_client_id': this.parent?.client?.id,
-        'parent_client_product_id': this.parent?.client?.product?.id,
-        'client_parent_id': this.clientParent?.id,
-        'client_parent_product_id': this.clientParent?.product?.id
+        'product_id': product?.id,
+        'client_id': client?.id,
+        'client_product_id': client?.product?.id,
+        'time': time?.millisecondsSinceEpoch,
+        'parent_product_id': parent?.product?.id,
+        'parent_client_id': parent?.client?.id,
+        'parent_client_product_id': parent?.client?.product?.id,
+        'client_parent_id': clientParent?.id,
+        'client_parent_product_id': clientParent?.product?.id
       };
 }
 
