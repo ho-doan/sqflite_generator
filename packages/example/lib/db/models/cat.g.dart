@@ -34,7 +34,7 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
   static String $createSelect(Set<WhereModel<dynamic, CatSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
-              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Cat>> getAll(
@@ -105,9 +105,9 @@ ${offset != null ? 'OFFSET $offset' : ''}
     await parent?.insert(database);
     await child?.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Cat (id,
-cat,
-cat,
-birth) 
+birth,
+parent_id,
+child_id) 
        VALUES(?, ?, ?, ?)''', [
       id,
       this.birth?.millisecondsSinceEpoch,
@@ -161,14 +161,15 @@ WHERE cat.id = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       Cat(
           id: json['cat_id'] as int?,
           birth: DateTime.fromMillisecondsSinceEpoch(
             json['${childName}cat_birth'] as int? ?? -1,
           ),
-          parent: Cat.fromDB(json, lst, 'parent_'),
-          child: Cat.fromDB(json, lst, 'child_'));
+          parent: childStep > 0 ? null : Cat.fromDB(json, lst, 'parent_', 1),
+          child: childStep > 0 ? null : Cat.fromDB(json, lst, 'child_', 1));
   Map<String, dynamic> $toDB() => {
         'id': this.id,
         'birth': this.birth?.millisecondsSinceEpoch,

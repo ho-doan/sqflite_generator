@@ -46,7 +46,7 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
   static String $createSelect(Set<WhereModel<dynamic, BillSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
-              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Bill>> getAll(
@@ -123,13 +123,15 @@ ${offset != null ? 'OFFSET $offset' : ''}
     await parent?.insert(database);
     await clientParent?.insert(database);
     final $id =
-        await database.rawInsert('''INSERT OR REPLACE INTO Bill (product,
-client,
-product,
-client,
-bill,
-client,
-time) 
+        await database.rawInsert('''INSERT OR REPLACE INTO Bill (product_id,
+client_id,
+client_product_id,
+time,
+parent_product_id,
+parent_client_id,
+parent_client_product_id,
+client_parent_id,
+client_parent_product_id) 
        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''', [
       product?.id,
       client?.id,
@@ -202,6 +204,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       Bill(
           time: DateTime.fromMillisecondsSinceEpoch(
@@ -209,7 +212,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
           ),
           product: Product.fromDB(json, lst, 'product_'),
           client: Client.fromDB(json, lst, 'client_'),
-          parent: Bill.fromDB(json, lst, 'parent_'),
+          parent: childStep > 0 ? null : Bill.fromDB(json, lst, 'parent_', 1),
           clientParent: Client.fromDB(json, lst, 'client_parent_'));
   Map<String, dynamic> $toDB() => {
         'product_id': this.product?.id,
@@ -281,8 +284,8 @@ class BillSetArgs<T> {
   static const BillSetArgs<BillSet> $parent =
       BillSetArgs<BillSet>('parent_', 'parent_');
 
-  static const ClientSetArgs<ClientSet> $clientParent =
-      ClientSetArgs<ClientSet>('client_parent_', 'client_parent_');
+  static const ClientSetArgs<BillSet> $clientParent =
+      ClientSetArgs<BillSet>('client_parent_', 'client_parent_');
 
   String leftJoin(
     String parentModel, [

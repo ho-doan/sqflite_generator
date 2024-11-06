@@ -288,7 +288,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..static = true
             ..docs.add('// TODO(hodoan): check')
             ..body = Code('''((select??{}).isEmpty ? \$default : select!)
-            .map((e)=>'\${'\${e.self}\${e.model}'.replaceFirst(RegExp('^_'), '')}.\${e.name} as \${e.nameCast}')
+            .map((e)=>'\${'\${e.self}\${e.model}'.replaceFirst(RegExp('^_'), '')}.\${e.name} as \${e.self}\${e.nameCast}')
             .join(',')''')
             ..requiredParameters.addAll([
               entity.selectArgs,
@@ -386,7 +386,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..static = true
           ..body = Code('${entity.classType}(${entity.rawFromDB})')
           ..requiredParameters.addAll([entity.fromArgs, entity.fromArgsList])
-          ..optionalParameters.add(entity.selectChildArgs)
+          ..optionalParameters.addAll([
+            entity.selectChildArgs,
+            entity.selectChildStepArgs,
+          ])
           ..returns = refer(entity.classType)),
         Method((m) => m
           ..name = '\$toDB'

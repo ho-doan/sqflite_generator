@@ -26,8 +26,11 @@ class Cat extends EntityQuery {
   });
 
   factory Cat.fromDB(
-          Map<dynamic, dynamic> json, List<Map<dynamic, dynamic>> lst,
-          [String childName = '']) =>
+    Map<dynamic, dynamic> json,
+    List<Map<dynamic, dynamic>> lst, [
+    String childName = '',
+    int childStep = 0,
+  ]) =>
       CatQuery.$fromDB(json, lst, childName);
 
   Map<String, dynamic> toDB() => $toDB();

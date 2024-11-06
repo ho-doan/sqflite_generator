@@ -35,7 +35,7 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
   static String $createSelect(Set<WhereModel<dynamic, BillMSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
-              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<BillM>> getAll(
@@ -157,6 +157,7 @@ WHERE bill_m.key = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       BillM(
           key: json['bill_m_key'] as int?,
@@ -283,7 +284,7 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
           Set<WhereModel<dynamic, BillDetailSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
-              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<BillDetail>> getAll(
@@ -354,8 +355,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
     await parent?.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO BillDetail (key,
-bill_m,
-name) 
+name,
+parent_key) 
        VALUES(?, ?, ?)''', [
       key,
       this.name,
@@ -410,6 +411,7 @@ WHERE bill_detail.key = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       BillDetail(
           key: json['bill_detail_key'] as int?,

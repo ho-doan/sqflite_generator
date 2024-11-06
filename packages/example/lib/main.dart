@@ -3,9 +3,12 @@ import 'dart:developer';
 
 import 'package:example/authentication_model.dart';
 import 'package:example/db/models/bill.dart';
+import 'package:example/db/models/client.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart' hide Column;
+
+import 'db/models/product.dart';
 
 void main() {
   runZonedGuarded(() async {
@@ -66,13 +69,19 @@ class _MyHomePageState extends State<MyHomePage> {
       BillQuery.getAll(
         db,
         select: {
+          // BillQuery.billQ.$productId,
           // BillSetArgs.productId,
           // BillSetArgs.clientId,
           // BillSetArgs.clientProductId,
           // BillSetArgs.time,
           // BillSetArgs.$client.$blocked,
-          BillSetArgs.$client.$$product.$firstName,
-          BillSetArgs.$client.$$product.$firstName
+          // BillQuery.billQ.$$client.$$product.$firstName,
+          // BillQuery.billQ.$$product.$firstName,
+          // BillSetArgs.$product.$firstName,
+          // BillSetArgs.$client.$$product.$firstName,
+          // BillSetArgs.$clientParent.$lastName,
+          // BillSetArgs.$clientParent.$$product.$firstName,
+          BillSetArgs.$parent.$$client.$$product.$firstName,
           // ClientSetArgs.firstName,
           // ClientSetArgs.lastName,
           // ClientSetArgs.blocked,
@@ -124,6 +133,76 @@ class _MyHomePageState extends State<MyHomePage> {
             //   Text('${item.name} ${item.details.map((e) => e.name)}')
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final bill = Bill(
+            product: Product(
+              id: 1,
+              firstName: 'test',
+              lastName: 'test',
+              blocked: false,
+            ),
+            client: Client(
+              id: 1,
+              firstName: 'test',
+              lastName: 'test',
+              blocked: false,
+              product: Product(
+                id: 2,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+              ),
+            ),
+            clientParent: Client(
+              id: 3,
+              firstName: 'test',
+              lastName: 'test',
+              blocked: false,
+              product: Product(
+                id: 4,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+              ),
+            ),
+            parent: Bill(
+              client: Client(
+                id: 5,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+                product: Product(
+                  id: 6,
+                  firstName: 'test',
+                  lastName: 'test',
+                  blocked: false,
+                ),
+              ),
+              product: Product(
+                id: 7,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+              ),
+              time: DateTime.now(),
+            ),
+            time: DateTime.now(),
+          );
+          await bill.product?.insert(database);
+          await bill.client?.insert(database);
+
+          await bill.clientParent?.product.insert(database);
+          await bill.clientParent?.insert(database);
+
+          await bill.parent?.client?.product.insert(database);
+          await bill.parent?.client?.insert(database);
+
+          await bill.parent?.insert(database);
+          await bill.insert(database);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -41,7 +41,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: cli
   static String $createSelect(Set<WhereModel<dynamic, ClientSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
-              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Client>> getAll(
@@ -114,8 +114,7 @@ ${offset != null ? 'OFFSET $offset' : ''}
   Future<int> insert(Database database) async {
     await product.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
-product,
-product,
+product_id,
 first_name,
 last_name,
 blocked) 
@@ -178,6 +177,7 @@ WHERE client.id = ? AND client.product_id = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       Client(
           id: json['client_id'] as int?,

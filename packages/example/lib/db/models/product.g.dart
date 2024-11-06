@@ -36,7 +36,7 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: pro
   static String $createSelect(Set<WhereModel<dynamic, ProductSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
           .map((e) =>
-              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.nameCast}')
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
 // TODO(hodoan): check
   static Future<List<Product>> getAll(
@@ -160,6 +160,7 @@ WHERE product.id = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       Product(
           id: json['product_id'] as int?,

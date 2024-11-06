@@ -33,9 +33,12 @@ class Client extends EntityQuery {
   });
 
   factory Client.fromDB(
-          Map<dynamic, dynamic> json, List<Map<dynamic, dynamic>> lst,
-          [String childName = '']) =>
-      ClientQuery.$fromDB(json, lst, childName);
+    Map<dynamic, dynamic> json,
+    List<Map<dynamic, dynamic>> lst, [
+    String childName = '',
+    int childStep = 0,
+  ]) =>
+      ClientQuery.$fromDB(json, lst, childName, childStep);
 
   Map<String, dynamic> toDB() => $toDB();
 }

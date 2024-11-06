@@ -35,9 +35,12 @@ class Bill extends EntityQuery {
   });
 
   factory Bill.fromDB(
-          Map<dynamic, dynamic> json, List<Map<dynamic, dynamic>> lst,
-          [String childName = '']) =>
-      BillQuery.$fromDB(json, lst, childName);
+    Map<dynamic, dynamic> json,
+    List<Map<dynamic, dynamic>> lst, [
+    String childName = '',
+    int childStep = 0,
+  ]) =>
+      BillQuery.$fromDB(json, lst, childName, childStep);
 
   Map<String, dynamic> toDB() => $toDB();
 }

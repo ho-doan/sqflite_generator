@@ -113,7 +113,6 @@ class AEntity {
           }()
         else if (e is APrimaryKey && e.args.parentClassNames.sublist(1).isEmpty)
           '${e.nameDefault}: json[\'${e.nameFromDB}\'] as ${e.dartType}',
-
       for (final key in primaryKeys.where(
           (e) => foreignKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
         '${key.nameDefault}: ${key.entityParent?.className}'
@@ -123,24 +122,9 @@ class AEntity {
         if (key.dartType.isDartCoreList)
           '${key.nameDefault}: lst.map((e)=>${key.entityParent?.className}.fromDB(e,[])).toList()'
         else
-          '${key.nameDefault}: ${key.entityParent?.className}'
-              '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\')',
-      // if (e.property.rawFromDB) {
-      //   return '${e.property.nameDefault}: ${e.property.dartType}'
-      //       '.fromDB(json,${e is AForeignKey ? (e.property as AForeignKey).subSelect(foreignKeys.duplicated(e.property as AForeignKey)) : '\'\''})';
-      // }
-      // if (e.property.dartType.toString().contains('DateTime')) {
-      //   return '${e.property.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.property.nameFromDB}\'] as int? ?? -1,)';
-      // }
-      // if (e.property.dartType.isDartCoreBool) {
-      //   return '${e.property.nameDefault}: (json[\'${e.property.nameFromDB}\'] as int?) == 1';
-      // }
-      // if (e.property is AColumn &&
-      //     (e.property as AColumn).converter != null) {
-      //   return '${e.property.nameDefault}: const ${(e.property as AColumn).converter}().fromJson(json[\'\${childName}${e.property.nameFromDB}\'] as String?)';
-      // }
-
-      // return '${e.property.nameDefault}: json[\'\${childName}${e.property.nameFromDB}\'] as ${e.property.dartType}';
+          ' ${key.nameDefault}: ${key.entityParent?.className == className ? 'childStep > 0 ? null :' : ''}'
+              '${key.entityParent?.className}'
+              '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\'${key.entityParent?.className == className ? ',1' : ''})',
     ].join(',\n');
   }
 
@@ -492,10 +476,18 @@ extension AInsert on AEntity {
     if (ps?.dartType.isDartCoreList ?? false) {
       return 'await Future.wait(${ps!.nameDefault}.map((e) => e.insert(database)));';
     }
-    final fieldsRaw = aPs
-        .whereNot((e) => e is AForeignKey && e.dartType.isDartCoreList)
-        .map((e) => e.nameToDB)
-        .join(',\n');
+    final fieldsRaw = [
+      ...allsss()
+          // .whereNot((e) => e is AForeignKey && e.dartType.isDartCoreList)
+          .map((e) => e.args.fieldNames.join('_').toSnakeCase())
+          .toList(),
+      for (final e in foreignKeys.where((e) =>
+          !e.dartType.isDartCoreList &&
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        ...e.entityParent!.primaryKeys
+            .expand((e) => e.expanded2())
+            .map((m) => m.args.fieldNames.join('_').toSnakeCase()),
+    ].join(',\n');
 
     if (ps != null) {
       // final \$${'${className}Id_${ps.nameDefault}'.toCamelCase()} =
@@ -604,6 +596,12 @@ extension AParam on AEntity {
     ..name = 'childName'
     ..type = refer('String')
     ..defaultTo = Code('\'\'')
+    ..named = false
+    ..required = false);
+  Parameter get selectChildStepArgs => Parameter((p) => p
+    ..name = 'childStep'
+    ..type = refer('int')
+    ..defaultTo = Code('0')
     ..named = false
     ..required = false);
   Parameter get databaseArgs => Parameter((p) => p
