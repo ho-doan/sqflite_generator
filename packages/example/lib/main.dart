@@ -69,6 +69,16 @@ class _MyHomePageState extends State<MyHomePage> {
       BillQuery.getAll(
         db,
         select: {
+          BillSetArgs.$product.$firstName,
+          BillSetArgs.productId,
+          BillSetArgs.clientId,
+          BillSetArgs.$client.$id,
+          BillSetArgs.$product.$id,
+          BillSetArgs.$client.$$product.$id,
+          BillSetArgs.$client.$productId,
+          BillSetArgs.$client.$firstName,
+          BillSetArgs.$client.$lastName,
+          BillSetArgs.$client.$blocked,
           // BillQuery.billQ.$productId,
           // BillSetArgs.productId,
           // BillSetArgs.clientId,
@@ -81,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // BillSetArgs.$client.$$product.$firstName,
           // BillSetArgs.$clientParent.$lastName,
           // BillSetArgs.$clientParent.$$product.$firstName,
+          BillSetArgs.$client.$$product.$firstName,
           BillSetArgs.$parent.$$client.$$product.$firstName,
           // ClientSetArgs.firstName,
           // ClientSetArgs.lastName,
@@ -104,7 +115,9 @@ class _MyHomePageState extends State<MyHomePage> {
         //   },
         // ],
       ).then(
-        (v) => setState(() => bills = v),
+        (v) => setState(() {
+          bills = v;
+        }),
       );
       return database = db;
     });
@@ -129,6 +142,9 @@ class _MyHomePageState extends State<MyHomePage> {
               '',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            for (final b in bills)
+              Text(
+                  'product_id: ${b.product?.id} client_id: ${b.client?.id} client_product_id: ${b.client?.product?.id}'),
             // for (final item in bills)
             //   Text('${item.name} ${item.details.map((e) => e.name)}')
           ],
@@ -138,9 +154,9 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () async {
           final bill = Bill(
             product: Product(
-              id: 1,
+              id: 12,
               firstName: 'test',
-              lastName: 'test',
+              lastName: 'tes4t',
               blocked: false,
             ),
             client: Client(

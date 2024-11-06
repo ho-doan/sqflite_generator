@@ -219,14 +219,12 @@ class CatSetArgs<T> {
     String parentModel, [
     int step = 0,
   ]) =>
-      step < 1
-          ? [
-              if (self.isNotEmpty)
-                '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self2}id''',
-              $$parent.leftJoin(parentModel, step + 1),
-              $$child.leftJoin(parentModel, step + 1)
-            ].join('\n')
-          : '';
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self2}id''',
+        if (step < 1) $$parent.leftJoin(parentModel, step + 1),
+        if (step < 1) $$child.leftJoin(parentModel, step + 1)
+      ].join('\n');
 
   $CatSetArgs<int, T> get $id => $CatSetArgs<int, T>(
         name: 'id',
@@ -242,9 +240,9 @@ class CatSetArgs<T> {
         self: this.self,
       );
 
-  CatSetArgs<T> get $$parent => CatSetArgs<T>('parent_', 'parent_');
+  CatSetArgs<T> get $$parent => CatSetArgs<T>('${self}parent_', 'parent_');
 
-  CatSetArgs<T> get $$child => CatSetArgs<T>('child_', 'child_');
+  CatSetArgs<T> get $$child => CatSetArgs<T>('${self}child_', 'child_');
 }
 
 class CatSet {

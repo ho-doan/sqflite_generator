@@ -219,13 +219,11 @@ class BillMSetArgs<T> {
     String parentModel, [
     int step = 0,
   ]) =>
-      step < 1
-          ? [
-              if (self.isNotEmpty)
-                '''LEFT JOIN BillM ${self}bill_m ON ${self}bill_m.key = $parentModel.${self2}key''',
-              $$details.leftJoin(parentModel, step + 0)
-            ].join('\n')
-          : '';
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN BillM ${self}bill_m ON ${self}bill_m.key = $parentModel.${self2}key''',
+        $$details.leftJoin(parentModel, step + 0)
+      ].join('\n');
 
   $BillMSetArgs<int, T> get $key => $BillMSetArgs<int, T>(
         name: 'key',
@@ -250,7 +248,7 @@ class BillMSetArgs<T> {
       );
 
   BillDetailSetArgs<T> get $$details =>
-      BillDetailSetArgs<T>('details_', 'details_');
+      BillDetailSetArgs<T>('${self}details_', 'details_');
 }
 
 class BillMSet {
@@ -461,13 +459,11 @@ class BillDetailSetArgs<T> {
     String parentModel, [
     int step = 0,
   ]) =>
-      step < 1
-          ? [
-              if (self.isNotEmpty)
-                '''LEFT JOIN BillDetail ${self}bill_detail ON ${self}bill_detail.key = $parentModel.${self2}key''',
-              $$parent.leftJoin(parentModel, step + 0)
-            ].join('\n')
-          : '';
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN BillDetail ${self}bill_detail ON ${self}bill_detail.key = $parentModel.${self2}key''',
+        $$parent.leftJoin(parentModel, step + 0)
+      ].join('\n');
 
   $BillDetailSetArgs<int, T> get $key => $BillDetailSetArgs<int, T>(
         name: 'key',
@@ -483,7 +479,7 @@ class BillDetailSetArgs<T> {
         self: this.self,
       );
 
-  BillMSetArgs<T> get $$parent => BillMSetArgs<T>('parent_', 'parent_');
+  BillMSetArgs<T> get $$parent => BillMSetArgs<T>('${self}parent_', 'parent_');
 }
 
 class BillDetailSet {

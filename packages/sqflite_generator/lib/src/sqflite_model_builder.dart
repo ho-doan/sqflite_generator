@@ -73,17 +73,19 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..defaultTo = Code('0'),
               ))
               ..body = Code(
-                  """step < 1?[if (self.isNotEmpty)'''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
+                  """[if (self.isNotEmpty)'''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
                 for (final item in entity.keysNew)
                   '\${self}${entity.className.toSnakeCase()}.${item.$2.args.fieldNames.join('_')} = \$parentModel.\${self2}${item.$2.args.fieldNames.join('_')}'
               ].join(' AND ')}''',
               ${[
                 for (final item in entity.foreignKeys)
                   [
+                    if (item.entityParent!.className == entity.className)
+                      'if(step < 1)',
                     '\$\$${item.nameDefault}.leftJoin(parentModel, step+${item.entityParent!.className == entity.className ? 1 : 0})',
                   ].join('\n')
               ].join(',\n')}
-              ].join('\\n'):''
+              ].join('\\n')
               """),
           ),
           for (final item in entity.allsss()) ...[
@@ -148,7 +150,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..lambda = true
                   ..body = Code(
                     '''${item.entityParent!.className}SetArgs<T>(
-                  '${item.args.fieldNames.first.toSnakeCase()}_',
+                  '\${self}${item.args.fieldNames.first.toSnakeCase()}_',
                   '${item.args.fieldNames.first.toSnakeCase()}_'
                   )''',
                   ),

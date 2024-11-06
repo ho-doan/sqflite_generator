@@ -82,15 +82,15 @@ ${offset != null ? 'OFFSET $offset' : ''}
       print('get all Bill $sql');
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
-    return mapList
-        .groupBy(((m) => [
+    final lst = mapList.groupByDB(
+        ((m) => [
               m[BillSetArgs.productId.nameCast],
               m[BillSetArgs.clientId.nameCast],
               m[BillSetArgs.clientProductId.nameCast]
-            ]))
-        .values
-        .map((e) => Bill.fromDB(e.first, e))
-        .toList();
+            ]),
+        ((e) => e.map((e) => e.toString()).join('_')));
+    print(lst);
+    return lst.values.map((e) => Bill.fromDB(e.first, e)).toList();
   }
 
   static Future<List<Bill>> top(
@@ -122,6 +122,29 @@ ${offset != null ? 'OFFSET $offset' : ''}
     await client?.insert(database);
     await parent?.insert(database);
     await clientParent?.insert(database);
+    print(
+      '''INSERT OR REPLACE INTO Bill (product_id,
+client_id,
+client_product_id,
+time,
+parent_product_id,
+parent_client_id,
+parent_client_product_id,
+client_parent_id,
+client_parent_product_id) 
+       VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ${[
+        product?.id,
+        client?.id,
+        client?.product?.id,
+        this.time?.millisecondsSinceEpoch,
+        parent?.product?.id,
+        parent?.client?.id,
+        parent?.client?.product?.id,
+        clientParent?.id,
+        clientParent?.product?.id,
+      ]}''',
+    );
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Bill (product_id,
 client_id,
@@ -284,23 +307,21 @@ class BillSetArgs<T> {
   static const BillSetArgs<BillSet> $parent =
       BillSetArgs<BillSet>('parent_', 'parent_');
 
-  static const ClientSetArgs<BillSet> $clientParent =
-      ClientSetArgs<BillSet>('client_parent_', 'client_parent_');
+  static const ClientSetArgs<ClientSet> $clientParent =
+      ClientSetArgs<ClientSet>('client_parent_', 'client_parent_');
 
   String leftJoin(
     String parentModel, [
     int step = 0,
   ]) =>
-      step < 1
-          ? [
-              if (self.isNotEmpty)
-                '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self2}product_id AND ${self}bill.client_id = $parentModel.${self2}client_id AND ${self}bill.client_product_id = $parentModel.${self2}client_product_id''',
-              $$product.leftJoin(parentModel, step + 0),
-              $$client.leftJoin(parentModel, step + 0),
-              $$parent.leftJoin(parentModel, step + 1),
-              $$clientParent.leftJoin(parentModel, step + 0)
-            ].join('\n')
-          : '';
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self2}product_id AND ${self}bill.client_id = $parentModel.${self2}client_id AND ${self}bill.client_product_id = $parentModel.${self2}client_product_id''',
+        $$product.leftJoin(parentModel, step + 0),
+        $$client.leftJoin(parentModel, step + 0),
+        if (step < 1) $$parent.leftJoin(parentModel, step + 1),
+        $$clientParent.leftJoin(parentModel, step + 0)
+      ].join('\n');
 
 // APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2)
   ProductSetArgs<T> get $$product =>
@@ -338,10 +359,10 @@ class BillSetArgs<T> {
         self: this.self,
       );
 
-  BillSetArgs<T> get $$parent => BillSetArgs<T>('parent_', 'parent_');
+  BillSetArgs<T> get $$parent => BillSetArgs<T>('${self}parent_', 'parent_');
 
   ClientSetArgs<T> get $$clientParent =>
-      ClientSetArgs<T>('client_parent_', 'client_parent_');
+      ClientSetArgs<T>('${self}client_parent_', 'client_parent_');
 }
 
 class BillSet {

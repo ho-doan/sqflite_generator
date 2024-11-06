@@ -226,12 +226,10 @@ class ProductSetArgs<T> {
     String parentModel, [
     int step = 0,
   ]) =>
-      step < 1
-          ? [
-              if (self.isNotEmpty)
-                '''LEFT JOIN Product ${self}product ON ${self}product.id = $parentModel.${self2}id''',
-            ].join('\n')
-          : '';
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN Product ${self}product ON ${self}product.id = $parentModel.${self2}id''',
+      ].join('\n');
 
   $ProductSetArgs<int, T> get $id => $ProductSetArgs<int, T>(
         name: 'id',

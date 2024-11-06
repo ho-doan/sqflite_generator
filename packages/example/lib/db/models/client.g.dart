@@ -256,13 +256,11 @@ class ClientSetArgs<T> {
     String parentModel, [
     int step = 0,
   ]) =>
-      step < 1
-          ? [
-              if (self.isNotEmpty)
-                '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self2}id AND ${self}client.product_id = $parentModel.${self2}product_id''',
-              $$product.leftJoin(parentModel, step + 0)
-            ].join('\n')
-          : '';
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self2}id AND ${self}client.product_id = $parentModel.${self2}product_id''',
+        $$product.leftJoin(parentModel, step + 0)
+      ].join('\n');
 
   $ClientSetArgs<int, T> get $id => $ClientSetArgs<int, T>(
         name: 'id',
