@@ -101,17 +101,21 @@ class _MyHomePageState extends State<MyHomePage> {
           // ClientSetArgs.$product.$id,
           // ClientSetArgs.$product.$blocked,
         },
-        // where: {
-        //   BillSetArgs.productId.equal(1),
-        //   // BillSetArgs.$product.$id.equal(1),
-        // },
-        // whereOr: [
-        //   {
-        //     BillSetArgs.productId.equal(1),
-        //     BillSetArgs.$product.$firstName.equal('1'),
-        //     BillSetArgs.$client.$$product.$lastName.likeContain('11'),
-        //   },
-        // ],
+        orderBy: {
+          // BillSetArgs.time.desc,
+          OrderBy.desc(BillSetArgs.productId),
+        },
+        where: {
+          BillSetArgs.productId.notEqual(1),
+          // BillSetArgs.$product.$id.equal(1),
+        },
+        whereOr: [
+          {
+            BillSetArgs.productId.equal(1),
+            // BillSetArgs.$product.$firstName.equal('1'),
+            // BillSetArgs.$client.$$product.$lastName.likeContain('11'),
+          },
+        ],
       ).then(
         (v) => setState(() {
           bills = v;
@@ -142,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             for (final b in bills)
               Text(
-                  'product_id: ${b.product?.id} client_id: ${b.client?.id} client_product_id: ${b.client?.product?.id}'),
+                  'product_id: ${b.product?.id} client_id: ${b.client?.id} client_product_id: ${b.client?.product.id}'),
             // for (final item in bills)
             //   Text('${item.name} ${item.details.map((e) => e.name)}')
           ],

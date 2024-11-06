@@ -26,12 +26,6 @@ extension BillQuery on Bill {
 			FOREIGN KEY (client_parent_id,client_parent_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug =
-      '''version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2),
-version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2),
-version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Bill, Client, Product], fieldNames: [client, product, id], step: 3),
-version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Bill], fieldNames: [time], step: 1)''';
-
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
@@ -47,7 +41,6 @@ version: 1, nameDefault: time, name: null, nameToDB: time, nameFromDB: bill_time
           .map((e) =>
               '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
-// TODO(hodoan): check
   static Future<List<Bill>> getAll(
     Database database, {
     Set<WhereModel<dynamic, BillSet>>? select,
@@ -166,11 +159,19 @@ client_parent_product_id)
 SELECT 
 ${$createSelect(select)}
  FROM Bill bill
-${BillSetArgs('', '').leftJoin('bill')}
+${const BillSetArgs('', '').leftJoin('bill')}
 WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
-// TODO(hodoan): check
-    return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
+    if (res.isEmpty) return null;
+    final mapList = res
+        .groupBy((e) => [
+              e[BillSetArgs.productId.nameCast],
+              e[BillSetArgs.clientId.nameCast],
+              e[BillSetArgs.clientProductId.nameCast]
+            ])
+        .values
+        .first;
+    return Bill.fromDB(mapList.first, mapList);
   }
 
   Future<void> delete(Database database) async {

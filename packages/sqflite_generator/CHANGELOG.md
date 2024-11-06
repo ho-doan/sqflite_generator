@@ -1,6 +1,6 @@
 ## 0.1.8-beta-5
 
-* fix gen select foreign key
+* hotfix gen foreign key, primary key, left join, where ext
 
 ## 0.1.8-beta-4
 

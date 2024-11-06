@@ -90,7 +90,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
               ].join('\\n')
               """),
           ),
-          for (final item in entity.allsss()) ...[
+          for (final item in entity.properties()) ...[
             if (item.args.parentClassNames.length == 2)
               Method(
                 (f) => f
@@ -160,7 +160,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ]
         ])
         ..fields.addAll([
-          for (final item in entity.allsss()) ...[
+          for (final item in entity.properties()) ...[
             if (item.args.parentClassNames.length == 2)
               Field(
                 (f) => f
@@ -250,14 +250,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         ),
         Field(
           (f) => f
-            ..name = 'debug'
-            ..type = refer('String')
-            ..assignment = Code("""'''${entity.rawDebug()}'''""")
-            ..modifier = FieldModifier.constant
-            ..static = true,
-        ),
-        Field(
-          (f) => f
             ..name = 'alter'
             ..type = refer('Map<int,List<String>>')
             ..docs.add('// TODO(hodoan): check')
@@ -271,7 +263,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..type = refer(
                 'Set<WhereModel<dynamic, ${entity.setClassNameExternal2}>>')
             ..assignment = Code('''{${[
-              for (final e in entity.allsss())
+              for (final e in entity.properties())
                 if (!(e is AColumn &&
                     e.alters.any((e) => e.type == AlterTypeGen.drop)))
                   '${entity.setClassNameExternal}.${e.args.fieldNames.join('_').toCamelCase()}',
@@ -296,7 +288,6 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) => m
           ..name = 'getAll'
           ..static = true
-          ..docs.add('// TODO(hodoan): check')
           ..modifier = MethodModifier.async
           ..body = Code(entity.rawGetAll)
           ..requiredParameters.add(entity.databaseArgs)

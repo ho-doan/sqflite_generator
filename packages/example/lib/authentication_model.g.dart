@@ -15,11 +15,6 @@ extension BillMQuery on BillM {
 			name TEXT NOT NULL
 	)''';
 
-  static const String debug =
-      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1),
-version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1),
-version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1)''';
-
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {
     2: ['ALTER TABLE BillM ADD memos TEXT;'],
@@ -36,7 +31,6 @@ version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_
           .map((e) =>
               '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
-// TODO(hodoan): check
   static Future<List<BillM>> getAll(
     Database database, {
     Set<WhereModel<dynamic, BillMSet>>? select,
@@ -127,11 +121,13 @@ memos)
 SELECT 
 ${$createSelect(select)}
  FROM BillM bill_m
-${BillMSetArgs('', '').leftJoin('bill_m')}
+${const BillMSetArgs('', '').leftJoin('bill_m')}
 WHERE bill_m.key = ?
 ''', [key]) as List<Map>);
-// TODO(hodoan): check
-    return res.isNotEmpty ? BillM.fromDB(res.first, res) : null;
+    if (res.isEmpty) return null;
+    final mapList =
+        res.groupBy((e) => [e[BillMSetArgs.key.nameCast]]).values.first;
+    return BillM.fromDB(mapList.first, mapList);
   }
 
   Future<void> delete(Database database) async {
@@ -263,10 +259,6 @@ extension BillDetailQuery on BillDetail {
 			FOREIGN KEY (parent_key) REFERENCES BillM (key) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug =
-      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1),
-version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1)''';
-
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
@@ -281,7 +273,6 @@ version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_det
           .map((e) =>
               '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
-// TODO(hodoan): check
   static Future<List<BillDetail>> getAll(
     Database database, {
     Set<WhereModel<dynamic, BillDetailSet>>? select,
@@ -375,11 +366,13 @@ parent_key)
 SELECT 
 ${$createSelect(select)}
  FROM BillDetail bill_detail
-${BillDetailSetArgs('', '').leftJoin('bill_detail')}
+${const BillDetailSetArgs('', '').leftJoin('bill_detail')}
 WHERE bill_detail.key = ?
 ''', [key]) as List<Map>);
-// TODO(hodoan): check
-    return res.isNotEmpty ? BillDetail.fromDB(res.first, res) : null;
+    if (res.isEmpty) return null;
+    final mapList =
+        res.groupBy((e) => [e[BillDetailSetArgs.key.nameCast]]).values.first;
+    return BillDetail.fromDB(mapList.first, mapList);
   }
 
   Future<void> delete(Database database) async {

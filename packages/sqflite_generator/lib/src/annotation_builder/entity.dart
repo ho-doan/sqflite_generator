@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart';
-import 'package:collection/collection.dart';
 import 'package:sqflite_generator/src/annotation_builder/column.dart';
 import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
 import 'package:sqflite_generator/src/annotation_builder/index.dart';
@@ -86,10 +85,9 @@ class AEntity {
     return map;
   }
 
-// TODO(hodoan): check
   String get rawFromDB {
     return [
-      for (final e in allsss())
+      for (final e in properties())
         if (e is AIndex)
           '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}'
         else if (e is AColumn)
@@ -193,13 +191,14 @@ class AEntity {
       'SELECT ',
       '\${\$createSelect(select)}',
       ' FROM $className ${className.toSnakeCase()}',
-      '\${$setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
+      '\${const $setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
       'WHERE ${_whereDB.join(' AND ')}',
       '\'\'\',',
       _whereStaticArgs,
       ') as List<Map>);',
-      '// TODO(hodoan): check',
-      'return res.isNotEmpty? $classType.fromDB(res.first,res) : null;'
+      'if (res.isEmpty) return null;',
+      'final mapList = res.groupBy((e)=>[${keysNew.map((e) => 'e[$setClassNameExternal.${e.$2.args.fieldNames.join('_').toCamelCase()}.nameCast]').join(',')}]).values.first;',
+      'return $classType.fromDB(mapList.first,mapList);',
     ].join('\n');
   }
 
@@ -316,7 +315,7 @@ class AEntity {
 }
 
 extension AEntityBase on AEntity {
-  List<AProperty> allsss() {
+  List<AProperty> properties() {
     if (parentClassName.length > (9 / 3)) return [];
     final alls = [
       for (final e in aPs)
@@ -410,13 +409,6 @@ extension AEntityBase on AEntity {
     return 'CREATE TABLE IF NOT EXISTS $className${newName ?? ''}(\n\t\t\t${alls.join(',\n\t\t\t')}\n\t)';
   }
 
-  // TODO(hodoan): doing
-  String rawDebug([AColumn? ps, String? newName]) {
-    // final all = aPss(false);
-    final all = allsss();
-    return all.join(',\n');
-  }
-
   AForeignKey? fKWithoutPK(AForeignKey f) {
     if (primaryKeys.map((e) => e.nameDefault).contains(f.nameDefault)) {
       return null;
@@ -466,7 +458,7 @@ extension AInsert on AEntity {
       return 'await Future.wait(${ps!.nameDefault}.map((e) => e.insert(database)));';
     }
     final fieldsRaw = [
-      ...allsss()
+      ...properties()
           // .whereNot((e) => e is AForeignKey && e.dartType.isDartCoreList)
           .map((e) => e.args.fieldNames.join('_').toSnakeCase())
           .toList(),

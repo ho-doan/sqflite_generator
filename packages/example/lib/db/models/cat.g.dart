@@ -18,10 +18,6 @@ extension CatQuery on Cat {
 			FOREIGN KEY (child_id) REFERENCES Cat (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug =
-      '''version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1),
-version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1)''';
-
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
@@ -35,7 +31,6 @@ version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_bir
           .map((e) =>
               '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
-// TODO(hodoan): check
   static Future<List<Cat>> getAll(
     Database database, {
     Set<WhereModel<dynamic, CatSet>>? select,
@@ -132,11 +127,13 @@ child_id)
 SELECT 
 ${$createSelect(select)}
  FROM Cat cat
-${CatSetArgs('', '').leftJoin('cat')}
+${const CatSetArgs('', '').leftJoin('cat')}
 WHERE cat.id = ?
 ''', [id]) as List<Map>);
-// TODO(hodoan): check
-    return res.isNotEmpty ? Cat.fromDB(res.first, res) : null;
+    if (res.isEmpty) return null;
+    final mapList =
+        res.groupBy((e) => [e[CatSetArgs.id.nameCast]]).values.first;
+    return Cat.fromDB(mapList.first, mapList);
   }
 
   Future<void> delete(Database database) async {

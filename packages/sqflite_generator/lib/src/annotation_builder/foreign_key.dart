@@ -113,20 +113,6 @@ class AForeignKey extends AProperty {
   }
 }
 
-extension on FieldElement {
-  List<ClassElement> classes([int step = 0]) {
-    final es = [
-      ...library.children.expand((e) => e.children),
-    ];
-    final lst = [
-      ...es.whereType<ClassElement>(),
-      if (step < 4) ...es.expand((e) => e.classes(step + 1)),
-    ];
-
-    return lst;
-  }
-}
-
 extension on Element {
   List<ClassElement> classes([int step = 0]) {
     final es = [

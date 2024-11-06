@@ -19,13 +19,6 @@ extension ClientQuery on Client {
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
-  static const String debug =
-      '''version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Client], fieldNames: [id], step: 1),
-version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2),
-version: 1, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: , args: APropertyArgs(parentClassName: [Client], fieldNames: [firstName], step: 1),
-version: 1, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: , args: APropertyArgs(parentClassName: [Client], fieldNames: [lastName], step: 1),
-version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [Client], fieldNames: [blocked], step: 1)''';
-
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
@@ -42,7 +35,6 @@ version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: cli
           .map((e) =>
               '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
-// TODO(hodoan): check
   static Future<List<Client>> getAll(
     Database database, {
     Set<WhereModel<dynamic, ClientSet>>? select,
@@ -143,11 +135,16 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Client client
-${ClientSetArgs('', '').leftJoin('client')}
+${const ClientSetArgs('', '').leftJoin('client')}
 WHERE client.id = ? AND client.product_id = ?
 ''', [id, productId]) as List<Map>);
-// TODO(hodoan): check
-    return res.isNotEmpty ? Client.fromDB(res.first, res) : null;
+    if (res.isEmpty) return null;
+    final mapList = res
+        .groupBy((e) =>
+            [e[ClientSetArgs.id.nameCast], e[ClientSetArgs.productId.nameCast]])
+        .values
+        .first;
+    return Client.fromDB(mapList.first, mapList);
   }
 
   Future<void> delete(Database database) async {

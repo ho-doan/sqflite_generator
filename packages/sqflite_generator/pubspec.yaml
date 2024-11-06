@@ -18,10 +18,9 @@ dependencies:
   collection: ^1.17.2
   path: ^1.8.3
   glob: ^2.1.2
-  # sqflite_annotation: ^0.1.4
-    # path: ../sqflite_annotation
-  sqflite_annotation:
-    path: ../sqflite_annotation
+  sqflite_annotation: ^0.1.5
+  # sqflite_annotation:
+  #   path: ../sqflite_annotation
   change_case: ^2.0.1
 
 dev_dependencies:
