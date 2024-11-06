@@ -181,9 +181,14 @@ class $BillMSetArgs<T, M> extends WhereModel<T, M> {
 }
 
 class BillMSetArgs<T> {
-  const BillMSetArgs(this.self);
+  const BillMSetArgs(
+    this.self,
+    this.self2,
+  );
 
   final String self;
+
+  final String self2;
 
   static const $BillMSetArgs<int, BillMSet> key = $BillMSetArgs<int, BillMSet>(
     name: 'key',
@@ -207,10 +212,18 @@ class BillMSetArgs<T> {
   );
 
   static const BillDetailSetArgs<BillDetailSet> $details =
-      BillDetailSetArgs<BillDetailSet>('details_');
+      BillDetailSetArgs<BillDetailSet>('details_', 'details_');
 
-  String leftJoin(String parentModel) =>
-      '''LEFT JOIN BillM ${self}bill_m ON ${self}bill_m.key = $parentModel.${self}key''';
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      step < 1
+          ? [
+              '''LEFT JOIN BillM ${self}bill_m ON ${self}bill_m.key = $parentModel.${self2}key''',
+              BillMSetArgs.$details.leftJoin(parentModel, step + 0)
+            ].join('\n')
+          : '';
 
   $BillMSetArgs<int, T> get $key => $BillMSetArgs<int, T>(
         name: 'key',
@@ -234,7 +247,8 @@ class BillMSetArgs<T> {
         self: this.self,
       );
 
-  BillDetailSetArgs<T> get $$details => BillDetailSetArgs<T>('details_');
+  BillDetailSetArgs<T> get $$details =>
+      BillDetailSetArgs<T>('details_', 'details_');
 }
 
 class BillMSet {
@@ -414,9 +428,14 @@ class $BillDetailSetArgs<T, M> extends WhereModel<T, M> {
 }
 
 class BillDetailSetArgs<T> {
-  const BillDetailSetArgs(this.self);
+  const BillDetailSetArgs(
+    this.self,
+    this.self2,
+  );
 
   final String self;
+
+  final String self2;
 
   static const $BillDetailSetArgs<int, BillDetailSet> key =
       $BillDetailSetArgs<int, BillDetailSet>(
@@ -433,10 +452,18 @@ class BillDetailSetArgs<T> {
   );
 
   static const BillMSetArgs<BillMSet> $parent =
-      BillMSetArgs<BillMSet>('parent_');
+      BillMSetArgs<BillMSet>('parent_', 'parent_');
 
-  String leftJoin(String parentModel) =>
-      '''LEFT JOIN BillDetail ${self}bill_detail ON ${self}bill_detail.key = $parentModel.${self}key''';
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      step < 1
+          ? [
+              '''LEFT JOIN BillDetail ${self}bill_detail ON ${self}bill_detail.key = $parentModel.${self2}key''',
+              BillDetailSetArgs.$parent.leftJoin(parentModel, step + 0)
+            ].join('\n')
+          : '';
 
   $BillDetailSetArgs<int, T> get $key => $BillDetailSetArgs<int, T>(
         name: 'key',
@@ -452,7 +479,7 @@ class BillDetailSetArgs<T> {
         self: this.self,
       );
 
-  BillMSetArgs<T> get $$parent => BillMSetArgs<T>('parent_');
+  BillMSetArgs<T> get $$parent => BillMSetArgs<T>('parent_', 'parent_');
 }
 
 class BillDetailSet {

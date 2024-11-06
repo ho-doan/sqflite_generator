@@ -675,6 +675,11 @@ extension AParam on AEntity {
             ..name = 'self'
             ..toThis = true,
         ),
+        Parameter(
+          (f) => f
+            ..name = 'self2'
+            ..toThis = true,
+        ),
       ];
   List<Parameter> get setOptionalArgsChild => [
         Parameter(
@@ -729,6 +734,12 @@ extension AFields on AEntity {
         Field(
           (f) => f
             ..name = 'self'
+            ..modifier = FieldModifier.final$
+            ..type = refer('String'),
+        ),
+        Field(
+          (f) => f
+            ..name = 'self2'
             ..modifier = FieldModifier.final$
             ..type = refer('String'),
         ),

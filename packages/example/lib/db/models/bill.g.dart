@@ -136,13 +136,13 @@ time)
        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''', [
       product?.id,
       client?.id,
-      client?.product.id,
-      time?.millisecondsSinceEpoch,
+      client?.product?.id,
+      this.time?.millisecondsSinceEpoch,
       parent?.product?.id,
       parent?.client?.id,
-      parent?.client?.product.id,
+      parent?.client?.product?.id,
       clientParent?.id,
-      clientParent?.product.id,
+      clientParent?.product?.id,
     ]);
     return $id;
   }
@@ -154,7 +154,11 @@ time)
     await clientParent?.update(database);
     return await database.update('Bill', toDB(),
         where: "product_id = ? AND client_id = ? AND client_product_id = ?",
-        whereArgs: [product?.id, client?.id, client?.product.id]);
+        whereArgs: [
+          this.product?.id,
+          this.client?.id,
+          this.client?.product?.id
+        ]);
   }
 
 // TODO(hodoan): check
@@ -182,7 +186,7 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE * FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
-        [product?.id, client?.id, client?.product.id]);
+        [this.product?.id, this.client?.id, this.client?.product?.id]);
   }
 
   static Future<void> deleteById(
@@ -214,15 +218,15 @@ WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
           parent: Bill.fromDB(json, lst, 'parent_'),
           clientParent: Client.fromDB(json, lst, 'client_parent_'));
   Map<String, dynamic> $toDB() => {
-        'product_id': product?.id,
-        'client_id': client?.id,
-        'client_product_id': client?.product.id,
-        'time': time?.millisecondsSinceEpoch,
-        'parent_product_id': parent?.product?.id,
-        'parent_client_id': parent?.client?.id,
-        'parent_client_product_id': parent?.client?.product.id,
-        'client_parent_id': clientParent?.id,
-        'client_parent_product_id': clientParent?.product.id
+        'product_id': this.product?.id,
+        'client_id': this.client?.id,
+        'client_product_id': this.client?.product?.id,
+        'time': this.time?.millisecondsSinceEpoch,
+        'parent_product_id': this.parent?.product?.id,
+        'parent_client_id': this.parent?.client?.id,
+        'parent_client_product_id': this.parent?.client?.product?.id,
+        'client_parent_id': this.clientParent?.id,
+        'client_parent_product_id': this.clientParent?.product?.id
       };
 }
 
@@ -236,12 +240,18 @@ class $BillSetArgs<T, M> extends WhereModel<T, M> {
 }
 
 class BillSetArgs<T> {
-  const BillSetArgs(this.self);
+  const BillSetArgs(
+    this.self,
+    this.self2,
+  );
 
   final String self;
 
+  final String self2;
+
+// APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2)
   static const ProductSetArgs<BillSet> $product =
-      ProductSetArgs<BillSet>('product_');
+      ProductSetArgs<BillSet>('bill_product_', 'product_');
 
   static const $BillSetArgs<int, BillSet> productId =
       $BillSetArgs<int, BillSet>(
@@ -250,8 +260,9 @@ class BillSetArgs<T> {
     model: 'bill',
   );
 
+// APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2)
   static const ClientSetArgs<BillSet> $client =
-      ClientSetArgs<BillSet>('client_');
+      ClientSetArgs<BillSet>('bill_client_', 'client_');
 
   static const $BillSetArgs<int, BillSet> clientId = $BillSetArgs<int, BillSet>(
     name: 'client_id',
@@ -273,15 +284,29 @@ class BillSetArgs<T> {
     model: 'bill',
   );
 
-  static const BillSetArgs<BillSet> $parent = BillSetArgs<BillSet>('parent_');
+  static const BillSetArgs<BillSet> $parent =
+      BillSetArgs<BillSet>('parent_', 'parent_');
 
   static const ClientSetArgs<ClientSet> $clientParent =
-      ClientSetArgs<ClientSet>('client_parent_');
+      ClientSetArgs<ClientSet>('client_parent_', 'client_parent_');
 
-  String leftJoin(String parentModel) =>
-      '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self}product_id AND ${self}bill.client_id = $parentModel.${self}client_id AND ${self}bill.client_product_id = $parentModel.${self}client_product_id''';
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      step < 1
+          ? [
+              '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self2}product_id AND ${self}bill.client_id = $parentModel.${self2}client_id AND ${self}bill.client_product_id = $parentModel.${self2}client_product_id''',
+              BillSetArgs.$product.leftJoin(parentModel, step + 0),
+              BillSetArgs.$client.leftJoin(parentModel, step + 0),
+              BillSetArgs.$parent.leftJoin(parentModel, step + 1),
+              BillSetArgs.$clientParent.leftJoin(parentModel, step + 0)
+            ].join('\n')
+          : '';
 
-  ProductSetArgs<T> get $$product => ProductSetArgs<T>('product_');
+// APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2)
+  ProductSetArgs<T> get $$product =>
+      ProductSetArgs<T>('bill_product_', 'product_');
 
   $BillSetArgs<int, T> get $productId => $BillSetArgs<int, T>(
         name: 'product_id',
@@ -290,7 +315,8 @@ class BillSetArgs<T> {
         self: this.self,
       );
 
-  ClientSetArgs<T> get $$client => ClientSetArgs<T>('client_');
+// APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2)
+  ClientSetArgs<T> get $$client => ClientSetArgs<T>('bill_client_', 'client_');
 
   $BillSetArgs<int, T> get $clientId => $BillSetArgs<int, T>(
         name: 'client_id',
@@ -313,9 +339,10 @@ class BillSetArgs<T> {
         self: this.self,
       );
 
-  BillSetArgs<T> get $$parent => BillSetArgs<T>('parent_');
+  BillSetArgs<T> get $$parent => BillSetArgs<T>('parent_', 'parent_');
 
-  ClientSetArgs<T> get $$clientParent => ClientSetArgs<T>('client_parent_');
+  ClientSetArgs<T> get $$clientParent =>
+      ClientSetArgs<T>('client_parent_', 'client_parent_');
 }
 
 class BillSet {

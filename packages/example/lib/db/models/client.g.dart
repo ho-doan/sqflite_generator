@@ -121,10 +121,10 @@ last_name,
 blocked) 
        VALUES(?, ?, ?, ?, ?)''', [
       id,
-      product.id,
-      firstName,
-      lastName,
-      blocked,
+      product?.id,
+      this.firstName,
+      this.lastName,
+      this.blocked,
     ]);
     return $id;
   }
@@ -132,7 +132,8 @@ blocked)
   Future<int> update(Database database) async {
     await product.update(database);
     return await database.update('Client', toDB(),
-        where: "id = ? AND product_id = ?", whereArgs: [id, product.id]);
+        where: "id = ? AND product_id = ?",
+        whereArgs: [this.id, this.product?.id]);
   }
 
 // TODO(hodoan): check
@@ -156,7 +157,7 @@ WHERE client.id = ? AND client.product_id = ?
   Future<void> delete(Database database) async {
     await database.rawQuery(
         '''DELETE * FROM Client client WHERE client.id = ? AND client.product_id = ?''',
-        [id, product.id]);
+        [this.id, this.product?.id]);
   }
 
   static Future<void> deleteById(
@@ -185,11 +186,11 @@ WHERE client.id = ? AND client.product_id = ?
           blocked: (json['${childName}client_blocked'] as int?) == 1,
           product: Product.fromDB(json, lst, 'product_'));
   Map<String, dynamic> $toDB() => {
-        'id': id,
-        'product_id': product.id,
-        'first_name': firstName,
-        'last_name': lastName,
-        'blocked': (blocked) ? 1 : 0
+        'id': this.id,
+        'product_id': this.product?.id,
+        'first_name': this.firstName,
+        'last_name': this.lastName,
+        'blocked': (this.blocked ?? false) ? 1 : 0
       };
 }
 
@@ -203,9 +204,14 @@ class $ClientSetArgs<T, M> extends WhereModel<T, M> {
 }
 
 class ClientSetArgs<T> {
-  const ClientSetArgs(this.self);
+  const ClientSetArgs(
+    this.self,
+    this.self2,
+  );
 
   final String self;
+
+  final String self2;
 
   static const $ClientSetArgs<int, ClientSet> id =
       $ClientSetArgs<int, ClientSet>(
@@ -214,8 +220,9 @@ class ClientSetArgs<T> {
     model: 'client',
   );
 
+// APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2)
   static const ProductSetArgs<ClientSet> $product =
-      ProductSetArgs<ClientSet>('product_');
+      ProductSetArgs<ClientSet>('client_product_', 'product_');
 
   static const $ClientSetArgs<int, ClientSet> productId =
       $ClientSetArgs<int, ClientSet>(
@@ -245,8 +252,16 @@ class ClientSetArgs<T> {
     model: 'client',
   );
 
-  String leftJoin(String parentModel) =>
-      '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self}id AND ${self}client.product_id = $parentModel.${self}product_id''';
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      step < 1
+          ? [
+              '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self2}id AND ${self}client.product_id = $parentModel.${self2}product_id''',
+              ClientSetArgs.$product.leftJoin(parentModel, step + 0)
+            ].join('\n')
+          : '';
 
   $ClientSetArgs<int, T> get $id => $ClientSetArgs<int, T>(
         name: 'id',
@@ -255,7 +270,9 @@ class ClientSetArgs<T> {
         self: this.self,
       );
 
-  ProductSetArgs<T> get $$product => ProductSetArgs<T>('product_');
+// APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2)
+  ProductSetArgs<T> get $$product =>
+      ProductSetArgs<T>('client_product_', 'product_');
 
   $ClientSetArgs<int, T> get $productId => $ClientSetArgs<int, T>(
         name: 'product_id',

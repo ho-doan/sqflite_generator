@@ -66,11 +66,25 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..name = 'parentModel'
                   ..type = refer('String'),
               ))
+              ..optionalParameters.add(Parameter(
+                (p) => p
+                  ..name = 'step'
+                  ..type = refer('int')
+                  ..defaultTo = Code('0'),
+              ))
               ..body = Code(
-                  """'''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
+                  """step < 1?['''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
                 for (final item in entity.keysNew)
-                  '\${self}${entity.className.toSnakeCase()}.${item.$2.args.fieldNames.join('_')} = \$parentModel.\${self}${item.$2.args.fieldNames.join('_')}'
-              ].join(' AND ')}'''"""),
+                  '\${self}${entity.className.toSnakeCase()}.${item.$2.args.fieldNames.join('_')} = \$parentModel.\${self2}${item.$2.args.fieldNames.join('_')}'
+              ].join(' AND ')}''',
+              ${[
+                for (final item in entity.foreignKeys)
+                  [
+                    '${entity.setClassNameExternal}.\$${item.nameDefault}.leftJoin(parentModel, step+${item.entityParent!.className == entity.className ? 1 : 0})',
+                  ].join('\n')
+              ].join(',\n')}
+              ].join('\\n'):''
+              """),
           ),
           for (final item in entity.allsss()) ...[
             if (item.args.parentClassNames.length == 2)
@@ -80,6 +94,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..returns =
                       refer('${item.args.parentClassNames.last}SetArgs<T>')
                   ..docs.addAll([
+                    '// ${item.args}',
                     if (item is AColumn &&
                         item.alters.any((e) => e.type == AlterTypeGen.drop))
                       '@Deprecated(\'no such column\')'
@@ -88,7 +103,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..lambda = true
                   ..body = Code(
                     '''${item.args.parentClassNames.last}SetArgs<T>(
-                  '${item.args.fieldNames.first.toSnakeCase()}_'
+                  '${item.args.parentClassNames.join('_').toSnakeCase()}_',
+                  '${item.args.parentClassNames.sublist(item.args.parentClassNames.length - 1).join('_').toSnakeCase()}_'
                   )''',
                   ),
               ),
@@ -132,6 +148,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..lambda = true
                   ..body = Code(
                     '''${item.entityParent!.className}SetArgs<T>(
+                  '${item.args.fieldNames.first.toSnakeCase()}_',
                   '${item.args.fieldNames.first.toSnakeCase()}_'
                   )''',
                   ),
@@ -147,6 +164,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..type = refer(
                       '${item.args.parentClassNames.last}SetArgs<${entity.setClassNameExternal2}>')
                   ..docs.addAll([
+                    '// ${item.args}',
                     if (item is AColumn &&
                         item.alters.any((e) => e.type == AlterTypeGen.drop))
                       '@Deprecated(\'no such column\')'
@@ -155,7 +173,8 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..modifier = FieldModifier.constant
                   ..assignment = Code(
                       '''${item.args.parentClassNames.last}SetArgs<${entity.setClassNameExternal2}>(
-              '${item.args.fieldNames.first.toSnakeCase()}_'
+              '${item.args.parentClassNames.join('_').toSnakeCase()}_',
+              '${item.args.parentClassNames.sublist(item.args.parentClassNames.length - 1).join('_').toSnakeCase()}_'
               )'''),
               ),
             Field(
@@ -199,6 +218,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
                   ..static = true
                   ..assignment = Code(
                     '''${item.entityParent!.className}SetArgs<${item.entityParent!.setClassNameExternal2}>(
+                  '${item.args.fieldNames.first.toSnakeCase()}_',
                   '${item.args.fieldNames.first.toSnakeCase()}_'
                   )''',
                   ),

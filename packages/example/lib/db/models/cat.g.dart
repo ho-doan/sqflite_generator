@@ -111,7 +111,7 @@ cat,
 birth) 
        VALUES(?, ?, ?, ?)''', [
       id,
-      birth?.millisecondsSinceEpoch,
+      this.birth?.millisecondsSinceEpoch,
       parent?.id,
       child?.id,
     ]);
@@ -122,7 +122,7 @@ birth)
     await parent?.update(database);
     await child?.update(database);
     return await database
-        .update('Cat', toDB(), where: "id = ?", whereArgs: [id]);
+        .update('Cat', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
 // TODO(hodoan): check
@@ -144,7 +144,8 @@ WHERE cat.id = ?
   }
 
   Future<void> delete(Database database) async {
-    await database.rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [id]);
+    await database
+        .rawQuery('''DELETE * FROM Cat cat WHERE cat.id = ?''', [this.id]);
   }
 
   static Future<void> deleteById(
@@ -171,10 +172,10 @@ WHERE cat.id = ?
           parent: Cat.fromDB(json, lst, 'parent_'),
           child: Cat.fromDB(json, lst, 'child_'));
   Map<String, dynamic> $toDB() => {
-        'id': id,
-        'birth': birth?.millisecondsSinceEpoch,
-        'parent_id': parent?.id,
-        'child_id': child?.id
+        'id': this.id,
+        'birth': this.birth?.millisecondsSinceEpoch,
+        'parent_id': this.parent?.id,
+        'child_id': this.child?.id
       };
 }
 
@@ -188,9 +189,14 @@ class $CatSetArgs<T, M> extends WhereModel<T, M> {
 }
 
 class CatSetArgs<T> {
-  const CatSetArgs(this.self);
+  const CatSetArgs(
+    this.self,
+    this.self2,
+  );
 
   final String self;
+
+  final String self2;
 
   static const $CatSetArgs<int, CatSet> id = $CatSetArgs<int, CatSet>(
     name: 'id',
@@ -204,12 +210,23 @@ class CatSetArgs<T> {
     model: 'cat',
   );
 
-  static const CatSetArgs<CatSet> $parent = CatSetArgs<CatSet>('parent_');
+  static const CatSetArgs<CatSet> $parent =
+      CatSetArgs<CatSet>('parent_', 'parent_');
 
-  static const CatSetArgs<CatSet> $child = CatSetArgs<CatSet>('child_');
+  static const CatSetArgs<CatSet> $child =
+      CatSetArgs<CatSet>('child_', 'child_');
 
-  String leftJoin(String parentModel) =>
-      '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self}id''';
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      step < 1
+          ? [
+              '''LEFT JOIN Cat ${self}cat ON ${self}cat.id = $parentModel.${self2}id''',
+              CatSetArgs.$parent.leftJoin(parentModel, step + 1),
+              CatSetArgs.$child.leftJoin(parentModel, step + 1)
+            ].join('\n')
+          : '';
 
   $CatSetArgs<int, T> get $id => $CatSetArgs<int, T>(
         name: 'id',
@@ -225,9 +242,9 @@ class CatSetArgs<T> {
         self: this.self,
       );
 
-  CatSetArgs<T> get $$parent => CatSetArgs<T>('parent_');
+  CatSetArgs<T> get $$parent => CatSetArgs<T>('parent_', 'parent_');
 
-  CatSetArgs<T> get $$child => CatSetArgs<T>('child_');
+  CatSetArgs<T> get $$child => CatSetArgs<T>('child_', 'child_');
 }
 
 class CatSet {

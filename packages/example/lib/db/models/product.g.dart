@@ -109,16 +109,16 @@ first_name,
 blocked) 
        VALUES(?, ?, ?, ?)''', [
       id,
-      lastName,
-      firstName,
-      blocked,
+      this.lastName,
+      this.firstName,
+      this.blocked,
     ]);
     return $id;
   }
 
   Future<int> update(Database database) async {
     return await database
-        .update('Product', toDB(), where: "id = ?", whereArgs: [id]);
+        .update('Product', toDB(), where: "id = ?", whereArgs: [this.id]);
   }
 
 // TODO(hodoan): check
@@ -139,7 +139,7 @@ WHERE product.id = ?
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE * FROM Product product WHERE product.id = ?''', [id]);
+        '''DELETE * FROM Product product WHERE product.id = ?''', [this.id]);
   }
 
   static Future<void> deleteById(
@@ -165,10 +165,10 @@ WHERE product.id = ?
           firstName: json['${childName}product_first_name'] as String?,
           blocked: (json['${childName}product_blocked'] as int?) == 1);
   Map<String, dynamic> $toDB() => {
-        'id': id,
-        'last_name': lastName,
-        'first_name': firstName,
-        'blocked': (blocked) ? 1 : 0
+        'id': this.id,
+        'last_name': this.lastName,
+        'first_name': this.firstName,
+        'blocked': (this.blocked ?? false) ? 1 : 0
       };
 }
 
@@ -182,9 +182,14 @@ class $ProductSetArgs<T, M> extends WhereModel<T, M> {
 }
 
 class ProductSetArgs<T> {
-  const ProductSetArgs(this.self);
+  const ProductSetArgs(
+    this.self,
+    this.self2,
+  );
 
   final String self;
+
+  final String self2;
 
   static const $ProductSetArgs<int, ProductSet> id =
       $ProductSetArgs<int, ProductSet>(
@@ -214,8 +219,15 @@ class ProductSetArgs<T> {
     model: 'product',
   );
 
-  String leftJoin(String parentModel) =>
-      '''LEFT JOIN Product ${self}product ON ${self}product.id = $parentModel.${self}id''';
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      step < 1
+          ? [
+              '''LEFT JOIN Product ${self}product ON ${self}product.id = $parentModel.${self2}id''',
+            ].join('\n')
+          : '';
 
   $ProductSetArgs<int, T> get $id => $ProductSetArgs<int, T>(
         name: 'id',
