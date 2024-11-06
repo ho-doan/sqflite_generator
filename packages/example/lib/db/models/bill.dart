@@ -10,12 +10,18 @@ part 'bill.g.dart';
 @entity
 class Bill extends EntityQuery {
   @primaryKey
-  @ForeignKey(name: 'productId')
+  @ForeignKey(name: 'Product')
   final Product? product;
 
   @primaryKey
-  @ForeignKey(name: 'clientId')
+  @ForeignKey(name: 'Client')
   final Client? client;
+
+  @ForeignKey(name: 'Bill')
+  final Bill? parent;
+
+  @ForeignKey(name: 'Client')
+  final Client? clientParent;
 
   @column
   final DateTime? time;
@@ -23,13 +29,18 @@ class Bill extends EntityQuery {
   const Bill({
     this.client,
     this.time,
+    this.parent,
+    this.clientParent,
     required this.product,
   });
 
   factory Bill.fromDB(
-          Map<dynamic, dynamic> json, List<Map<dynamic, dynamic>> lst,
-          [String childName = '']) =>
-      BillQuery.$fromDB(json, lst, childName);
+    Map<dynamic, dynamic> json,
+    List<Map<dynamic, dynamic>> lst, [
+    String childName = '',
+    int childStep = 0,
+  ]) =>
+      BillQuery.$fromDB(json, lst, childName, childStep);
 
   Map<String, dynamic> toDB() => $toDB();
 }

@@ -4,8 +4,6 @@ import 'package:change_case/change_case.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'package:sqflite_generator/src/extensions/sql_type.dart';
 
-import 'foreign_key.dart';
-
 enum AlterTypeGen {
   add,
   @Deprecated('not support')
@@ -33,16 +31,17 @@ class AlterDBGen {
 }
 
 class AProperty {
+  final APropertyArgs args;
   final String? name;
   final int version;
   final String nameDefault;
   final DartType dartType;
-  final bool rawFromDB;
   final String className;
   final int step;
   final List<AlterDBGen> alters;
 
   const AProperty({
+    required this.args,
     this.name,
     this.alters = const [],
     required this.step,
@@ -50,7 +49,6 @@ class AProperty {
     required this.nameDefault,
     required this.dartType,
     required this.className,
-    this.rawFromDB = false,
   });
   String get typeSelect {
     if (dartType.isDartCoreInt) return 'int';
@@ -67,16 +65,10 @@ class AProperty {
   String get nameToDB => (name ?? nameDefault).toSnakeCase();
   String get nameFromDB => '${className.$rm}_$nameToDB'.toSnakeCase();
 
-  /// ```
-  /// @primaryKey
-  /// @ForeignKey(name: 'productId')
-  /// final Product? product;
-  /// ```
-  /// * [isFore] = true
-  /// ```
-  /// @primaryKey
-  /// @ForeignKey(name: 'productId')
-  /// final Product? product;
+  @override
+  toString() =>
+      'version: $version, nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
+      ' _sqlType: $_sqlType, _isNull: $_isNull, args: $args';
 
   /// @primaryKey
   /// @ForeignKey(name: 'clientId')
@@ -88,21 +80,24 @@ class AProperty {
   /// @ForeignKey(name: 'clientId')
   /// ```
   /// * [autoId] = true
+  /// * [newName] is for rename table
   String rawCreate({
     bool isId = false,
     bool autoId = false,
     bool isIds = false,
-    bool isFore = false,
-  }) =>
-      isFore
-          ? ''
-          : [
-              nameToDB,
-              _sqlType,
-              if (isId && !isIds) 'PRIMARY KEY',
-              if (autoId && !isIds) 'AUTOINCREMENT',
-              _isNull,
-            ].where((e) => e.isNotEmpty).join(' ');
+    String? newName,
+  }) {
+    return [
+      // if (newName != null)
+      //   args.fieldNames.sublist(1).join('_').toSnakeCase()
+      // else
+      args.fieldNames.join('_').toSnakeCase(),
+      _sqlType,
+      if (isId && !isIds) 'PRIMARY KEY',
+      if (autoId && !isIds) 'AUTOINCREMENT',
+      _isNull,
+    ].where((e) => e.isNotEmpty).join(' ');
+  }
 
   Map<int, List<String>> rawUpdate() {
     return {
@@ -135,23 +130,43 @@ extension Aps on AProperty {
       '\'\${childName}${className.$rm.toSnakeCase()}.$nameToDB as \${childName}$nameFromDB\'';
 }
 
-extension APropertyX on List<AProperty> {
-  /// ```
-  /// @primaryKey
-  /// @ForeignKey(name: 'productId')
-  /// final Product? product;
-  /// ```
-  /// * [isFore] = true
-  String rawCreate(List<AForeignKey> fores) {
-    if (length < 2) return '';
-    final keys = [
-      for (final item in this)
-        if (fores.any((e) => e.nameDefault == item.nameDefault))
-          fores.firstWhere((e) => e.nameDefault == item.nameDefault).nameToDB
-        // '${fores.firstWhere((e) => e.nameDefault == item.nameDefault).entityParent?.primaryKeys.firstWhere((e) => e.name == item.name).nameToDB}'
-        else
-          item.name ?? item.nameDefault.toSnakeCase()
-    ].join(', ');
-    return 'PRIMARY KEY($keys)';
-  }
+class APropertyArgs {
+  final List<String> parentClassNames;
+  final List<String> fieldNames;
+  final int step;
+
+  const APropertyArgs({
+    required this.parentClassNames,
+    required this.fieldNames,
+    required this.step,
+  });
+
+  APropertyArgs copyWithByEntity({
+    required String parentClassName,
+  }) =>
+      APropertyArgs(
+        parentClassNames: [...parentClassNames, parentClassName],
+        fieldNames: fieldNames,
+        step: step + 1,
+      );
+  APropertyArgs copyWithByElement({
+    required String fieldName,
+  }) =>
+      APropertyArgs(
+        parentClassNames: parentClassNames,
+        fieldNames: [...fieldNames, fieldName],
+        step: step,
+      );
+
+  @override
+  String toString() =>
+      'APropertyArgs(parentClassName: $parentClassNames, fieldNames: $fieldNames, step: $step)';
+}
+
+extension APrs on APropertyArgs {
+  String fieldNamesNotLast(String? className) =>
+      '${fieldNames.sublist(0, fieldNames.length - 1).join('_').toSnakeCase()}_$className'
+          .toSnakeCase();
+  String fieldNamesOf(String? className) =>
+      '${fieldNames.join('_').toSnakeCase()}_$className'.toSnakeCase();
 }

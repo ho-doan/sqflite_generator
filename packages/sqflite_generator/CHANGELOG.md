@@ -1,3 +1,23 @@
+## 0.1.8-beta-5
+
+* hotfix gen foreign key, primary key, left join, where ext
+
+## 0.1.8-beta-4
+
+* fix gen select foreign key
+
+## 0.1.8-beta-3
+
+* fix gen select foreign key
+
+## 0.1.8-beta-2
+
+* fix gen select foreign key
+
+## 0.1.8-beta
+
+* fix gen select foreign key
+
 ## 0.1.7
 
 * fix gen select foreign key

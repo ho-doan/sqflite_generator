@@ -9,10 +9,10 @@ class Cat extends EntityQuery {
   @primaryKey
   final int? id;
 
-  @ForeignKey(name: 'parentId')
+  @ForeignKey(name: 'Cat')
   final Cat? parent;
 
-  @ForeignKey(name: 'childId')
+  @ForeignKey(name: 'Cat')
   final Cat? child;
 
   @column
@@ -26,8 +26,11 @@ class Cat extends EntityQuery {
   });
 
   factory Cat.fromDB(
-          Map<dynamic, dynamic> json, List<Map<dynamic, dynamic>> lst,
-          [String childName = '']) =>
+    Map<dynamic, dynamic> json,
+    List<Map<dynamic, dynamic>> lst, [
+    String childName = '',
+    int childStep = 0,
+  ]) =>
       CatQuery.$fromDB(json, lst, childName);
 
   Map<String, dynamic> toDB() => $toDB();

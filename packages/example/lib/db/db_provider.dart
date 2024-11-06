@@ -26,8 +26,8 @@ class DBProvider {
     ClientQuery.getAll(
       _database,
       where: {
-        ClientQuery.lastName.equal('k'),
-        ClientQuery.productBlocked.equal(true)
+        ClientSetArgs.lastName.equal('k'),
+        ClientSetArgs.$product.$blocked.equal(true)
       },
     );
   }
@@ -51,9 +51,9 @@ class DBProvider {
     return res;
   }
 
-  getClient(int id) async {
+  getClient(int id, int productId) async {
     final db = _database;
-    return ClientQuery.getById(db, id);
+    return ClientQuery.getById(db, id, productId);
   }
 
   Future<List<Client>> getBlockedClients() async {
@@ -61,7 +61,7 @@ class DBProvider {
 
     // var res = await db.rawQuery("SELECT * FROM Client WHERE blocked=1");
     var res = await ClientQuery.getAll(db, where: {
-      ClientQuery.blocked.equal(true),
+      ClientSetArgs.blocked.equal(true),
     });
 
     List<Client> list = res;
@@ -74,21 +74,21 @@ class DBProvider {
     return await ClientQuery.getAll(
       db,
       select: {
-        ClientQuery.id,
-        ClientQuery.blocked,
-        ClientQuery.productLastName,
-        ClientQuery.productId,
+        ClientSetArgs.id,
+        ClientSetArgs.blocked,
+        ClientSetArgs.$product.$lastName,
+        ClientSetArgs.$product.$id,
       },
       where: {
-        ClientQuery.lastName.equal('k'),
-        ClientQuery.productBlocked.equal(true)
+        ClientSetArgs.lastName.equal('k'),
+        ClientSetArgs.$product.$blocked.equal(true)
       },
     );
   }
 
-  deleteClient(int id) async {
+  deleteClient(int id, int productId) async {
     final db = _database;
-    return await ClientQuery.deleteById(db, id);
+    return await ClientQuery.deleteById(db, id, productId);
   }
 
   deleteAll() async {

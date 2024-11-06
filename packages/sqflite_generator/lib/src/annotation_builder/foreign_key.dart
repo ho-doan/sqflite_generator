@@ -18,9 +18,9 @@ class AForeignKey extends AProperty {
   final AEntity? entityParent;
 
   const AForeignKey._({
+    required super.args,
     super.name,
     required super.version,
-    super.rawFromDB,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,
     required this.entityParent,
@@ -29,25 +29,52 @@ class AForeignKey extends AProperty {
     required super.className,
     required super.step,
   });
+
   factory AForeignKey.fromElement(
-      FieldElement element, String className, int step) {
+    FieldElement element,
+    FieldElement? parentElement,
+    String className,
+    List<String> parentClassName,
+    APropertyArgs args,
+    int step,
+  ) {
     AEntity? aEntity;
     if (element.type.isDartCoreList) {
-      final pElement = element.library.children
-          .whereType<CompilationUnitElement>()
-          .expand((e) => e.children)
-          .firstWhereOrNull(
-            (e) =>
-                e is ClassElement &&
-                e.displayName == AForeignKeyX._name(element),
-          );
+      final es = [
+        ...element.library.children.expand((e) => e.classes()),
+        ...element.children.expand((e) => e.children),
+      ];
+      Element? pElement = es.firstWhereOrNull(
+        (e) =>
+            e is ClassElement && e.displayName == AForeignKeyX._name(element),
+      );
+      if (pElement == null && parentElement != null) {
+        pElement = parentElement;
+      }
       if (pElement != null) {
-        aEntity = AEntity.of(pElement as ClassElement, step + 1);
+        aEntity = AEntity.of(
+          pElement as ClassElement,
+          args.copyWithByElement(fieldName: element.displayName),
+          [
+            ...parentClassName,
+            if (parentClassName.isEmpty) element.displayName else className,
+          ],
+          step + 1,
+        );
       }
     } else {
-      aEntity = AEntity.of(element.type.element as ClassElement, step + 1);
+      aEntity = AEntity.of(
+        element.type.element as ClassElement,
+        args.copyWithByElement(fieldName: element.displayName),
+        [
+          ...parentClassName,
+          if (parentClassName.isEmpty) element.displayName else className,
+        ],
+        step + 1,
+      );
     }
     return AForeignKey._(
+      args: args.copyWithByElement(fieldName: element.displayName),
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
@@ -56,57 +83,93 @@ class AForeignKey extends AProperty {
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
   }
   factory AForeignKey.fromSuperElement(
-      SuperFormalParameterElement element, String className, int step) {
+    SuperFormalParameterElement element,
+    String className,
+    List<String> parentClassName,
+    APropertyArgs args,
+    int step,
+  ) {
     return AForeignKey._(
+      args: args,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
-      entityParent: AEntity.of(element.type.element as ClassElement, step + 1),
+      entityParent: AEntity.of(
+        element.type.element as ClassElement,
+        args,
+        parentClassName,
+        step + 1,
+      ),
       name: AForeignKeyX._name(element),
       version: AForeignKeyX._version(element),
       onDelete: AForeignKeyX._delValue(element),
       onUpdate: AForeignKeyX._updValue(element),
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
+  }
+}
+
+extension on Element {
+  List<ClassElement> classes([int step = 0]) {
+    final es = [
+      ...library?.children.expand((e) => e.children) ?? <Element>[],
+    ];
+    final lst = [
+      ...es.whereType<ClassElement>(),
+      if (step < 4) ...es.expand((e) => e.classes(step + 1)),
+    ];
+
+    return lst;
+  }
+}
+
+extension AForeignKeyXL on List<AForeignKey> {
+  AForeignKey? of(String fieldName) {
+    return firstWhereOrNull((e) => e.nameDefault == fieldName);
   }
 }
 
 extension AForeignKeyX on AForeignKey {
   String get typeNotSuffix =>
       dartType.toString().replaceFirst('?', '').replaceFirst('\$', '');
-  String? get rawCreateForeign => dartType.isDartCoreList
+  String? rawCreateForeign(String self, String goal) => dartType.isDartCoreList
       ? null
-      : 'FOREIGN KEY ($nameToDB) REFERENCES $typeNotSuffix '
-          '(${entityParent?.primaryKeys.first.name ?? entityParent?.primaryKeys.first.nameDefault.toSnakeCase()})'
+      : 'FOREIGN KEY ($self) REFERENCES $typeNotSuffix '
+          '($goal)'
           ' ON UPDATE ${onUpdate.str} ON DELETE ${onDelete.str}';
   static List<AForeignKey> fields(
     int step,
+    APropertyArgs args,
     List<FieldElement> fields,
     String className,
+    List<String> parentClassName,
     List<SuperFormalParameterElement> cons,
   ) {
     return [
       ...cons
           .where((e) => _checker.hasAnnotationOfExact(e))
-          .map((e) => AForeignKey.fromSuperElement(e, className, step + 1))
+          .map((e) => AForeignKey.fromSuperElement(
+                e,
+                className,
+                parentClassName,
+                args,
+                step + 1,
+              ))
           .toList(),
       ...fields
           .where((e) => _checker.hasAnnotationOfExact(e))
-          .map((e) => AForeignKey.fromElement(e, className, step + 1))
+          .map((e) => AForeignKey.fromElement(
+                e,
+                e,
+                className,
+                parentClassName,
+                args,
+                step + 1,
+              ))
           .toList()
     ];
   }

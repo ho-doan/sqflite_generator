@@ -23,11 +23,23 @@ class OrderBy<T extends WhereModel> {
   factory OrderBy.desc(T field) => OrderBy._(field, 'DESC');
 }
 
-abstract class WhereModel<T> {
+abstract class WhereModel<T, M> {
   final String field;
+
+  final String self;
+
+  final String name;
+
+  final String model;
+
+  final String nameCast;
 
   const WhereModel({
     required this.field,
+    required this.self,
+    required this.name,
+    required this.model,
+    required this.nameCast,
   });
 }
 
@@ -35,17 +47,17 @@ abstract class EntityQuery {
   const EntityQuery();
 }
 
-extension $EntityQuery on EntityQuery {
+extension $EntityQuery<T, M> on EntityQuery {
   /// EXISTS
-  WhereResult<String> exists(String subQuery) =>
+  WhereResult<String, M> exists(String subQuery) =>
       WhereResult('', 'EXISTS', '($subQuery)');
 
   /// NOT EXISTS
-  WhereResult<String> notExists(String subQuery) =>
+  WhereResult<String, M> notExists(String subQuery) =>
       WhereResult('', 'NOT EXISTS', '($subQuery)');
 }
 
-class WhereResult<T> {
+class WhereResult<T, M> {
   final String key;
   final T value;
   final int? value2;
@@ -90,83 +102,97 @@ extension $WhereResultLst on List<Set<WhereResult>>? {
       '';
 }
 
-extension $WhereExt<T> on WhereModel<T> {
+extension $WhereExt<T, M> on WhereModel<T, M> {
   /// v = 0
-  WhereResult<T> equal(T value) => WhereResult(field, '=', value);
+  WhereResult<T, M> equal(T value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), '=', value);
 
   /// v IN (1,2,3)
-  WhereResult<String> in$(List<T> value) => WhereResult(
-      field, 'IN', '(${value.map((e) => e is int ? e : "'$e'").join(',')})');
+  WhereResult<String, M> in$(List<T> value) => WhereResult(
+        field.replaceFirst(RegExp('^_'), ''),
+        'IN',
+        '(${value.map((e) => e is int ? e : "'$e'").join(',')})',
+      );
 
   /// v NOT IN (1,2,3)
-  WhereResult<String> notIn(List<T> value) =>
-      WhereResult(field, 'NOT IN', '(${value.join(',')})');
+  WhereResult<String, M> notIn(List<T> value) => WhereResult(
+        field.replaceFirst(RegExp('^_'), ''),
+        'NOT IN',
+        '(${value.map((e) => e is int ? e : "'$e'").join(',')})',
+      );
 
   /// v IS NOT NULL
-  WhereResult<String> notNull() => WhereResult(field, 'IS NOT', 'NULL');
+  WhereResult<String, M> notNull() =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'IS NOT', 'NULL');
 
   /// v IS NULL
-  WhereResult<String> null$() => WhereResult(field, 'IS', 'NULL');
+  WhereResult<String, M> null$() =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'IS', 'NULL');
 
   /// v <> 0
-  WhereResult<T> notEqual(T value) => WhereResult(field, '<>', value);
+  WhereResult<T, M> notEqual(T value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), '<>', value);
 }
 
-extension $WhereExtString on WhereModel<String> {
+extension $WhereExtString<M> on WhereModel<String, M> {
   /// v IN (SELECT key from tbl_a)
-  WhereResult<String> inQuery(String query) =>
-      WhereResult(field, 'IN', '($query)');
+  WhereResult<String, M> inQuery(String query) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'IN', '($query)');
 
   /// v NOT IN (SELECT key from tbl_a)
-  WhereResult<String> notInQuery(String query) =>
-      WhereResult(field, 'NOT IN', '($query)');
+  WhereResult<String, M> notInQuery(String query) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'NOT IN', '($query)');
 
   /// v LIKE 'value%'
-  WhereResult<String> likeStart(String value) =>
-      WhereResult(field, 'LIKE', '\'$value%\'');
+  WhereResult<String, M> likeStart(String value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'LIKE', '\'$value%\'');
 
   /// v LIKE '%value'
-  WhereResult<String> likeEnd(String value) =>
-      WhereResult(field, 'LIKE', '\'%$value\'');
+  WhereResult<String, M> likeEnd(String value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'LIKE', '\'%$value\'');
 
   /// v LIKE '%value%'
-  WhereResult<String> likeContain(String value) =>
-      WhereResult(field, 'LIKE', '\'%$value%\'');
+  WhereResult<String, M> likeContain(String value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'LIKE', '\'%$value%\'');
 
   /// v LIKE '%10\\%%' => LIKE 10%
-  WhereResult<String> likeContainEscape(String value, String escape) =>
-      WhereResult(field, 'LIKE', '\'%$value%\' ESCAPE \'$escape\'');
+  WhereResult<String, M> likeContainEscape(String value, String escape) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'LIKE',
+          '\'%$value%\' ESCAPE \'$escape\'');
 
   /// * [start] = Br
   /// * [end] = wn
   /// * [character] = _
   /// * [count] = 1, [count] = 2 => [character]  _ => __
   /// * v LIKE '%Br_wn%'
-  WhereResult<String> likeContainByCharacter(
+  WhereResult<String, M> likeContainByCharacter(
           String start, String end, String character, int count) =>
-      WhereResult(field, 'LIKE', '\'%$start${character * count}$end%\'');
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'LIKE',
+          '\'%$start${character * count}$end%\'');
 }
 
-extension $WhereExtInt on WhereModel<int> {
+extension $WhereExtInt<M> on WhereModel<int, M> {
   /// v < 0
-  WhereResult<int> lessThan(int value) => WhereResult(field, '<', value);
+  WhereResult<int, M> lessThan(int value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), '<', value);
 
   /// v > 0
-  WhereResult<int> greaterThan(int value) => WhereResult(field, '>', value);
+  WhereResult<int, M> greaterThan(int value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), '>', value);
 
   /// v >= 0
-  WhereResult<int> greaterThanOrEqual(int value) =>
-      WhereResult(field, '>=', value);
+  WhereResult<int, M> greaterThanOrEqual(int value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), '>=', value);
 
   /// v <= 0
-  WhereResult<int> lessThanOrEqual(int value) =>
-      WhereResult(field, '<=', value);
+  WhereResult<int, M> lessThanOrEqual(int value) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), '<=', value);
 
   /// v BETWEEN 0 and 1
-  WhereResult<int> between(int from, int to) =>
-      WhereResult(field, 'BETWEEN', from, to);
+  WhereResult<int, M> between(int from, int to) =>
+      WhereResult(field.replaceFirst(RegExp('^_'), ''), 'BETWEEN', from, to);
 
   /// v NOT BETWEEN 0 and 1
-  WhereResult<int> notBetween(int from, int to) =>
-      WhereResult(field, 'NOT BETWEEN', from, to);
+  WhereResult<int, M> notBetween(int from, int to) => WhereResult(
+      field.replaceFirst(RegExp('^_'), ''), 'NOT BETWEEN', from, to);
 }

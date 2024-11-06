@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
+import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
 
 import 'entity.dart';
 import 'property.dart';
@@ -9,32 +10,41 @@ final _checker = const TypeChecker.fromRuntime(PrimaryKey);
 
 class APrimaryKey extends AProperty {
   final bool auto;
+  final AEntity? entityParent;
+  final AForeignKey? foreignKey;
 
   const APrimaryKey._({
+    required super.args,
+    required this.foreignKey,
+    required this.entityParent,
     required super.step,
     this.auto = true,
     super.name,
     required super.version,
-    super.rawFromDB,
     required super.nameDefault,
     required super.dartType,
     required super.className,
   });
 
   factory APrimaryKey.fromElement(
-      FieldElement element, String className, int step) {
+    FieldElement element,
+    APropertyArgs args,
+    String className,
+    List<String> parentClassName,
+    int step,
+    AEntity? entityParent,
+    AForeignKey? foreignKey,
+  ) {
     return APrimaryKey._(
+      args: args.copyWithByElement(fieldName: element.displayName),
+      foreignKey: foreignKey,
+      entityParent: entityParent,
       auto: APrimaryKeyX._auto(element),
       step: step,
       name: APrimaryKeyX._name(element),
       version: APrimaryKeyX._version(element),
       nameDefault: element.displayName,
       dartType: element.type,
-      rawFromDB: element.type.element is ClassElement &&
-          AEntity.of(element.type.element as ClassElement, step + 1)
-                  ?.primaryKeys
-                  .isNotEmpty ==
-              true,
       className: className,
     );
   }
@@ -42,11 +52,25 @@ class APrimaryKey extends AProperty {
 
 extension APrimaryKeyX on APrimaryKey {
   static List<APrimaryKey> fields(
-      List<FieldElement> fields, String className, int step) {
-    return fields
-        .where((e) => _checker.hasAnnotationOfExact(e))
-        .map((e) => APrimaryKey.fromElement(e, className, step))
-        .toList();
+    List<FieldElement> fields,
+    APropertyArgs args,
+    String className,
+    List<String> parentClassName,
+    int step,
+    List<AForeignKey>? fores,
+  ) {
+    return fields.where((e) => _checker.hasAnnotationOfExact(e)).map((e) {
+      final foreignKey = fores?.of(e.displayName);
+      return APrimaryKey.fromElement(
+        e,
+        args,
+        className,
+        parentClassName,
+        step,
+        foreignKey?.entityParent,
+        foreignKey,
+      );
+    }).toList();
   }
 
   static bool isElement(Element e) {

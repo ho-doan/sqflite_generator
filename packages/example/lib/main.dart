@@ -2,9 +2,13 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:example/authentication_model.dart';
+import 'package:example/db/models/bill.dart';
+import 'package:example/db/models/client.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart' hide Column;
+
+import 'db/models/product.dart';
 
 void main() {
   runZonedGuarded(() async {
@@ -19,7 +23,7 @@ void main() {
         const MigrationModel(
           uidKey: 'uidV1-detail',
           sqlInsert:
-              '''INSERT INTO BillDetail(name, bill) VALUES('dt 1', 1),('dt 2', 1),('dt 3', 1),('dt 4', 1),('dt 5', 1),('dt 6', 2),('dt 7', 2),('dt 8', 2),('dt 9', 2);''',
+              '''INSERT INTO BillDetail(name, parent_key) VALUES('dt 1', 1),('dt 2', 1),('dt 3', 1),('dt 4', 1),('dt 5', 1),('dt 6', 2),('dt 7', 2),('dt 8', 2),('dt 9', 2);''',
         )
       ],
     );
@@ -57,25 +61,65 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Database database;
 
-  List<BillM> bills = [];
+  List<Bill> bills = [];
 
   @override
   void initState() {
     configSql().then((db) {
-      BillMQuery.getAll(
+      BillQuery.getAll(
         db,
+        select: {
+          BillSetArgs.$product.$firstName,
+          BillSetArgs.productId,
+          BillSetArgs.clientId,
+          BillSetArgs.$client.$id,
+          BillSetArgs.$product.$id,
+          BillSetArgs.$client.$$product.$id,
+          BillSetArgs.$client.$productId,
+          BillSetArgs.$client.$firstName,
+          BillSetArgs.$client.$lastName,
+          BillSetArgs.$client.$blocked,
+          BillSetArgs.time,
+          // BillSetArgs.productId,
+          // BillSetArgs.clientId,
+          // BillSetArgs.clientProductId,
+          // BillSetArgs.time,
+          // BillSetArgs.$client.$blocked,
+          // BillSetArgs.$product.$firstName,
+          // BillSetArgs.$client.$$product.$firstName,
+          // BillSetArgs.$clientParent.$lastName,
+          // BillSetArgs.$clientParent.$$product.$firstName,
+          BillSetArgs.$client.$$product.$firstName,
+          BillSetArgs.$parent.$$client.$$product.$firstName,
+          // ClientSetArgs.firstName,
+          // ClientSetArgs.lastName,
+          // ClientSetArgs.blocked,
+          // ClientSetArgs.id,
+          // ClientSetArgs.productId,
+          // ClientSetArgs.$product.$firstName,
+          // ClientSetArgs.$product.$lastName,
+          // ClientSetArgs.$product.$id,
+          // ClientSetArgs.$product.$blocked,
+        },
+        orderBy: {
+          // BillSetArgs.time.desc,
+          OrderBy.desc(BillSetArgs.productId),
+        },
         where: {
-          BillMQuery.key.equal(1),
+          BillSetArgs.productId.notEqual(1),
+          // BillSetArgs.$product.$id.equal(1),
         },
         whereOr: [
           {
-            BillMQuery.key.equal(0),
-            BillMQuery.name.equal('1'),
-            BillMQuery.key.lessThan(1),
+            BillSetArgs.productId.equal(1),
+            // BillSetArgs.$product.$firstName.equal('1'),
+            // BillSetArgs.$client.$$product.$lastName.likeContain('11'),
           },
         ],
       ).then(
-        (v) => setState(() => bills = v),
+        (v) => setState(() {
+          bills = v;
+        }),
       );
       return database = db;
     });
@@ -100,10 +144,83 @@ class _MyHomePageState extends State<MyHomePage> {
               '',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            for (final item in bills)
-              Text('${item.name} ${item.details.map((e) => e.name)}')
+            for (final b in bills)
+              Text(
+                  'product_id: ${b.product?.id} client_id: ${b.client?.id} client_product_id: ${b.client?.product.id}'),
+            // for (final item in bills)
+            //   Text('${item.name} ${item.details.map((e) => e.name)}')
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final bill = Bill(
+            product: Product(
+              id: 12,
+              firstName: 'test',
+              lastName: 'tes4t',
+              blocked: false,
+            ),
+            client: Client(
+              id: 1,
+              firstName: 'test',
+              lastName: 'test',
+              blocked: false,
+              product: Product(
+                id: 2,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+              ),
+            ),
+            clientParent: Client(
+              id: 3,
+              firstName: 'test',
+              lastName: 'test',
+              blocked: false,
+              product: Product(
+                id: 4,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+              ),
+            ),
+            parent: Bill(
+              client: Client(
+                id: 5,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+                product: Product(
+                  id: 6,
+                  firstName: 'test',
+                  lastName: 'test',
+                  blocked: false,
+                ),
+              ),
+              product: Product(
+                id: 7,
+                firstName: 'test',
+                lastName: 'test',
+                blocked: false,
+              ),
+              time: DateTime.now(),
+            ),
+            time: DateTime.now(),
+          );
+          await bill.product?.insert(database);
+          await bill.client?.insert(database);
+
+          await bill.clientParent?.product.insert(database);
+          await bill.clientParent?.insert(database);
+
+          await bill.parent?.client?.product.insert(database);
+          await bill.parent?.client?.insert(database);
+
+          await bill.parent?.insert(database);
+          await bill.insert(database);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart';
-import 'package:collection/collection.dart';
 import 'package:sqflite_generator/src/annotation_builder/column.dart';
 import 'package:sqflite_generator/src/annotation_builder/foreign_key.dart';
 import 'package:sqflite_generator/src/annotation_builder/index.dart';
@@ -9,37 +8,15 @@ import 'package:sqflite_generator/src/annotation_builder/primary_key.dart';
 import 'package:sqflite_generator/src/annotation_builder/property.dart';
 
 class AEntity {
+  final APropertyArgs args;
   final List<AColumn> columns;
   final List<AForeignKey> foreignKeys;
   final List<APrimaryKey> primaryKeys;
   final List<AIndex> indices;
   final String className;
   final String classType;
+  final List<String> parentClassName;
   String get extensionName => '${classType}Query';
-
-  String rawCreateTable([AColumn? ps, String? newName]) {
-    final all = [
-      ...primaryKeys.map(
-        (e) => e.rawCreate(
-          autoId: e.auto,
-          isId: true,
-          isIds: primaryKeys.length > 1,
-          isFore: foreignKeys.any((f) => e.nameDefault == f.nameDefault),
-        ),
-      ),
-      ...columns
-          .where((e) => !e.alters.any((e) => e.type == AlterTypeGen.add))
-          .where((e) => e.nameDefault != ps?.nameDefault)
-          .map((e) => e.rawCreate()),
-      ...indices.map((e) => e.rawCreate()),
-      ...foreignKeys
-          .where((e) => !e.dartType.isDartCoreList)
-          .map((e) => e.rawCreate()),
-      primaryKeys.rawCreate(foreignKeys),
-      if (newName == null) ...foreignKeys.map((e) => e.rawCreateForeign),
-    ].where((e) => e != null && e.isNotEmpty);
-    return 'CREATE TABLE IF NOT EXISTS $className${newName ?? ''}(\n\t\t${all.join(',\n\t\t\t')}\n\t)';
-  }
 
   List<AProperty> rawCreateTablePS(AColumn? ps) {
     return [
@@ -54,9 +31,9 @@ class AEntity {
 
   Map<int, List<String>> get rawAlterTable {
     final lst = [
-      ...primaryKeys.map((e) => e),
-      ...columns.map((e) => e),
-      ...indices.map((e) => e),
+      ...primaryKeys,
+      ...columns,
+      ...indices,
       ...foreignKeys.where((e) => !e.dartType.isDartCoreList).map((e) => e),
     ];
     final map = <int, List<String>>{};
@@ -70,97 +47,99 @@ class AEntity {
       }
     }
     for (final item in lst) {
-      if (item is AColumn &&
-          item.alters.any((e) => e.type == AlterTypeGen.drop)) {
-        final version =
-            item.alters.firstWhere((e) => e.type == AlterTypeGen.drop).version;
+      // TODO(hodoan): check
+      // if (item is AColumn &&
+      //     item.alters.any((e) => e.type == AlterTypeGen.drop)) {
+      //   final version =
+      //       item.alters.firstWhere((e) => e.type == AlterTypeGen.drop).version;
 
-        final raws = <String>[
-          for (final item in foreignKeys)
-            if (item.entityParent != null) ...[
-              "'''${item.entityParent!.rawCreateTable(null, '_new')}'''",
-              "'INSERT INTO ${item.entityParent!.className}_new(${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className};'",
-              "'DROP TABLE ${item.entityParent!.className};'",
-              // "'ALTER TABLE ${item.entityParent!.className}_new RENAME TO ${item.entityParent!.className};'",
-            ],
-          "'''${rawCreateTable(item, '_new')}'''",
-          "'INSERT INTO ${className}_new(${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')})SELECT ${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')} FROM $className;'",
-          "'DROP TABLE $className;'",
-          "'ALTER TABLE ${className}_new RENAME TO $className;'",
-          for (final item in foreignKeys)
-            if (item.entityParent != null) ...[
-              "${item.entityParent!.extensionName}.createTable",
-              "'INSERT INTO ${item.entityParent!.className}(${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className}_new;'",
-              "'DROP TABLE ${item.entityParent!.className}_new;'",
-            ],
-        ];
+      //   final raws = <String>[
+      //     for (final item in foreignKeys)
+      //       if (item.entityParent != null) ...[
+      //         "'''${item.entityParent!.rawCreateTable(null, '_new')}'''",
+      //         "'INSERT INTO ${item.entityParent!.className}_new(${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className};'",
+      //         "'DROP TABLE ${item.entityParent!.className};'",
+      //         // "'ALTER TABLE ${item.entityParent!.className}_new RENAME TO ${item.entityParent!.className};'",
+      //       ],
+      //     "'''${rawCreateTable(item, '_new')}'''",
+      //     "'INSERT INTO ${className}_new(${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')})SELECT ${rawCreateTablePS(item).map((e) => e.nameToDB).join(',')} FROM $className;'",
+      //     "'DROP TABLE $className;'",
+      //     "'ALTER TABLE ${className}_new RENAME TO $className;'",
+      //     for (final item in foreignKeys)
+      //       if (item.entityParent != null) ...[
+      //         "${item.entityParent!.extensionName}.createTable",
+      //         "'INSERT INTO ${item.entityParent!.className}(${item.entityParent!.rawCreateTablePS(null).map(
+      //               (e) => e.args.fieldNames.join('_').toSnakeCase(),
+      //             ).join(',')})SELECT ${item.entityParent!.rawCreateTablePS(null).map((e) => e.nameToDB).join(',')} FROM ${item.entityParent!.className}_new;'",
+      //         "'DROP TABLE ${item.entityParent!.className}_new;'",
+      //       ],
+      //   ];
 
-        if (map.containsKey(version)) {
-          map[version]!.addAll(raws);
-        } else {
-          map[version] = raws;
-        }
-      }
+      //   if (map.containsKey(version)) {
+      //     map[version]!.addAll(raws);
+      //   } else {
+      //     map[version] = raws;
+      //   }
+      // }
     }
     return map;
   }
 
   String get rawFromDB {
     return [
-      aPs.map(
-        (e) {
-          if (e is AForeignKey) {
-            if (!e.dartType.isDartCoreList) {
-              return '${e.nameDefault}:${e.entityParent?.className}.fromDB(json,[])';
+      for (final e in properties())
+        if (e is AIndex)
+          '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}'
+        else if (e is AColumn)
+          () {
+            if (e.dartType.toString().contains('DateTime')) {
+              return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.nameFromDB}\'] as int? ?? -1,)';
+            } else if (e.dartType.isDartCoreBool) {
+              return '${e.nameDefault}: (json[\'\${childName}${e.nameFromDB}\'] as int?) == 1';
+            } else if (e.converter != null) {
+              return '${e.nameDefault}: const ${(e).converter}().fromJson(json[\'\${childName}${e.nameFromDB}\'] as String?)';
+            } else {
+              return '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}';
             }
-            return '${e.nameDefault}: lst.map((e)=>${e.entityParent?.className}.fromDB(e,[])).toList()';
-          }
-          if (e.rawFromDB) {
-            return '${e.nameDefault}: ${e.dartType}.fromDB(json,${e is AForeignKey ? e.subSelect(foreignKeys.duplicated(e)) : '\'\''})';
-          }
-          if (e.dartType.toString().contains('DateTime')) {
-            return '${e.nameDefault}: DateTime.fromMillisecondsSinceEpoch(json[\'\${childName}${e.nameFromDB}\'] as int? ?? -1,)';
-          }
-          if (e.dartType.isDartCoreBool) {
-            return '${e.nameDefault}: (json[\'${e.nameFromDB}\'] as int?) == 1';
-          }
-          if (e is AColumn && e.converter != null) {
-            return '${e.nameDefault}: const ${e.converter}().fromJson(json[\'\${childName}${e.nameFromDB}\'] as String?)';
-          }
-          return '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}';
-        },
-      ).join(','),
-      ','
-    ].join();
+          }()
+        else if (e is APrimaryKey && e.args.parentClassNames.sublist(1).isEmpty)
+          '${e.nameDefault}: json[\'\${childName}${e.nameFromDB}\'] as ${e.dartType}',
+      for (final key in primaryKeys.where(
+          (e) => foreignKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        '${key.nameDefault}: ${key.entityParent?.className}'
+            '.fromDB(json,lst,\'${key.args.fieldNames.join('_').toSnakeCase()}_\')',
+      for (final key in foreignKeys.where((e) =>
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        if (key.dartType.isDartCoreList)
+          '${key.nameDefault}: lst.map((e)=>${key.entityParent?.className}.fromDB(e,[])).toList()'
+        else
+          ' ${key.nameDefault}: ${key.entityParent?.className == className ? 'childStep > 0 ? null :' : ''}'
+              '${key.entityParent?.className}'
+              '.fromDB(json,lst,\'${key.nameDefault.toSnakeCase()}_\'${key.entityParent?.className == className ? ',1' : ''})',
+    ].join(',\n');
   }
 
   String get rawToDB {
     return [
-      aPs
-          .map(
-            (e) {
-              if (e is AForeignKey) {
-                if (!e.dartType.isDartCoreList) {
-                  return '\'${e.nameToDB}\': ${e.defaultSuffix}.${e.entityParent?.primaryKeys.firstOrNull?.nameDefault}';
-                }
-                return '';
-              }
-              if (e.dartType.toString().contains('DateTime')) {
-                return '\'${e.nameToDB}\': this.${e.defaultSuffix}.millisecondsSinceEpoch';
-              }
-              if (e.dartType.isDartCoreBool) {
-                return '\'${e.nameDefault}\': (this.${e.nameDefault} ?? false) ? 1 : 0';
-              }
-              if (e is AColumn && e.converter != null) {
-                return '\'${e.nameToDB}\': const ${e.converter}().toJson(this.${e.nameDefault})';
-              }
-              return '\'${e.nameToDB}\':this.${e.nameDefault}';
-            },
-          )
-          .where((e) => e.isNotEmpty)
-          .join(','),
-      ','
-    ].join();
+      for (final item in keysNew)
+        '\'${item.$2.args.fieldNames.join('_').toSnakeCase()}\': ${item.$2.args.fieldNames.join('?.')}',
+      for (final item in indices) '\'${item.nameToDB}\': ${item.nameDefault}',
+      for (final item in columns)
+        if (item.dartType.toString().contains('DateTime'))
+          '\'${item.nameToDB}\': ${item.nameDefault}?.millisecondsSinceEpoch'
+        else if (item.dartType.isDartCoreBool)
+          '\'${item.nameToDB}\': (${item.nameDefault} ?? false) ? 1 : 0'
+        else if (item.converter != null)
+          '\'${item.nameToDB}\': const ${(item).converter}().toJson(${item.nameDefault})'
+        else
+          '\'${item.nameToDB}\':${item.nameDefault}',
+      for (final k in foreignKeys.where((e) =>
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        if (!k.dartType.isDartCoreList)
+          for (final key
+              in k.entityParent!.primaryKeys.expand((e) => e.expanded2()))
+            '\'${key.args.fieldNames.join('_').toSnakeCase()}\': ${key.args.fieldNames.join('?.')}',
+    ].join(',\n');
   }
 
   String get rawGetAll {
@@ -180,15 +159,15 @@ class AEntity {
         }
       ''',
       'final sql = \'\'\'SELECT \${\$createSelect(select)} FROM $className ${className.toSnakeCase()}',
-      ...aFores,
+      '\${const $setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
       '\${whereStr.isNotEmpty ? whereStr : \'\'}',
-      "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field} \${e.type}').join(',')}' : ''}",
+      "\${(orderBy ?? {}).isNotEmpty ? 'ORDER BY \${(orderBy ?? {}).map((e) => '\${e.field.field.replaceFirst(RegExp('^_'), '')} \${e.type}').join(',')}' : ''}",
       "\${limit != null ? 'LIMIT \$limit' : ''}",
       "\${offset != null ? 'OFFSET \$offset' : ''}",
       "''';",
       "if (kDebugMode) { print('get all $className \$sql'); }",
       'final mapList = (await database.rawQuery(sql) as List<Map>);',
-      'return mapList.groupBy(((m) => m[$extensionName.${aPsAll.first.name}.nameCast]))'
+      'return mapList.groupBy(((m) => [${keysNew.map((e) => 'm[$setClassNameExternal.${e.$2.args.fieldNames.join('_').toCamelCase()}.nameCast]').join(',')}]))'
           '.values.map((e)=>$classType.fromDB(e.first,e)).toList();',
     ].join('\n');
   }
@@ -212,18 +191,20 @@ class AEntity {
       'SELECT ',
       '\${\$createSelect(select)}',
       ' FROM $className ${className.toSnakeCase()}',
-      ...aFores,
+      '\${const $setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
       'WHERE ${_whereDB.join(' AND ')}',
       '\'\'\',',
       _whereStaticArgs,
       ') as List<Map>);',
-      'return res.isNotEmpty? $classType.fromDB(res.first,res) : null;'
+      'if (res.isEmpty) return null;',
+      'final mapList = res.groupBy((e)=>[${keysNew.map((e) => 'e[$setClassNameExternal.${e.$2.args.fieldNames.join('_').toCamelCase()}.nameCast]').join(',')}]).values.first;',
+      'return $classType.fromDB(mapList.first,mapList);',
     ].join('\n');
   }
 
   String delete(bool isStatic) {
     return [
-      'await database.rawQuery(\'\'\'DELETE FROM $className ${className.toSnakeCase()} WHERE ${_whereDB.join(' AND ')}\'\'\',',
+      'await database.rawQuery(\'\'\'DELETE * FROM $className ${className.toSnakeCase()} WHERE ${_whereDB.join(' AND ')}\'\'\',',
       isStatic ? _whereStaticArgs : _whereArgs,
       ');'
     ].join('');
@@ -236,6 +217,8 @@ class AEntity {
   }
 
   const AEntity._({
+    required this.args,
+    this.parentClassName = const [],
     required this.columns,
     required this.foreignKeys,
     required this.primaryKeys,
@@ -244,12 +227,28 @@ class AEntity {
     required this.classType,
   });
 
-  static AEntity? of(ClassElement element, [int step = 0]) {
-    if (step > 3) return null;
-    return AEntity._fromElement(element, step);
+  static AEntity? of(
+    ClassElement element,
+    APropertyArgs args,
+    List<String> parentClassName, [
+    int step = 0,
+  ]) {
+    if (step > 9) return null;
+    return AEntity._fromElement(
+        element,
+        args.copyWithByEntity(
+          parentClassName: element.displayName,
+        ),
+        parentClassName,
+        step);
   }
 
-  factory AEntity._fromElement(ClassElement element, int step) {
+  factory AEntity._fromElement(
+    ClassElement element,
+    APropertyArgs args,
+    List<String> parentClassName,
+    int step,
+  ) {
     final fields = element.fields.cast<FieldElement>();
 
     final cons = element.constructors.where((e) => !e.isFactory);
@@ -267,28 +266,170 @@ class AEntity {
             .cast()
             .toList(),
     ];
-    final indies = AIndexX.fields(fields, element.displayName, step + 1);
-    final primaries =
-        APrimaryKeyX.fields(fields, element.displayName, step + 1);
-    final fores =
-        AForeignKeyX.fields(step + 1, fields, element.displayName, ss);
+    final indies = AIndexX.fields(
+      fields,
+      args,
+      element.displayName,
+      parentClassName,
+      step + 1,
+    );
+    final fores = AForeignKeyX.fields(
+      step + 1,
+      args,
+      fields,
+      element.displayName,
+      parentClassName,
+      ss,
+    );
+
+    final primaries = APrimaryKeyX.fields(
+      fields,
+      args,
+      element.displayName,
+      parentClassName,
+      step + 1,
+      fores,
+    );
 
     return AEntity._(
+      parentClassName: parentClassName,
       className: element.displayName.replaceFirst('\$', ''),
       classType: element.displayName,
       columns: AColumnX.fields(
         step + 1,
         fields,
         element.displayName,
+        parentClassName,
+        args,
         [...fs, ...ss],
         primaries,
         indies,
         fores,
       ),
+      args: args,
       foreignKeys: fores,
       primaryKeys: primaries,
       indices: indies,
     );
+  }
+}
+
+extension AEntityBase on AEntity {
+  List<AProperty> properties() {
+    if (parentClassName.length > (9 / 3)) return [];
+    final alls = [
+      for (final e in aPs)
+        if (e is APrimaryKey &&
+
+            /// primary key of child self
+            /// ```
+            /// class A{
+            ///   @primaryKey
+            ///   final A? child;
+            /// }
+            /// ```
+            /// result [true]
+            !e.args.parentClassNames.sublist(1).contains(className)) ...[
+          for (final f in e.expanded2()) f,
+        ] else if (e is AColumn)
+          e
+        else if (e is AIndex)
+          e
+    ];
+    return alls;
+  }
+
+  /// [newName] is for rename table
+  String rawCreateTable([AColumn? ps, String? newName]) {
+    final alls = [
+      for (final e in aPs.where((e) => e.version < 2))
+        if (e is APrimaryKey &&
+
+            /// primary key of child self
+            /// ```
+            /// class A{
+            ///   @primaryKey
+            ///   final A? child;
+            /// }
+            /// ```
+            /// result [true]
+            !e.args.parentClassNames.sublist(1).contains(className)) ...[
+          /// default version is 1
+          ...e.expanded2().map(
+                (e) => e.rawCreate(
+                  newName: newName,
+                  autoId: e.auto,
+                  isId: true,
+                  isIds: primaryKeys.length > 1,
+                ),
+              ),
+        ] else if (e is AColumn) ...[
+          e.rawCreate(newName: newName),
+        ] else if (e is AIndex) ...[
+          e.rawCreate(newName: newName),
+        ] else if (e is AForeignKey &&
+
+            /// foreign key of child self not primary key
+            /// ```
+            /// class A{
+            ///   @primaryKey
+            ///   @ForeignKey(name: 'A')
+            ///   final A? child;
+            /// }
+            /// -> false
+            /// ```
+            !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)) ...[
+          ...e.entityParent!.primaryKeys.expand(
+            (f) => f.expanded2().map(
+                  (k) => k.rawCreate(newName: newName),
+                ),
+          ),
+        ],
+      if (primaryKeys.length > 1)
+        'PRIMARY KEY (${primaryKeys.expand(
+              (e) => e.expanded2(),
+            ).map(
+              (e) => e.args.fieldNames.join('_').toSnakeCase(),
+            ).toList().join(',')})',
+      for (final k in foreignKeys)
+        k.rawCreateForeign(
+          k.entityParent!.primaryKeys
+              .expand((e) => e.expanded2())
+              .map(
+                (m) => m.args.fieldNames.join('_').toSnakeCase(),
+              )
+              .join(','),
+          k.entityParent!.primaryKeys
+              .expand((e) => e.expanded2())
+              .map((e) => e.args.fieldNames.sublist(1).join('_').toSnakeCase())
+              .join(','),
+        ),
+    ].where((e) => e != null);
+
+    return 'CREATE TABLE IF NOT EXISTS $className${newName ?? ''}(\n\t\t\t${alls.join(',\n\t\t\t')}\n\t)';
+  }
+
+  AForeignKey? fKWithoutPK(AForeignKey f) {
+    if (primaryKeys.map((e) => e.nameDefault).contains(f.nameDefault)) {
+      return null;
+    }
+    return f;
+  }
+}
+
+extension on APrimaryKey {
+  List<APrimaryKey> expanded2() {
+    final lst = <APrimaryKey>[];
+    if (entityParent == null) {
+      lst.add(this);
+    } else {
+      lst.addAll([
+        ...entityParent!.primaryKeys.expand(
+          (e) => e.expanded2(),
+        ),
+      ]);
+    }
+    return lst;
   }
 }
 
@@ -316,32 +457,40 @@ extension AInsert on AEntity {
     if (ps?.dartType.isDartCoreList ?? false) {
       return 'await Future.wait(${ps!.nameDefault}.map((e) => e.insert(database)));';
     }
-    final fieldsRaw = aPs
-        .whereNot((e) => e is AForeignKey && e.dartType.isDartCoreList)
-        .map((e) => e.nameToDB)
-        .join(',\n');
+    final fieldsRaw = [
+      ...properties()
+          // .whereNot((e) => e is AForeignKey && e.dartType.isDartCoreList)
+          .map((e) => e.args.fieldNames.join('_').toSnakeCase())
+          .toList(),
+      for (final e in foreignKeys.where((e) =>
+          !e.dartType.isDartCoreList &&
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        ...e.entityParent!.primaryKeys
+            .expand((e) => e.expanded2())
+            .map((m) => m.args.fieldNames.join('_').toSnakeCase()),
+    ].join(',\n');
 
     if (ps != null) {
-      return 'final \$${'${className}Id_${ps.nameDefault}'.toCamelCase()} = await ${ps.defaultSuffix}.insert(database);';
+      // final \$${'${className}Id_${ps.nameDefault}'.toCamelCase()} =
+      return 'await ${ps.defaultSuffix}.insert(database);';
     }
 
-    final fieldsValue = aPs.map((e) {
-      if (e is AForeignKey) {
-        if (e.dartType.isDartCoreList) {
-          return null;
-        }
-        return '\$${'${e.entityParent?.className}Id_${e.nameDefault}'.toCamelCase()}';
-      }
-      if (ps != null) return '$ps.${e.nameDefault}';
-      if (e is AColumn && e.converter != null) {
-        print('======= ${e.converter} ${e.nameDefault} ${e.className}');
-        if (e.dartType.toString().contains('DateTime')) {
-          return 'this.${e.defaultSuffix}.millisecondsSinceEpoch';
-        }
-        return 'const ${e.converter}().toJson(this.${e.nameDefault})';
-      }
-      return 'this.${e.nameDefault}';
-    }).where((e) => e != null);
+    final fieldsValue = [
+      for (final key in keysNew) key.$2.args.fieldNames.join('?.'),
+      for (final item in columns)
+        if (item.dartType.toString().contains('DateTime'))
+          '${item.defaultSuffix}.millisecondsSinceEpoch'
+        else if (item.converter != null)
+          'const ${item.converter}().toJson(${item.nameDefault})'
+        else
+          item.nameDefault,
+      for (final k in foreignKeys.where((e) =>
+          !e.dartType.isDartCoreList &&
+          !primaryKeys.map((e) => e.nameDefault).contains(e.nameDefault)))
+        ...k.entityParent!.primaryKeys
+            .expand((e) => e.expanded2())
+            .map((m) => m.args.fieldNames.join('?.')),
+    ];
 
     return [
       ...foreignKeys.where((e) => !e.dartType.isDartCoreList).map(
@@ -350,7 +499,7 @@ extension AInsert on AEntity {
       '''final \$id = await database.rawInsert(\'\'\'INSERT OR REPLACE INTO $className ($fieldsRaw) 
        VALUES(${List.generate(fieldsValue.length, (index) => '?').join(', ')})\'\'\',
        [
-        ${fieldsValue.join(',')},
+        ${fieldsValue.join(',\n')},
        ]
       );''',
       if (ps == null) 'return \$id;'
@@ -366,6 +515,8 @@ extension AForeignKeyXYZ on List<AForeignKey> {
 
 extension AQuery on AEntity {
   String get setClassName => '\$${className}SetArgs';
+  String get setClassNameExternal => '${className}SetArgs';
+  String get setClassNameExternal2 => '${className}Set';
   String get defaultSelectClass => '\$default';
   List<String> get aFieldNames {
     return [
@@ -376,83 +527,25 @@ extension AQuery on AEntity {
     ].map((e) => e.nameToDB).toList();
   }
 
-  List<String> get aFores {
-    return [
-      for (final e in foreignKeys)
-        if (e.dartType.isDartCoreList)
-          () {
-            final property = e.entityParent?.aPs.firstWhereOrNull(
-                (e) => e.dartType.toString().$rq == className);
-            return property != null
-                ? ' LEFT JOIN ${e.entityParent?.name} ${'${e.nameDefault}_${e.joinAsStr(foreignKeys.duplicated(e)).toSnakeCase()}'}'
-                    ' ON ${'${e.nameDefault}_${e.joinAsStr(foreignKeys.duplicated(e)).toSnakeCase()}'}.${property.nameToDB}'
-                    ' = ${className.toSnakeCase()}.${primaryKeys.first.nameToDB}'
-                : '';
-          }()
-        else
-          ' LEFT JOIN ${e.entityParent?.name} ${e.joinAsStr(foreignKeys.duplicated(e))}'
-              ' ON ${e.joinAsStr(foreignKeys.duplicated(e))}.${e.entityParent?.primaryKeys.first.nameToDB}'
-              ' = ${className.toSnakeCase()}.${e.name?.toSnakeCase()}'
-    ];
-  }
-
   List<AProperty> get aPs {
-    return {
-      for (final e in primaryKeys) e.nameDefault: e,
-      for (final e in foreignKeys) e.nameDefault: e,
-      for (final e in columns) e.nameDefault: e,
-      for (final e in indices) e.nameDefault: e,
-    }.values.toList();
-  }
-
-  List<({String name, String? field, AProperty p})> get aPsAll {
     return [
-      for (final item in aPs)
-        if (item is AForeignKey) ...[
-          for (final sItem in item.entityParent?.aPs ?? <AProperty>[])
-            if (!sItem.dartType.toString().contains(className))
-              (
-                name: '${() {
-                  if (sItem.className.toLowerCase() ==
-                      item.nameDefault.toLowerCase()) {
-                    return sItem.className;
-                  }
-                  return '${sItem.className}_${item.nameFromDB}';
-                }()}_${sItem.nameDefault}'
-                    .toCamelCase(),
-                p: sItem,
-                field: item.nameDefault,
-              )
-        ] else
-          (
-            name: item.nameDefault,
-            p: item,
-            field: null,
-          ),
+      ...primaryKeys,
+      ...foreignKeys,
+      ...columns,
+      ...indices,
     ];
-  }
-
-  List<({String name, String? field, AProperty p})> get aPsPri {
-    return [
-      for (final item in aPs)
-        if (item is APrimaryKey) (name: item.nameDefault, p: item, field: null),
-    ];
-  }
-
-  List<String> get $check {
-    return [for (final item in aPsAll) '${item.name} == true'];
   }
 }
 
 extension AParam on AEntity {
   Parameter get selectArgs => Parameter((p) => p
     ..name = 'select'
-    ..type = refer('Set<$setClassName>?')
+    ..type = refer('Set<WhereModel<dynamic, $setClassNameExternal2>>?')
     ..named = true
     ..required = false);
   Parameter get whereArgs => Parameter((p) => p
     ..name = 'where'
-    ..type = refer('Set<WhereResult>?')
+    ..type = refer('Set<WhereResult<dynamic, $setClassNameExternal2>>?')
     ..named = true
     ..required = false);
   Parameter get whereOrArgs => Parameter((p) => p
@@ -486,6 +579,12 @@ extension AParam on AEntity {
     ..defaultTo = Code('\'\'')
     ..named = false
     ..required = false);
+  Parameter get selectChildStepArgs => Parameter((p) => p
+    ..name = 'childStep'
+    ..type = refer('int')
+    ..defaultTo = Code('0')
+    ..named = false
+    ..required = false);
   Parameter get databaseArgs => Parameter((p) => p
     ..name = 'database'
     ..type = refer('Database'));
@@ -496,44 +595,81 @@ extension AParam on AEntity {
     ..name = 'lst'
     ..type = refer('List<Map>'));
   List<Parameter> get keysRequiredArgs => [
-        for (final key in keys)
-          if (key is AForeignKey)
-            for (final k in key.entityParent?.keys ?? <AProperty>[])
-              if (k is AForeignKey)
-                for (final sk in key.entityParent?.keys ?? <AProperty>[])
-                  Parameter((p) => p
-                    ..name = '${k.nameDefault}_${sk.nameDefault}'.toCamelCase()
-                    ..type = refer(sk.dartType.toString()))
-              else
-                Parameter((p) => p
-                  ..name = '${key.nameDefault}_${k.nameDefault}'.toCamelCase()
-                  ..type = refer(k.dartType.toString()))
-          else
-            Parameter((p) => p
-              ..name = key.nameDefault.toCamelCase()
-              ..type = refer(key.dartType.toString()))
+        for (final key in keysNew)
+          Parameter((p) => p
+            ..name = key.$2.args.fieldNames.join('_').toCamelCase()
+            ..type = refer(key.$2.dartType.toString()))
       ];
   List<Parameter> get setOptionalArgs => [
+        Parameter(
+          (f) => f
+            ..name = 'self'
+            ..defaultTo = Code('\'\'')
+            ..named = true
+            ..toSuper = true,
+        ),
         Parameter(
           (f) => f
             ..name = 'name'
             ..required = true
             ..named = true
-            ..toThis = true,
+            ..toSuper = true,
         ),
         Parameter(
           (f) => f
             ..name = 'nameCast'
             ..named = true
             ..required = true
-            ..toThis = true,
+            ..toSuper = true,
         ),
         Parameter(
           (f) => f
             ..name = 'model'
             ..named = true
             ..required = true
+            ..toSuper = true,
+        ),
+      ];
+  List<Parameter> get setOptionalArgsExternal => [
+        Parameter(
+          (f) => f
+            ..name = 'self'
             ..toThis = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'self2'
+            ..toThis = true,
+        ),
+      ];
+  List<Parameter> get setOptionalArgsChild => [
+        Parameter(
+          (f) => f
+            ..name = 'self'
+            ..defaultTo = Code('\'\'')
+            ..named = true
+            ..toSuper = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'name'
+            ..required = true
+            ..named = true
+            ..toSuper = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'nameCast'
+            ..named = true
+            ..required = true
+            ..toSuper = true,
+        ),
+        Parameter(
+          (f) => f
+            ..name = 'model'
+            ..named = true
+            ..required = true
+            ..toSuper = true,
         ),
       ];
   List<Parameter> get fieldOptionalQuery => [
@@ -555,36 +691,21 @@ extension AParam on AEntity {
 }
 
 extension AFields on AEntity {
-  List<Field> get setFields => [
+  List<Field> get setFieldsExternal => [
         Field(
           (f) => f
-            ..name = 'name'
+            ..name = 'self'
             ..modifier = FieldModifier.final$
             ..type = refer('String'),
         ),
         Field(
           (f) => f
-            ..name = 'model'
-            ..modifier = FieldModifier.final$
-            ..type = refer('String'),
-        ),
-        Field(
-          (f) => f
-            ..name = 'nameCast'
+            ..name = 'self2'
             ..modifier = FieldModifier.final$
             ..type = refer('String'),
         ),
       ];
 
-  List<Field> get selectFields => [
-        for (final item in aPsAll)
-          Field(
-            (f) => f
-              ..name = item.name
-              ..modifier = FieldModifier.final$
-              ..type = refer('bool?'),
-          )
-      ];
   List<Field> get queryFields => [
         Field(
           (f) => f
@@ -599,23 +720,35 @@ extension AFields on AEntity {
             ..type = refer('String'),
         ),
       ];
-  List<AProperty> get keys {
+
+  List<(String, APrimaryKey)> get keysNew {
     return [
-      for (final item in primaryKeys)
-        foreignKeys
-                .firstWhereOrNull((e) => e.nameDefault == item.nameDefault) ??
-            item
+      for (final e in primaryKeys)
+        if (
+
+            /// primary key of child self
+            /// ```
+            /// class A{
+            ///   @primaryKey
+            ///   final A? child;
+            /// }
+            /// ```
+            /// result [true]
+            !e.args.parentClassNames
+                .sublist(1)
+                .map((e) => e.toCamelCase())
+                .contains(className.toCamelCase())) ...[
+          ...[
+            for (final f in e.expanded2())
+              if (!e.dartType.isDartCoreList) (e.nameDefault, f),
+          ],
+        ],
     ];
   }
 
   List<String> get _whereArgs {
     return [
-      for (final key in keys)
-        if (key is AForeignKey)
-          for (final item in key.entityParent?.keys ?? <AProperty>[])
-            '${key.defaultSuffix}.${item.nameDefault}'
-        else
-          'this.${key.nameDefault}'
+      for (final key in keysNew) key.$2.args.fieldNames.join('?.'),
     ];
   }
 
@@ -624,11 +757,15 @@ extension AFields on AEntity {
 
   List<String> get _whereDB {
     return [
-      for (final key in keys) '${className.toSnakeCase()}.${key.nameToDB} = ?'
+      for (final key in keysNew)
+        '${className.toSnakeCase()}.${key.$2.args.fieldNames.join('_')} = ?'
     ];
   }
 
   List<String> get _whereDBUpdate {
-    return [for (final key in keys) '${key.nameToDB} = ?'];
+    return [
+      for (final key in keysNew)
+        '${key.$2.args.fieldNames.join('_').toSnakeCase()} = ?'
+    ];
   }
 }

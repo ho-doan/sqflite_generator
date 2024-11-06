@@ -15,15 +15,13 @@ import 'package:example/db/models/product.dart' as i0;
 
 import 'package:example/db/models/client.dart' as i1;
 
-import 'package:example/db/models/category.dart' as i2;
+import 'package:example/db/models/cat.dart' as i2;
 
-import 'package:example/db/models/cat.dart' as i3;
+import 'package:example/db/models/bill.dart' as i3;
 
-import 'package:example/db/models/bill.dart' as i4;
+import 'package:example/authentication_model.dart' as i4;
 
 import 'package:example/authentication_model.dart' as i5;
-
-import 'package:example/authentication_model.dart' as i6;
 
 import 'dart:io';
 
@@ -35,21 +33,19 @@ final List<String> _schemas = [
   'CREATE TABLE IF NOT EXISTS Migrations(key TEXT PRIMARY KEY)',
   i0.ProductQuery.createTable,
   i1.ClientQuery.createTable,
-  i2.CategoryQuery.createTable,
-  i3.CatQuery.createTable,
-  i4.BillQuery.createTable,
-  i5.BillMQuery.createTable,
-  i6.BillDetailQuery.createTable
+  i2.CatQuery.createTable,
+  i3.BillQuery.createTable,
+  i4.BillMQuery.createTable,
+  i5.BillDetailQuery.createTable
 ];
 
 final List<Map<int, List<String>>> _alters = [
   i0.ProductQuery.alter,
   i1.ClientQuery.alter,
-  i2.CategoryQuery.alter,
-  i3.CatQuery.alter,
-  i4.BillQuery.alter,
-  i5.BillMQuery.alter,
-  i6.BillDetailQuery.alter
+  i2.CatQuery.alter,
+  i3.BillQuery.alter,
+  i4.BillMQuery.alter,
+  i5.BillDetailQuery.alter
 ];
 
 Future<Database> $configSql([
@@ -129,9 +125,8 @@ Future<void> $clearDatabase(Database db) => Future.wait([
       db.execute('DELETE * FROM Migrations'),
       i0.ProductQuery.deleteAll(db),
       i1.ClientQuery.deleteAll(db),
-      i2.CategoryQuery.deleteAll(db),
-      i3.CatQuery.deleteAll(db),
-      i4.BillQuery.deleteAll(db),
-      i5.BillMQuery.deleteAll(db),
-      i6.BillDetailQuery.deleteAll(db),
+      i2.CatQuery.deleteAll(db),
+      i3.BillQuery.deleteAll(db),
+      i4.BillMQuery.deleteAll(db),
+      i5.BillDetailQuery.deleteAll(db),
     ]);

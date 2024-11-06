@@ -20,20 +20,221 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
     if (_parsedElementCheckSet.contains(element)) return null;
     _parsedElementCheckSet.add(element);
 
-    final entity = AEntity.of(element)!;
+    final entity = AEntity.of(
+        element,
+        APropertyArgs(
+          parentClassNames: [],
+          fieldNames: [],
+          step: 0,
+        ),
+        [])!;
 
-    final classSetBuilder = Class((c) => c
-      ..name = entity.setClassName
-      ..types.add(refer('T'))
-      ..extend = refer('WhereModel<T>')
-      ..fields.addAll(entity.setFields)
-      ..constructors.add(
-        Constructor((c) => c
-          ..constant = true
-          ..initializers.add(Code('super(field: \'\$model.\$name\')'))
-          // ..body = Code('super(field: \'\$model.\$name\')')
-          ..optionalParameters.addAll(entity.setOptionalArgs)),
-      ));
+    final classSetBuilder = Class(
+      (c) => c
+        ..name = entity.setClassName
+        ..types.addAll([refer('T'), refer('M')])
+        ..extend = refer('WhereModel<T,M>')
+        ..constructors.add(
+          Constructor(
+            (c) => c
+              ..constant = true
+              ..initializers.add(
+                Code('super(field: \'\${self}_\$model.\$name\')'),
+              )
+              ..optionalParameters.addAll(entity.setOptionalArgs),
+          ),
+        ),
+    );
+    final classSetBuilderExternal2 = Class(
+      (c) => c
+        ..name = entity.setClassNameExternal2
+        ..constructors.add(
+          Constructor((c) => c..constant = true),
+        ),
+    );
+    final classSetBuilderExternal = Class(
+      (c) => c
+        ..name = entity.setClassNameExternal
+        ..types.addAll([refer('T')])
+        ..fields.addAll(entity.setFieldsExternal)
+        ..methods.addAll([
+          Method(
+            (m) => m
+              ..name = 'leftJoin'
+              ..returns = refer('String')
+              ..lambda = true
+              ..requiredParameters.add(Parameter(
+                (p) => p
+                  ..name = 'parentModel'
+                  ..type = refer('String'),
+              ))
+              ..optionalParameters.add(Parameter(
+                (p) => p
+                  ..name = 'step'
+                  ..type = refer('int')
+                  ..defaultTo = Code('0'),
+              ))
+              ..body = Code(
+                  """[if (self.isNotEmpty)'''LEFT JOIN ${entity.className} \${self}${entity.className.toSnakeCase()} ON ${[
+                for (final item in entity.keysNew)
+                  '\${self}${entity.className.toSnakeCase()}.${item.$2.args.fieldNames.join('_')} = \$parentModel.\${self2}${item.$2.args.fieldNames.join('_')}'
+              ].join(' AND ')}''',
+              ${[
+                for (final item in entity.foreignKeys)
+                  [
+                    if (item.entityParent!.className == entity.className)
+                      'if(step < 1)',
+                    '\$\$${item.nameDefault}.leftJoin(parentModel, step+${item.entityParent!.className == entity.className ? 1 : 0})',
+                  ].join('\n')
+              ].join(',\n')}
+              ].join('\\n')
+              """),
+          ),
+          for (final item in entity.properties()) ...[
+            if (item.args.parentClassNames.length == 2)
+              Method(
+                (f) => f
+                  ..name = '\$\$${item.args.fieldNames.first}'
+                  ..returns =
+                      refer('${item.args.parentClassNames.last}SetArgs<T>')
+                  ..docs.addAll([
+                    '// ${item.args}',
+                    if (item is AColumn &&
+                        item.alters.any((e) => e.type == AlterTypeGen.drop))
+                      '@Deprecated(\'no such column\')'
+                  ])
+                  ..type = MethodType.getter
+                  ..lambda = true
+                  ..body = Code(
+                    '''${item.args.parentClassNames.last}SetArgs<T>(
+                  '\${self}${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_',
+                  '${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_'
+                  )''',
+                  ),
+              ),
+            Method(
+              (f) => f
+                ..name = '\$${item.args.fieldNames.join('_').toCamelCase()}'
+                ..type = MethodType.getter
+                ..returns =
+                    refer('${entity.setClassName}<${item.typeSelect},T>')
+                ..docs.addAll([
+                  if (item is AColumn &&
+                      item.alters.any((e) => e.type == AlterTypeGen.drop))
+                    '@Deprecated(\'no such column\')'
+                ])
+                ..lambda = true
+                ..body = Code('''${entity.setClassName}<${item.typeSelect},T>(
+              name: '${item.args.fieldNames.join('_').toSnakeCase()}',
+              nameCast: '${[
+                  item.args.parentClassNames.first,
+                  ...item.args.fieldNames
+                ].join('_').toSnakeCase()}',
+              model: '${item.args.parentClassNames.first.toSnakeCase()}',
+              self: this.self,
+              )'''),
+            ),
+          ],
+          for (final item in entity.foreignKeys)
+            if (!entity.primaryKeys.any(
+              (e) => e.nameDefault == item.nameDefault,
+            )) ...[
+              Method(
+                (f) => f
+                  ..name = '\$\$${item.args.fieldNames.first}'
+                  ..returns = refer('${item.entityParent!.className}SetArgs<T>')
+                  ..docs.addAll([
+                    if (item is AColumn &&
+                        item.alters.any((e) => e.type == AlterTypeGen.drop))
+                      '@Deprecated(\'no such column\')'
+                  ])
+                  ..type = MethodType.getter
+                  ..lambda = true
+                  ..body = Code(
+                    '''${item.entityParent!.className}SetArgs<T>(
+                  '\${self}${item.args.fieldNames.first.toSnakeCase()}_',
+                  '${item.args.fieldNames.first.toSnakeCase()}_'
+                  )''',
+                  ),
+              ),
+            ]
+        ])
+        ..fields.addAll([
+          for (final item in entity.properties()) ...[
+            if (item.args.parentClassNames.length == 2)
+              Field(
+                (f) => f
+                  ..name = '\$${item.args.fieldNames.first}'
+                  ..type = refer(
+                      '${item.args.parentClassNames.last}SetArgs<${entity.setClassNameExternal2}>')
+                  ..docs.addAll([
+                    '// ${item.args}',
+                    if (item is AColumn &&
+                        item.alters.any((e) => e.type == AlterTypeGen.drop))
+                      '@Deprecated(\'no such column\')'
+                  ])
+                  ..static = true
+                  ..modifier = FieldModifier.constant
+                  ..assignment = Code(
+                      '''${item.args.parentClassNames.last}SetArgs<${entity.setClassNameExternal2}>(
+              '${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_',
+              '${item.args.fieldNames.sublist(0, item.args.fieldNames.length - 1).join('_').toSnakeCase()}_'
+              )'''),
+              ),
+            Field(
+              (f) => f
+                ..name = item.args.fieldNames.join('_').toCamelCase()
+                ..type = refer(
+                    '${entity.setClassName}<${item.typeSelect},${entity.setClassNameExternal2}>')
+                ..docs.addAll([
+                  if (item is AColumn &&
+                      item.alters.any((e) => e.type == AlterTypeGen.drop))
+                    '@Deprecated(\'no such column\')'
+                ])
+                ..assignment = Code(
+                    '''${entity.setClassName}<${item.typeSelect},${entity.setClassNameExternal2}>(
+              name: '${item.args.fieldNames.join('_').toSnakeCase()}',
+              nameCast: '${[
+                  item.args.parentClassNames.first,
+                  ...item.args.fieldNames
+                ].join('_').toSnakeCase()}',
+              model: '${item.args.parentClassNames.first.toSnakeCase()}',
+              )''')
+                ..modifier = FieldModifier.constant
+                ..static = true,
+            ),
+          ],
+          for (final item in entity.foreignKeys)
+            if (!entity.primaryKeys.any(
+              (e) => e.nameDefault == item.nameDefault,
+            )) ...[
+              Field(
+                (f) => f
+                  ..name = '\$${item.args.fieldNames.first}'
+                  ..type = refer(
+                      '${item.entityParent!.className}SetArgs<${item.entityParent!.setClassNameExternal2}>')
+                  ..docs.addAll([
+                    if (item is AColumn &&
+                        item.alters.any((e) => e.type == AlterTypeGen.drop))
+                      '@Deprecated(\'no such column\')'
+                  ])
+                  ..modifier = FieldModifier.constant
+                  ..static = true
+                  ..assignment = Code(
+                    '''${item.entityParent!.className}SetArgs<${item.entityParent!.setClassNameExternal2}>(
+                  '${item.args.fieldNames.first.toSnakeCase()}_',
+                  '${item.args.fieldNames.first.toSnakeCase()}_'
+                  )''',
+                  ),
+              ),
+            ],
+        ])
+        ..constructors.add(
+          Constructor((c) => c
+            ..constant = true
+            ..requiredParameters.addAll(entity.setOptionalArgsExternal)),
+        ),
+    );
 
     final extensionBuilder = ExtensionBuilder()
       ..name = entity.extensionName
@@ -51,40 +252,21 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           (f) => f
             ..name = 'alter'
             ..type = refer('Map<int,List<String>>')
+            ..docs.add('// TODO(hodoan): check')
             ..assignment = Code("""${entity.rawAlterTable}""")
             ..modifier = FieldModifier.constant
             ..static = true,
         ),
-        for (final item in entity.aPsAll)
-          Field(
-            (f) => f
-              ..name = item.name
-              ..type = refer('${entity.setClassName}<${item.p.typeSelect}>')
-              ..docs.addAll([
-                if (item.p is AColumn &&
-                    item.p.alters.any((e) => e.type == AlterTypeGen.drop))
-                  '@Deprecated(\'no such column\')'
-              ])
-              ..assignment = Code('''${entity.setClassName}(
-              name: '${item.p.nameDefault.toSnakeCase()}',
-              nameCast: '${item.p.nameFromDB}',
-              model: '${[
-                if (item.field != null) item.field,
-                item.p.className.$rm
-              ].join('_').toSnakeCase()}',
-              )''')
-              ..modifier = FieldModifier.constant
-              ..static = true,
-          ),
         Field(
           (f) => f
             ..name = entity.defaultSelectClass
-            ..type = refer('Set<${entity.setClassName}>')
+            ..type = refer(
+                'Set<WhereModel<dynamic, ${entity.setClassNameExternal2}>>')
             ..assignment = Code('''{${[
-              for (final e in entity.aPsAll)
-                if (!(e.p is AColumn &&
-                    e.p.alters.any((e) => e.type == AlterTypeGen.drop)))
-                  '${entity.extensionName}.${e.name}'
+              for (final e in entity.properties())
+                if (!(e is AColumn &&
+                    e.alters.any((e) => e.type == AlterTypeGen.drop)))
+                  '${entity.setClassNameExternal}.${e.args.fieldNames.join('_').toCamelCase()}',
             ].join(',')},}''')
             ..static = true,
         ),
@@ -96,12 +278,11 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ..lambda = true
             ..static = true
             ..body = Code('''((select??{}).isEmpty ? \$default : select!)
-            .map((e)=>'\$childName\${e.model}.\${e.name} as \${e.nameCast}')
+            .map((e)=>'\${'\${e.self}\${e.model}'.replaceFirst(RegExp('^_'), '')}.\${e.name} as \${e.self}\${e.nameCast}')
             .join(',')''')
             ..requiredParameters.addAll([
               entity.selectArgs,
             ])
-            ..optionalParameters.add(entity.selectChildArgs)
             ..returns = refer('String'),
         ),
         Method((m) => m
@@ -143,6 +324,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
         Method((m) => m
           ..name = 'insert'
           ..modifier = MethodModifier.async
+          ..docs.add('// TODO(hodoan): check primary keys auto')
           ..body = Code(entity.rawInsert())
           ..requiredParameters.addAll([entity.databaseArgs])
           ..returns = refer('Future<int>')),
@@ -192,7 +374,10 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..static = true
           ..body = Code('${entity.classType}(${entity.rawFromDB})')
           ..requiredParameters.addAll([entity.fromArgs, entity.fromArgsList])
-          ..optionalParameters.add(entity.selectChildArgs)
+          ..optionalParameters.addAll([
+            entity.selectChildArgs,
+            entity.selectChildStepArgs,
+          ])
           ..returns = refer(entity.classType)),
         Method((m) => m
           ..name = '\$toDB'
@@ -203,8 +388,11 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
 
     final emitter = DartEmitter(useNullSafetySyntax: true);
     return DartFormatter().format([
+      '// ignore_for_file: library_private_types_in_public_api',
       extensionBuilder.build().accept(emitter),
       classSetBuilder.accept(emitter),
+      classSetBuilderExternal.accept(emitter),
+      classSetBuilderExternal2.accept(emitter),
     ].join('\n\n'));
   }
 }

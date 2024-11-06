@@ -6,102 +6,45 @@ part of 'bill.dart';
 // SqfliteModelGenerator
 // **************************************************************************
 
+// ignore_for_file: library_private_types_in_public_api
+
 extension BillQuery on Bill {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Bill(
-		time INTEGER,
 			product_id INTEGER,
 			client_id INTEGER,
-			PRIMARY KEY(product_id, client_id),
+			client_product_id INTEGER,
+			parent_product_id INTEGER,
+			parent_client_id INTEGER,
+			parent_client_product_id INTEGER,
+			client_parent_id INTEGER,
+			client_parent_product_id INTEGER,
+			time INTEGER,
+			PRIMARY KEY (product_id,client_id,client_product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY (client_id) REFERENCES Client (id) ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY (client_id,client_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (parent_product_id,parent_client_id,parent_client_product_id) REFERENCES Bill (product_id,client_id,client_product_id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY (client_parent_id,client_parent_product_id) REFERENCES Client (id,product_id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
+// TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-  static const $BillSetArgs<int> productId = $BillSetArgs(
-    name: 'id',
-    nameCast: 'product_id',
-    model: 'product_product',
-  );
-
-  static const $BillSetArgs<String> productLastName = $BillSetArgs(
-    name: 'last_name',
-    nameCast: 'product_last_name',
-    model: 'product_product',
-  );
-
-  static const $BillSetArgs<String> productFirstName = $BillSetArgs(
-    name: 'first_name',
-    nameCast: 'product_first_name',
-    model: 'product_product',
-  );
-
-  static const $BillSetArgs<bool> productBlocked = $BillSetArgs(
-    name: 'blocked',
-    nameCast: 'product_blocked',
-    model: 'product_product',
-  );
-
-  static const $BillSetArgs<int> clientId = $BillSetArgs(
-    name: 'id',
-    nameCast: 'client_id',
-    model: 'client_client',
-  );
-
-  static const $BillSetArgs<String> clientProduct = $BillSetArgs(
-    name: 'product',
-    nameCast: 'client_product_id',
-    model: 'client_client',
-  );
-
-  static const $BillSetArgs<String> clientFirstName = $BillSetArgs(
-    name: 'first_name',
-    nameCast: 'client_first_name',
-    model: 'client_client',
-  );
-
-  static const $BillSetArgs<String> clientLastName = $BillSetArgs(
-    name: 'last_name',
-    nameCast: 'client_last_name',
-    model: 'client_client',
-  );
-
-  static const $BillSetArgs<bool> clientBlocked = $BillSetArgs(
-    name: 'blocked',
-    nameCast: 'client_blocked',
-    model: 'client_client',
-  );
-
-  static const $BillSetArgs<String> time = $BillSetArgs(
-    name: 'time',
-    nameCast: 'bill_time',
-    model: 'bill',
-  );
-
-  static Set<$BillSetArgs> $default = {
-    BillQuery.productId,
-    BillQuery.productLastName,
-    BillQuery.productFirstName,
-    BillQuery.productBlocked,
-    BillQuery.clientId,
-    BillQuery.clientProduct,
-    BillQuery.clientFirstName,
-    BillQuery.clientLastName,
-    BillQuery.clientBlocked,
-    BillQuery.time,
+  static Set<WhereModel<dynamic, BillSet>> $default = {
+    BillSetArgs.productId,
+    BillSetArgs.clientId,
+    BillSetArgs.clientProductId,
+    BillSetArgs.time,
   };
 
-  static String $createSelect(
-    Set<$BillSetArgs>? select, [
-    String childName = '',
-  ]) =>
+  static String $createSelect(Set<WhereModel<dynamic, BillSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
-          .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
+          .map((e) =>
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
   static Future<List<Bill>> getAll(
     Database database, {
-    Set<$BillSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, BillSet>>? select,
+    Set<WhereResult<dynamic, BillSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$BillSetArgs>>? orderBy,
     int? limit,
@@ -121,10 +64,9 @@ extension BillQuery on Bill {
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Bill bill
- LEFT JOIN Product product ON product.id = bill.product_id
- LEFT JOIN Client client ON client.id = bill.client_id
+${const BillSetArgs('', '').leftJoin('bill')}
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -133,7 +75,11 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[BillQuery.productId.nameCast]))
+        .groupBy(((m) => [
+              m[BillSetArgs.productId.nameCast],
+              m[BillSetArgs.clientId.nameCast],
+              m[BillSetArgs.clientProductId.nameCast]
+            ]))
         .values
         .map((e) => Bill.fromDB(e.first, e))
         .toList();
@@ -141,8 +87,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
 
   static Future<List<Bill>> top(
     Database database, {
-    Set<$BillSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, BillSet>>? select,
+    Set<WhereResult<dynamic, BillSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$BillSetArgs>>? orderBy,
     required int top,
@@ -162,17 +108,32 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
+// TODO(hodoan): check primary keys auto
   Future<int> insert(Database database) async {
-    final $productIdProduct = await product?.insert(database);
-    final $clientIdClient = await client?.insert(database);
+    await product?.insert(database);
+    await client?.insert(database);
+    await parent?.insert(database);
+    await clientParent?.insert(database);
     final $id =
         await database.rawInsert('''INSERT OR REPLACE INTO Bill (product_id,
 client_id,
-time) 
-       VALUES(?, ?, ?)''', [
-      $productIdProduct,
-      $clientIdClient,
-      this.time,
+client_product_id,
+time,
+parent_product_id,
+parent_client_id,
+parent_client_product_id,
+client_parent_id,
+client_parent_product_id) 
+       VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''', [
+      product?.id,
+      client?.id,
+      client?.product?.id,
+      time?.millisecondsSinceEpoch,
+      parent?.product?.id,
+      parent?.client?.id,
+      parent?.client?.product?.id,
+      clientParent?.id,
+      clientParent?.product?.id,
     ]);
     return $id;
   }
@@ -180,42 +141,54 @@ time)
   Future<int> update(Database database) async {
     await product?.update(database);
     await client?.update(database);
+    await parent?.update(database);
+    await clientParent?.update(database);
     return await database.update('Bill', toDB(),
-        where: "product_id = ? AND client_id = ?",
-        whereArgs: [product?.id, client?.id]);
+        where: "product_id = ? AND client_id = ? AND client_product_id = ?",
+        whereArgs: [product?.id, client?.id, client?.product?.id]);
   }
 
   static Future<Bill?> getById(
     Database database,
     int? productId,
-    int? clientId, {
-    Set<$BillSetArgs>? select,
+    int? clientId,
+    int? clientProductId, {
+    Set<WhereModel<dynamic, BillSet>>? select,
   }) async {
     final res = (await database.rawQuery('''
 SELECT 
 ${$createSelect(select)}
  FROM Bill bill
- LEFT JOIN Product product ON product.id = bill.product_id
- LEFT JOIN Client client ON client.id = bill.client_id
-WHERE bill.product_id = ? AND bill.client_id = ?
-''', [productId, clientId]) as List<Map>);
-    return res.isNotEmpty ? Bill.fromDB(res.first, res) : null;
+${const BillSetArgs('', '').leftJoin('bill')}
+WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
+''', [productId, clientId, clientProductId]) as List<Map>);
+    if (res.isEmpty) return null;
+    final mapList = res
+        .groupBy((e) => [
+              e[BillSetArgs.productId.nameCast],
+              e[BillSetArgs.clientId.nameCast],
+              e[BillSetArgs.clientProductId.nameCast]
+            ])
+        .values
+        .first;
+    return Bill.fromDB(mapList.first, mapList);
   }
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ?''',
-        [product?.id, client?.id]);
+        '''DELETE * FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
+        [product?.id, client?.id, client?.product?.id]);
   }
 
   static Future<void> deleteById(
     Database database,
     int? productId,
     int? clientId,
+    int? clientProductId,
   ) async {
     await database.rawQuery(
-        '''DELETE FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ?''',
-        [productId, clientId]);
+        '''DELETE * FROM Bill bill WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?''',
+        [productId, clientId, clientProductId]);
   }
 
   static Future<void> deleteAll(Database database) async {
@@ -226,31 +199,144 @@ WHERE bill.product_id = ? AND bill.client_id = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       Bill(
-        product: Product.fromDB(json, []),
-        client: Client.fromDB(json, []),
-        time: DateTime.fromMillisecondsSinceEpoch(
-          json['${childName}bill_time'] as int? ?? -1,
-        ),
-      );
+          time: DateTime.fromMillisecondsSinceEpoch(
+            json['${childName}bill_time'] as int? ?? -1,
+          ),
+          product: Product.fromDB(json, lst, 'product_'),
+          client: Client.fromDB(json, lst, 'client_'),
+          parent: childStep > 0 ? null : Bill.fromDB(json, lst, 'parent_', 1),
+          clientParent: Client.fromDB(json, lst, 'client_parent_'));
   Map<String, dynamic> $toDB() => {
         'product_id': product?.id,
         'client_id': client?.id,
-        'time': this.time?.millisecondsSinceEpoch,
+        'client_product_id': client?.product?.id,
+        'time': time?.millisecondsSinceEpoch,
+        'parent_product_id': parent?.product?.id,
+        'parent_client_id': parent?.client?.id,
+        'parent_client_product_id': parent?.client?.product?.id,
+        'client_parent_id': clientParent?.id,
+        'client_parent_product_id': clientParent?.product?.id
       };
 }
 
-class $BillSetArgs<T> extends WhereModel<T> {
+class $BillSetArgs<T, M> extends WhereModel<T, M> {
   const $BillSetArgs({
-    required this.name,
-    required this.nameCast,
-    required this.model,
-  }) : super(field: '$model.$name');
+    super.self = '',
+    required super.name,
+    required super.nameCast,
+    required super.model,
+  }) : super(field: '${self}_$model.$name');
+}
 
-  final String name;
+class BillSetArgs<T> {
+  const BillSetArgs(
+    this.self,
+    this.self2,
+  );
 
-  final String model;
+  final String self;
 
-  final String nameCast;
+  final String self2;
+
+// APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2)
+  static const ProductSetArgs<BillSet> $product =
+      ProductSetArgs<BillSet>('product_', 'product_');
+
+  static const $BillSetArgs<int, BillSet> productId =
+      $BillSetArgs<int, BillSet>(
+    name: 'product_id',
+    nameCast: 'bill_product_id',
+    model: 'bill',
+  );
+
+// APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2)
+  static const ClientSetArgs<BillSet> $client =
+      ClientSetArgs<BillSet>('client_', 'client_');
+
+  static const $BillSetArgs<int, BillSet> clientId = $BillSetArgs<int, BillSet>(
+    name: 'client_id',
+    nameCast: 'bill_client_id',
+    model: 'bill',
+  );
+
+  static const $BillSetArgs<int, BillSet> clientProductId =
+      $BillSetArgs<int, BillSet>(
+    name: 'client_product_id',
+    nameCast: 'bill_client_product_id',
+    model: 'bill',
+  );
+
+  static const $BillSetArgs<String, BillSet> time =
+      $BillSetArgs<String, BillSet>(
+    name: 'time',
+    nameCast: 'bill_time',
+    model: 'bill',
+  );
+
+  static const BillSetArgs<BillSet> $parent =
+      BillSetArgs<BillSet>('parent_', 'parent_');
+
+  static const ClientSetArgs<ClientSet> $clientParent =
+      ClientSetArgs<ClientSet>('client_parent_', 'client_parent_');
+
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN Bill ${self}bill ON ${self}bill.product_id = $parentModel.${self2}product_id AND ${self}bill.client_id = $parentModel.${self2}client_id AND ${self}bill.client_product_id = $parentModel.${self2}client_product_id''',
+        $$product.leftJoin(parentModel, step + 0),
+        $$client.leftJoin(parentModel, step + 0),
+        if (step < 1) $$parent.leftJoin(parentModel, step + 1),
+        $$clientParent.leftJoin(parentModel, step + 0)
+      ].join('\n');
+
+// APropertyArgs(parentClassName: [Bill, Product], fieldNames: [product, id], step: 2)
+  ProductSetArgs<T> get $$product =>
+      ProductSetArgs<T>('${self}product_', 'product_');
+
+  $BillSetArgs<int, T> get $productId => $BillSetArgs<int, T>(
+        name: 'product_id',
+        nameCast: 'bill_product_id',
+        model: 'bill',
+        self: this.self,
+      );
+
+// APropertyArgs(parentClassName: [Bill, Client], fieldNames: [client, id], step: 2)
+  ClientSetArgs<T> get $$client =>
+      ClientSetArgs<T>('${self}client_', 'client_');
+
+  $BillSetArgs<int, T> get $clientId => $BillSetArgs<int, T>(
+        name: 'client_id',
+        nameCast: 'bill_client_id',
+        model: 'bill',
+        self: this.self,
+      );
+
+  $BillSetArgs<int, T> get $clientProductId => $BillSetArgs<int, T>(
+        name: 'client_product_id',
+        nameCast: 'bill_client_product_id',
+        model: 'bill',
+        self: this.self,
+      );
+
+  $BillSetArgs<String, T> get $time => $BillSetArgs<String, T>(
+        name: 'time',
+        nameCast: 'bill_time',
+        model: 'bill',
+        self: this.self,
+      );
+
+  BillSetArgs<T> get $$parent => BillSetArgs<T>('${self}parent_', 'parent_');
+
+  ClientSetArgs<T> get $$clientParent =>
+      ClientSetArgs<T>('${self}client_parent_', 'client_parent_');
+}
+
+class BillSet {
+  const BillSet();
 }

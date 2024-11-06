@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:sqflite_generator/src/annotation_builder/property.dart';
 
 import '../annotation_builder/entity.dart';
 
@@ -60,7 +61,16 @@ extension DartTypeX on DartType {
       return TypeSql.enumerated;
     }
     if (element != null && element is ClassElement) {
-      final parent = AEntity.of(element as ClassElement, step + 1);
+      final parent = AEntity.of(
+        element as ClassElement,
+        // TODO(hodoan): fix this
+        APropertyArgs(
+          parentClassNames: [],
+          fieldNames: [],
+          step: step + 1,
+        ),
+        [],
+      );
       return parent?.primaryKeys.first.dartType.typeSql(step + 1);
     }
     return null;

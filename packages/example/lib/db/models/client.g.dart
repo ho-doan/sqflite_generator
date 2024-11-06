@@ -6,88 +6,39 @@ part of 'client.dart';
 // SqfliteModelGenerator
 // **************************************************************************
 
+// ignore_for_file: library_private_types_in_public_api
+
 extension ClientQuery on Client {
   static const String createTable = '''CREATE TABLE IF NOT EXISTS Client(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+			id INTEGER,
+			product_id INTEGER,
 			first_name TEXT,
 			last_name TEXT,
 			blocked BIT NOT NULL,
-			product_id INTEGER NOT NULL,
+			PRIMARY KEY (id,product_id),
 			FOREIGN KEY (product_id) REFERENCES Product (id) ON UPDATE NO ACTION ON DELETE NO ACTION
 	)''';
 
+// TODO(hodoan): check
   static const Map<int, List<String>> alter = {};
 
-  static const $ClientSetArgs<int> id = $ClientSetArgs(
-    name: 'id',
-    nameCast: 'client_id',
-    model: 'client',
-  );
-
-  static const $ClientSetArgs<int> productId = $ClientSetArgs(
-    name: 'id',
-    nameCast: 'product_id',
-    model: 'product_product',
-  );
-
-  static const $ClientSetArgs<String> productLastName = $ClientSetArgs(
-    name: 'last_name',
-    nameCast: 'product_last_name',
-    model: 'product_product',
-  );
-
-  static const $ClientSetArgs<String> productFirstName = $ClientSetArgs(
-    name: 'first_name',
-    nameCast: 'product_first_name',
-    model: 'product_product',
-  );
-
-  static const $ClientSetArgs<bool> productBlocked = $ClientSetArgs(
-    name: 'blocked',
-    nameCast: 'product_blocked',
-    model: 'product_product',
-  );
-
-  static const $ClientSetArgs<String> firstName = $ClientSetArgs(
-    name: 'first_name',
-    nameCast: 'client_first_name',
-    model: 'client',
-  );
-
-  static const $ClientSetArgs<String> lastName = $ClientSetArgs(
-    name: 'last_name',
-    nameCast: 'client_last_name',
-    model: 'client',
-  );
-
-  static const $ClientSetArgs<bool> blocked = $ClientSetArgs(
-    name: 'blocked',
-    nameCast: 'client_blocked',
-    model: 'client',
-  );
-
-  static Set<$ClientSetArgs> $default = {
-    ClientQuery.id,
-    ClientQuery.productId,
-    ClientQuery.productLastName,
-    ClientQuery.productFirstName,
-    ClientQuery.productBlocked,
-    ClientQuery.firstName,
-    ClientQuery.lastName,
-    ClientQuery.blocked,
+  static Set<WhereModel<dynamic, ClientSet>> $default = {
+    ClientSetArgs.id,
+    ClientSetArgs.productId,
+    ClientSetArgs.firstName,
+    ClientSetArgs.lastName,
+    ClientSetArgs.blocked,
   };
 
-  static String $createSelect(
-    Set<$ClientSetArgs>? select, [
-    String childName = '',
-  ]) =>
+  static String $createSelect(Set<WhereModel<dynamic, ClientSet>>? select) =>
       ((select ?? {}).isEmpty ? $default : select!)
-          .map((e) => '$childName${e.model}.${e.name} as ${e.nameCast}')
+          .map((e) =>
+              '${'${e.self}${e.model}'.replaceFirst(RegExp('^_'), '')}.${e.name} as ${e.self}${e.nameCast}')
           .join(',');
   static Future<List<Client>> getAll(
     Database database, {
-    Set<$ClientSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, ClientSet>>? select,
+    Set<WhereResult<dynamic, ClientSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$ClientSetArgs>>? orderBy,
     int? limit,
@@ -107,9 +58,9 @@ extension ClientQuery on Client {
     }
 
     final sql = '''SELECT ${$createSelect(select)} FROM Client client
- LEFT JOIN Product product ON product.id = client.product_id
+${const ClientSetArgs('', '').leftJoin('client')}
 ${whereStr.isNotEmpty ? whereStr : ''}
-${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field} ${e.type}').join(',')}' : ''}
+${(orderBy ?? {}).isNotEmpty ? 'ORDER BY ${(orderBy ?? {}).map((e) => '${e.field.field.replaceFirst(RegExp('^_'), '')} ${e.type}').join(',')}' : ''}
 ${limit != null ? 'LIMIT $limit' : ''}
 ${offset != null ? 'OFFSET $offset' : ''}
 ''';
@@ -118,7 +69,10 @@ ${offset != null ? 'OFFSET $offset' : ''}
     }
     final mapList = (await database.rawQuery(sql) as List<Map>);
     return mapList
-        .groupBy(((m) => m[ClientQuery.id.nameCast]))
+        .groupBy(((m) => [
+              m[ClientSetArgs.id.nameCast],
+              m[ClientSetArgs.productId.nameCast]
+            ]))
         .values
         .map((e) => Client.fromDB(e.first, e))
         .toList();
@@ -126,8 +80,8 @@ ${offset != null ? 'OFFSET $offset' : ''}
 
   static Future<List<Client>> top(
     Database database, {
-    Set<$ClientSetArgs>? select,
-    Set<WhereResult>? where,
+    Set<WhereModel<dynamic, ClientSet>>? select,
+    Set<WhereResult<dynamic, ClientSet>>? where,
     List<Set<WhereResult>>? whereOr,
     Set<OrderBy<$ClientSetArgs>>? orderBy,
     required int top,
@@ -147,55 +101,66 @@ ${offset != null ? 'OFFSET $offset' : ''}
     return mapList.first['ns_count'] as int;
   }
 
+// TODO(hodoan): check primary keys auto
   Future<int> insert(Database database) async {
-    final $productIdProduct = await product.insert(database);
+    await product.insert(database);
     final $id = await database.rawInsert('''INSERT OR REPLACE INTO Client (id,
 product_id,
 first_name,
 last_name,
 blocked) 
        VALUES(?, ?, ?, ?, ?)''', [
-      this.id,
-      $productIdProduct,
-      this.firstName,
-      this.lastName,
-      this.blocked,
+      id,
+      product?.id,
+      firstName,
+      lastName,
+      blocked,
     ]);
     return $id;
   }
 
   Future<int> update(Database database) async {
     await product.update(database);
-    return await database
-        .update('Client', toDB(), where: "id = ?", whereArgs: [this.id]);
+    return await database.update('Client', toDB(),
+        where: "id = ? AND product_id = ?", whereArgs: [id, product?.id]);
   }
 
   static Future<Client?> getById(
     Database database,
-    int? id, {
-    Set<$ClientSetArgs>? select,
+    int? id,
+    int? productId, {
+    Set<WhereModel<dynamic, ClientSet>>? select,
   }) async {
     final res = (await database.rawQuery('''
 SELECT 
 ${$createSelect(select)}
  FROM Client client
- LEFT JOIN Product product ON product.id = client.product_id
-WHERE client.id = ?
-''', [id]) as List<Map>);
-    return res.isNotEmpty ? Client.fromDB(res.first, res) : null;
+${const ClientSetArgs('', '').leftJoin('client')}
+WHERE client.id = ? AND client.product_id = ?
+''', [id, productId]) as List<Map>);
+    if (res.isEmpty) return null;
+    final mapList = res
+        .groupBy((e) =>
+            [e[ClientSetArgs.id.nameCast], e[ClientSetArgs.productId.nameCast]])
+        .values
+        .first;
+    return Client.fromDB(mapList.first, mapList);
   }
 
   Future<void> delete(Database database) async {
     await database.rawQuery(
-        '''DELETE FROM Client client WHERE client.id = ?''', [this.id]);
+        '''DELETE * FROM Client client WHERE client.id = ? AND client.product_id = ?''',
+        [id, product?.id]);
   }
 
   static Future<void> deleteById(
     Database database,
     int? id,
+    int? productId,
   ) async {
-    await database
-        .rawQuery('''DELETE FROM Client client WHERE client.id = ?''', [id]);
+    await database.rawQuery(
+        '''DELETE * FROM Client client WHERE client.id = ? AND client.product_id = ?''',
+        [id, productId]);
   }
 
   static Future<void> deleteAll(Database database) async {
@@ -206,33 +171,131 @@ WHERE client.id = ?
     Map json,
     List<Map> lst, [
     String childName = '',
+    int childStep = 0,
   ]) =>
       Client(
-        id: json['${childName}client_id'] as int?,
-        product: Product.fromDB(json, []),
-        firstName: json['${childName}client_first_name'] as String?,
-        lastName: json['${childName}client_last_name'] as String?,
-        blocked: (json['client_blocked'] as int?) == 1,
-      );
+          id: json['${childName}client_id'] as int?,
+          firstName: json['${childName}client_first_name'] as String?,
+          lastName: json['${childName}client_last_name'] as String?,
+          blocked: (json['${childName}client_blocked'] as int?) == 1,
+          product: Product.fromDB(json, lst, 'product_'));
   Map<String, dynamic> $toDB() => {
-        'id': this.id,
-        'product_id': product.id,
-        'first_name': this.firstName,
-        'last_name': this.lastName,
-        'blocked': (this.blocked ?? false) ? 1 : 0,
+        'id': id,
+        'product_id': product?.id,
+        'first_name': firstName,
+        'last_name': lastName,
+        'blocked': (blocked ?? false) ? 1 : 0
       };
 }
 
-class $ClientSetArgs<T> extends WhereModel<T> {
+class $ClientSetArgs<T, M> extends WhereModel<T, M> {
   const $ClientSetArgs({
-    required this.name,
-    required this.nameCast,
-    required this.model,
-  }) : super(field: '$model.$name');
+    super.self = '',
+    required super.name,
+    required super.nameCast,
+    required super.model,
+  }) : super(field: '${self}_$model.$name');
+}
 
-  final String name;
+class ClientSetArgs<T> {
+  const ClientSetArgs(
+    this.self,
+    this.self2,
+  );
 
-  final String model;
+  final String self;
 
-  final String nameCast;
+  final String self2;
+
+  static const $ClientSetArgs<int, ClientSet> id =
+      $ClientSetArgs<int, ClientSet>(
+    name: 'id',
+    nameCast: 'client_id',
+    model: 'client',
+  );
+
+// APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2)
+  static const ProductSetArgs<ClientSet> $product =
+      ProductSetArgs<ClientSet>('product_', 'product_');
+
+  static const $ClientSetArgs<int, ClientSet> productId =
+      $ClientSetArgs<int, ClientSet>(
+    name: 'product_id',
+    nameCast: 'client_product_id',
+    model: 'client',
+  );
+
+  static const $ClientSetArgs<String, ClientSet> firstName =
+      $ClientSetArgs<String, ClientSet>(
+    name: 'first_name',
+    nameCast: 'client_first_name',
+    model: 'client',
+  );
+
+  static const $ClientSetArgs<String, ClientSet> lastName =
+      $ClientSetArgs<String, ClientSet>(
+    name: 'last_name',
+    nameCast: 'client_last_name',
+    model: 'client',
+  );
+
+  static const $ClientSetArgs<bool, ClientSet> blocked =
+      $ClientSetArgs<bool, ClientSet>(
+    name: 'blocked',
+    nameCast: 'client_blocked',
+    model: 'client',
+  );
+
+  String leftJoin(
+    String parentModel, [
+    int step = 0,
+  ]) =>
+      [
+        if (self.isNotEmpty)
+          '''LEFT JOIN Client ${self}client ON ${self}client.id = $parentModel.${self2}id AND ${self}client.product_id = $parentModel.${self2}product_id''',
+        $$product.leftJoin(parentModel, step + 0)
+      ].join('\n');
+
+  $ClientSetArgs<int, T> get $id => $ClientSetArgs<int, T>(
+        name: 'id',
+        nameCast: 'client_id',
+        model: 'client',
+        self: this.self,
+      );
+
+// APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2)
+  ProductSetArgs<T> get $$product =>
+      ProductSetArgs<T>('${self}product_', 'product_');
+
+  $ClientSetArgs<int, T> get $productId => $ClientSetArgs<int, T>(
+        name: 'product_id',
+        nameCast: 'client_product_id',
+        model: 'client',
+        self: this.self,
+      );
+
+  $ClientSetArgs<String, T> get $firstName => $ClientSetArgs<String, T>(
+        name: 'first_name',
+        nameCast: 'client_first_name',
+        model: 'client',
+        self: this.self,
+      );
+
+  $ClientSetArgs<String, T> get $lastName => $ClientSetArgs<String, T>(
+        name: 'last_name',
+        nameCast: 'client_last_name',
+        model: 'client',
+        self: this.self,
+      );
+
+  $ClientSetArgs<bool, T> get $blocked => $ClientSetArgs<bool, T>(
+        name: 'blocked',
+        nameCast: 'client_blocked',
+        model: 'client',
+        self: this.self,
+      );
+}
+
+class ClientSet {
+  const ClientSet();
 }

@@ -43,10 +43,14 @@ class BillM extends EntityQuery {
   final int? key;
 
   @Deprecated('not using when db version 3')
-  @Column(converter: StringListConverter(), alters: [
-    AlterDB(version: version2, type: AlterType.add),
-    AlterDB(version: version3, type: AlterType.drop),
-  ])
+  @Column(
+    converter: StringListConverter(),
+    version: version2,
+    alters: [
+      AlterDB(version: version2, type: AlterType.add),
+      AlterDB(version: version3, type: AlterType.drop),
+    ],
+  )
   final List<String> memos;
 
   Map<String, dynamic> toDB() => $toDB();
@@ -65,7 +69,7 @@ class StringListConverter extends ColumnDBConverter<List<String>> {
 class BillDetail extends EntityQuery {
   final String name;
 
-  @ForeignKey(name: 'Bill')
+  @ForeignKey(name: 'BillM')
   final BillM? parent;
 
   const BillDetail({
