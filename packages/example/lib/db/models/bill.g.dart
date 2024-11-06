@@ -170,10 +170,7 @@ time)
 SELECT 
 ${$createSelect(select)}
  FROM Bill bill
-${BillSetArgs.$product.leftJoin('bill')}
-${BillSetArgs.$client.leftJoin('bill')}
-${BillSetArgs.$parent.leftJoin('bill')}
-${BillSetArgs.$clientParent.leftJoin('bill')}
+${BillSetArgs('', '').leftJoin('bill')}
 WHERE bill.product_id = ? AND bill.client_id = ? AND bill.client_product_id = ?
 ''', [productId, clientId, clientProductId]) as List<Map>);
 // TODO(hodoan): check

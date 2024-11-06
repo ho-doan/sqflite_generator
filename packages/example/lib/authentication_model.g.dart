@@ -129,7 +129,7 @@ memos)
 SELECT 
 ${$createSelect(select)}
  FROM BillM bill_m
- LEFT JOIN BillDetail details_bill_m ON details_bill_m.bill_m = bill_m.key
+${BillMSetArgs('', '').leftJoin('bill_m')}
 WHERE bill_m.key = ?
 ''', [key]) as List<Map>);
 // TODO(hodoan): check
@@ -380,7 +380,7 @@ name)
 SELECT 
 ${$createSelect(select)}
  FROM BillDetail bill_detail
-${BillDetailSetArgs.$parent.leftJoin('bill_detail')}
+${BillDetailSetArgs('', '').leftJoin('bill_detail')}
 WHERE bill_detail.key = ?
 ''', [key]) as List<Map>);
 // TODO(hodoan): check

@@ -217,7 +217,7 @@ class AEntity {
       'SELECT ',
       '\${\$createSelect(select)}',
       ' FROM $className ${className.toSnakeCase()}',
-      ...aFores,
+      '\${$setClassNameExternal(\'\',\'\').leftJoin(\'${className.toSnakeCase()}\')}',
       'WHERE ${_whereDB.join(' AND ')}',
       '\'\'\',',
       _whereStaticArgs,
@@ -552,24 +552,6 @@ extension AQuery on AEntity {
       ...indices,
       ...foreignKeys,
     ].map((e) => e.nameToDB).toList();
-  }
-
-  List<String> get aFores {
-    return [
-      for (final e in foreignKeys)
-        if (e.dartType.isDartCoreList)
-          () {
-            final property = e.entityParent?.aPs.firstWhereOrNull(
-                (e) => e.dartType.toString().$rq == className);
-            return property != null
-                ? ' LEFT JOIN ${e.entityParent?.name} ${'${e.args.fieldNames.join('_').toSnakeCase()}_${e.className.toSnakeCase()}'}'
-                    ' ON ${'${e.args.fieldNames.join('_').toSnakeCase()}_${e.className.toSnakeCase()}'}.${property.nameToDB}'
-                    ' = ${className.toSnakeCase()}.${primaryKeys.first.nameToDB}'
-                : '';
-          }()
-        else
-          '\${${e.args.parentClassNames.first}SetArgs.\$${e.nameDefault}.leftJoin(\'${className.toSnakeCase()}\')}'
-    ];
   }
 
   List<AProperty> get aPs {

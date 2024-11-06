@@ -134,8 +134,7 @@ birth)
 SELECT 
 ${$createSelect(select)}
  FROM Cat cat
-${CatSetArgs.$parent.leftJoin('cat')}
-${CatSetArgs.$child.leftJoin('cat')}
+${CatSetArgs('', '').leftJoin('cat')}
 WHERE cat.id = ?
 ''', [id]) as List<Map>);
 // TODO(hodoan): check

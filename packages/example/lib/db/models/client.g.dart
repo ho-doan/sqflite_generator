@@ -147,7 +147,7 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Client client
-${ClientSetArgs.$product.leftJoin('client')}
+${ClientSetArgs('', '').leftJoin('client')}
 WHERE client.id = ? AND client.product_id = ?
 ''', [id, productId]) as List<Map>);
 // TODO(hodoan): check

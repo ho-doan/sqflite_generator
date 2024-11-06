@@ -132,6 +132,7 @@ blocked)
 SELECT 
 ${$createSelect(select)}
  FROM Product product
+${ProductSetArgs('', '').leftJoin('product')}
 WHERE product.id = ?
 ''', [id]) as List<Map>);
 // TODO(hodoan): check
