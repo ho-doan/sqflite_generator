@@ -16,9 +16,9 @@ extension BillMQuery on BillM {
 	)''';
 
   static const String debug =
-      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1), parentClassName: [],
-version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1), parentClassName: [],
-version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1), parentClassName: []''';
+      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_m_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [BillM], fieldNames: [key], step: 1),
+version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_m_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [BillM], fieldNames: [name], step: 1),
+version: 2, nameDefault: memos, name: null, nameToDB: memos, nameFromDB: bill_m_memos, dartType: List<String>, _isQues: false, _sqlType: TEXT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [BillM], fieldNames: [memos], step: 1)''';
 
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {
@@ -264,8 +264,8 @@ extension BillDetailQuery on BillDetail {
 	)''';
 
   static const String debug =
-      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1), parentClassName: [],
-version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1), parentClassName: []''';
+      '''version: 1, nameDefault: key, name: null, nameToDB: key, nameFromDB: bill_detail_key, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [key], step: 1),
+version: -1, nameDefault: name, name: null, nameToDB: name, nameFromDB: bill_detail_name, dartType: String, _isQues: false, _sqlType: TEXT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [BillDetail], fieldNames: [name], step: 1)''';
 
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};

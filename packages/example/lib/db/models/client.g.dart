@@ -20,11 +20,11 @@ extension ClientQuery on Client {
 	)''';
 
   static const String debug =
-      '''version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client], fieldNames: [id], step: 1), parentClassName: [],
-version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2), parentClassName: [product],
-version: 1, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Client], fieldNames: [firstName], step: 1), parentClassName: [],
-version: 1, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: args: APropertyArgs(parentClassName: [Client], fieldNames: [lastName], step: 1), parentClassName: [],
-version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULLargs: APropertyArgs(parentClassName: [Client], fieldNames: [blocked], step: 1), parentClassName: []''';
+      '''version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: client_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Client], fieldNames: [id], step: 1),
+version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: product_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Client, Product], fieldNames: [product, id], step: 2),
+version: 1, nameDefault: firstName, name: null, nameToDB: first_name, nameFromDB: client_first_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: , args: APropertyArgs(parentClassName: [Client], fieldNames: [firstName], step: 1),
+version: 1, nameDefault: lastName, name: null, nameToDB: last_name, nameFromDB: client_last_name, dartType: String?, _isQues: true, _sqlType: TEXT, _isNull: , args: APropertyArgs(parentClassName: [Client], fieldNames: [lastName], step: 1),
+version: 1, nameDefault: blocked, name: null, nameToDB: blocked, nameFromDB: client_blocked, dartType: bool, _isQues: false, _sqlType: BIT, _isNull: NOT NULL, args: APropertyArgs(parentClassName: [Client], fieldNames: [blocked], step: 1)''';
 
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};

@@ -19,8 +19,8 @@ extension CatQuery on Cat {
 	)''';
 
   static const String debug =
-      '''version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1), parentClassName: [],
-version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1), parentClassName: []''';
+      '''version: 1, nameDefault: id, name: null, nameToDB: id, nameFromDB: cat_id, dartType: int?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Cat], fieldNames: [id], step: 1),
+version: 1, nameDefault: birth, name: null, nameToDB: birth, nameFromDB: cat_birth, dartType: DateTime?, _isQues: true, _sqlType: INTEGER, _isNull: , args: APropertyArgs(parentClassName: [Cat], fieldNames: [birth], step: 1)''';
 
 // TODO(hodoan): check
   static const Map<int, List<String>> alter = {};

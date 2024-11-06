@@ -11,7 +11,6 @@ class AIndex extends AProperty {
 
   const AIndex._({
     required super.args,
-    required super.parentClassName,
     // TODO(hodoan): unused
     // ignore: unused_element
     this.unique = false,
@@ -34,7 +33,6 @@ class AIndex extends AProperty {
       args: args.copyWithByElement(
         fieldName: element.displayName,
       ),
-      parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,

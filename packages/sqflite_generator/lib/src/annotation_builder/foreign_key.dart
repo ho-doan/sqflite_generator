@@ -20,7 +20,6 @@ class AForeignKey extends AProperty {
   const AForeignKey._({
     required super.args,
     super.name,
-    required super.parentClassName,
     required super.version,
     this.onDelete = ForeignAction.noAction,
     this.onUpdate = ForeignAction.noAction,
@@ -76,7 +75,6 @@ class AForeignKey extends AProperty {
     }
     return AForeignKey._(
       args: args.copyWithByElement(fieldName: element.displayName),
-      parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,
@@ -97,7 +95,6 @@ class AForeignKey extends AProperty {
   ) {
     return AForeignKey._(
       args: args,
-      parentClassName: parentClassName,
       step: step,
       nameDefault: element.displayName,
       dartType: element.type,

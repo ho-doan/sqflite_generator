@@ -48,7 +48,7 @@ extension DartTypeX on DartType {
   /// * enum
   /// * Uint8list
   /// * DateTime
-  TypeSql? typeSql(int step, List<String> parentClassName) {
+  TypeSql? typeSql(int step) {
     if (isDartCoreBool) return TypeSql.bool;
     if (isDartCoreDouble) return TypeSql.double;
     if (isDartCoreInt) return TypeSql.integer;
@@ -65,16 +65,13 @@ extension DartTypeX on DartType {
         element as ClassElement,
         // TODO(hodoan): fix this
         APropertyArgs(
-          parentClassNames: parentClassName,
+          parentClassNames: [],
           fieldNames: [],
           step: step + 1,
         ),
         [],
       );
-      return parent?.primaryKeys.first.dartType.typeSql(
-        step + 1,
-        parentClassName,
-      );
+      return parent?.primaryKeys.first.dartType.typeSql(step + 1);
     }
     return null;
   }

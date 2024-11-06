@@ -13,7 +13,6 @@ class AColumn extends AProperty {
   final String? converter;
   const AColumn._({
     required super.args,
-    required super.parentClassName,
     required this.converter,
     super.alters,
     super.name,
@@ -34,7 +33,6 @@ class AColumn extends AProperty {
 
     return AColumn._(
       args: args.copyWithByElement(fieldName: element.displayName),
-      parentClassName: parentClassName,
       alters: AColumnX._alters(element),
       converter: AColumnX._type(element),
       step: step,
@@ -55,7 +53,6 @@ class AColumn extends AProperty {
     final type = element.type;
     return AColumn._(
       args: args.copyWithByElement(fieldName: element.displayName),
-      parentClassName: parentClassName,
       alters: AColumnX._alters(element),
       converter: AColumnX._type(element),
       step: step,

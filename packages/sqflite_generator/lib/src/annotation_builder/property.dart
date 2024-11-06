@@ -39,12 +39,9 @@ class AProperty {
   final String className;
   final int step;
   final List<AlterDBGen> alters;
-  @Deprecated('use args.class')
-  final List<String> parentClassName;
 
   const AProperty({
     required this.args,
-    required this.parentClassName,
     this.name,
     this.alters = const [],
     required this.step,
@@ -61,14 +58,7 @@ class AProperty {
 
   bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
   String get _isNull => _isQues ? '' : 'NOT NULL';
-  String get _sqlType =>
-      dartType
-          .typeSql(
-            step,
-            parentClassName,
-          )
-          ?.str ??
-      'NONE';
+  String get _sqlType => dartType.typeSql(step)?.str ?? 'NONE';
 
   bool get isEnum => dartType.isEnum;
 
@@ -78,8 +68,7 @@ class AProperty {
   @override
   toString() =>
       'version: $version, nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
-      ' _sqlType: $_sqlType, _isNull: $_isNull'
-      'args: $args, parentClassName: $parentClassName';
+      ' _sqlType: $_sqlType, _isNull: $_isNull, args: $args';
 
   /// @primaryKey
   /// @ForeignKey(name: 'clientId')

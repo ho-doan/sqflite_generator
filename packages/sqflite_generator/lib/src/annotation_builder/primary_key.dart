@@ -16,7 +16,6 @@ class APrimaryKey extends AProperty {
   const APrimaryKey._({
     required super.args,
     required this.foreignKey,
-    required super.parentClassName,
     required this.entityParent,
     required super.step,
     this.auto = true,
@@ -39,7 +38,6 @@ class APrimaryKey extends AProperty {
     return APrimaryKey._(
       args: args.copyWithByElement(fieldName: element.displayName),
       foreignKey: foreignKey,
-      parentClassName: parentClassName,
       entityParent: entityParent,
       auto: APrimaryKeyX._auto(element),
       step: step,
