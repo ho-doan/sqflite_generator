@@ -56,9 +56,10 @@ class AProperty {
     return 'String';
   }
 
-  bool get _isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
-  String get _isNull => _isQues ? '' : 'NOT NULL';
+  bool get isQues => dartType.nullabilitySuffix == NullabilitySuffix.question;
+  String get _isNull => isQues ? '' : 'NOT NULL';
   String get _sqlType => dartType.typeSql(step)?.str ?? 'NONE';
+  MTypeSql? get sqlType => dartType.typeSql(step)?.mSql;
 
   bool get isEnum => dartType.isEnum;
 
@@ -67,7 +68,7 @@ class AProperty {
 
   @override
   toString() =>
-      'version: $version, nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $_isQues,'
+      'version: $version, nameDefault: $nameDefault, name: $name, nameToDB: $nameToDB, nameFromDB: $nameFromDB, dartType: $dartType, _isQues: $isQues,'
       ' _sqlType: $_sqlType, _isNull: $_isNull, args: $args';
 
   /// @primaryKey

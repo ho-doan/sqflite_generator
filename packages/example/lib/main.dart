@@ -134,34 +134,35 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            for (final b in bills)
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'You have pushed the button this many times:',
+              ),
               Text(
-                  'product_id: ${b.product?.id} client_id: ${b.client?.id} client_product_id: ${b.client?.product.id}'),
-            // for (final item in bills)
-            //   Text('${item.name} ${item.details.map((e) => e.name)}')
-          ],
+                '',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              for (final b in bills) Text(b.toString()),
+              // for (final item in bills)
+              //   Text('${item.name} ${item.details.map((e) => e.name)}')
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final bill = Bill(
-            product: Product(
+            product: const Product(
               id: 12,
               firstName: 'test',
               lastName: 'tes4t',
               blocked: false,
             ),
-            client: Client(
+            client: const Client(
               id: 1,
               firstName: 'test',
               lastName: 'test',
@@ -173,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 blocked: false,
               ),
             ),
-            clientParent: Client(
+            clientParent: const Client(
               id: 3,
               firstName: 'test',
               lastName: 'test',
@@ -186,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             parent: Bill(
-              client: Client(
+              client: const Client(
                 id: 5,
                 firstName: 'test',
                 lastName: 'test',
@@ -198,7 +199,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   blocked: false,
                 ),
               ),
-              product: Product(
+              product: const Product(
                 id: 7,
                 firstName: 'test',
                 lastName: 'test',
@@ -208,16 +209,16 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             time: DateTime.now(),
           );
-          await bill.product?.insert(database);
-          await bill.client?.insert(database);
+          // await bill.product?.insert(database);
+          // await bill.client?.insert(database);
 
-          await bill.clientParent?.product.insert(database);
-          await bill.clientParent?.insert(database);
+          // await bill.clientParent?.product.insert(database);
+          // await bill.clientParent?.insert(database);
 
-          await bill.parent?.client?.product.insert(database);
-          await bill.parent?.client?.insert(database);
+          // await bill.parent?.client?.product.insert(database);
+          // await bill.parent?.client?.insert(database);
 
-          await bill.parent?.insert(database);
+          // await bill.parent?.insert(database);
           await bill.insert(database);
         },
         child: const Icon(Icons.add),

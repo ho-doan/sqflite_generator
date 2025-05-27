@@ -41,4 +41,13 @@ class Client extends EntityQuery {
       ClientQuery.$fromDB(json, lst, childName, childStep);
 
   Map<String, dynamic> toDB() => $toDB();
+
+  @override
+  String toString() => '''Client
+      id: $id
+      firstName: $firstName
+      lastName: $lastName
+      blocked: $blocked
+      product: 
+        ${product.toString()}''';
 }

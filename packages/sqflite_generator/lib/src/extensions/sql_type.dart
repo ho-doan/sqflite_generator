@@ -16,6 +16,8 @@ enum TypeSql {
   uint8List,
 }
 
+enum MTypeSql { integer, bit, real, text, blob }
+
 extension TypeSqlX on TypeSql {
   String get str {
     switch (this) {
@@ -33,6 +35,25 @@ extension TypeSqlX on TypeSql {
         return 'TEXT';
       case TypeSql.uint8List:
         return 'BLOB';
+    }
+  }
+
+  MTypeSql get mSql {
+    switch (this) {
+      case TypeSql.integer:
+      case TypeSql.dateTime:
+        return MTypeSql.integer;
+      case TypeSql.bool:
+        return MTypeSql.bit;
+      case TypeSql.double:
+        return MTypeSql.real;
+      case TypeSql.list:
+      case TypeSql.map:
+      case TypeSql.string:
+      case TypeSql.enumerated:
+        return MTypeSql.text;
+      case TypeSql.uint8List:
+        return MTypeSql.blob;
     }
   }
 }

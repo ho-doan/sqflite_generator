@@ -415,6 +415,23 @@ extension AEntityBase on AEntity {
     }
     return f;
   }
+
+  //#region new code
+  // static bool _auto(FieldElement field) {
+  //   return _checker
+  //       .firstAnnotationOfExact(field)!
+  //       .getField('auto')!
+  //       .toBoolValue()!;
+  // }
+  /// [newName] is for rename table
+  String get selectAll {
+    final alls = [
+      for (final e in aPs) e.nameDefault.toSnakeCase(),
+    ];
+
+    return '\n\tSELECT\n\t\t\t${alls.join(',\n\t\t\t')}\n\tFROM $className;';
+  }
+  //#region
 }
 
 extension on APrimaryKey {

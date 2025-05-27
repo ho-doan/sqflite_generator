@@ -7,6 +7,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:sqflite_annotation/sqflite_annotation.dart';
 import 'package:sqflite_generator/src/annotation_builder/column.dart';
 import 'package:sqflite_generator/src/annotation_builder/property.dart';
+import 'package:sqflite_generator/src/extensions/sql_type.dart';
 
 import 'annotation_builder/entity.dart';
 
@@ -285,6 +286,7 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
             ])
             ..returns = refer('String'),
         ),
+        // Set<JoinModel> return (List<SelfModel>,dynamic/* (...JoinModel) */)
         Method((m) => m
           ..name = 'getAll'
           ..static = true
@@ -386,9 +388,218 @@ class SqfliteModelGenerator extends GeneratorForAnnotation<Entity> {
           ..returns = refer('Map<String,dynamic>')),
       ]);
 
+    // TODO(hodoan): DISTINCT, https://www.sqlitetutorial.net/sqlite-distinct/
+    final extensionBuilder2 = ExtensionBuilder()
+      ..name = '\$${entity.extensionName}Sample'
+      ..on = refer(entity.classType)
+      ..fields.addAll([
+        Field(
+          (f) => f
+            ..name = 'selectAll'
+            ..type = refer('String')
+            ..assignment = Code("""'''${entity.selectAll}'''""")
+            ..modifier = FieldModifier.constant
+            ..static = true,
+        ),
+      ]);
+
+    final classSetBuilderFilter = Class(
+      (c) => c
+        ..name = '${entity.className}Filter'
+        ..constructors.add(
+          Constructor(
+            (c) => c
+              ..constant = true
+              ..requiredParameters.addAll([
+                Parameter(
+                  (p) => p
+                    ..name = 'value'
+                    ..toThis = true,
+                ),
+              ]),
+          ),
+        )
+        ..fields.addAll([
+          Field(
+            (f) => f
+              ..name = 'value'
+              ..type = refer('String')
+              ..modifier = FieldModifier.final$,
+          ),
+        ])
+        ..methods.addAll([
+          for (final field in entity.aPs)
+            Method(
+              (m) => m
+                ..name = 'sortBy${field.nameDefault.toPascalCase()}'
+                ..lambda = true
+                ..returns = Reference('${entity.className}Filter')
+                ..type = MethodType.getter
+                ..body = Code(
+                    'const ${entity.className}Filter(\'${field.nameDefault.toSnakeCase()}\')'),
+            ),
+          for (final field in entity.aPs)
+            Method(
+              (m) => m
+                ..name = 'sortBy${field.nameDefault.toPascalCase()}Desc'
+                ..lambda = true
+                ..returns = Reference('${entity.className}Filter')
+                ..type = MethodType.getter
+                ..body = Code(
+                    'const ${entity.className}Filter(\'${field.nameDefault.toSnakeCase()} DESC\')'),
+            ),
+          for (final field in entity.aPs.where((e) => e.isQues))
+            Method(
+              (m) => m
+                ..name = 'sortBy${field.nameDefault.toPascalCase()}NullsFirst'
+                ..lambda = true
+                ..returns = Reference('${entity.className}Filter')
+                ..type = MethodType.getter
+                ..body = Code(
+                    'const ${entity.className}Filter(\'${field.nameDefault.toSnakeCase()} NULLS FIRST\')'),
+            ),
+          for (final field in entity.aPs.where((e) => e.isQues))
+            Method(
+              (m) => m
+                ..name = 'sortBy${field.nameDefault.toPascalCase()}NullsLast'
+                ..lambda = true
+                ..returns = Reference('${entity.className}Filter')
+                ..type = MethodType.getter
+                ..body = Code(
+                    'const ${entity.className}Filter(\'${field.nameDefault.toSnakeCase()} NULLS LAST\')'),
+            ),
+        ]),
+    );
+    final classSetBuilderWhere = Class(
+      (c) => c
+        ..name = '${entity.className}Where'
+        ..constructors.add(
+          Constructor(
+            (c) => c
+              ..constant = true
+              ..requiredParameters.addAll([
+                Parameter(
+                  (p) => p
+                    ..name = 'value'
+                    ..toThis = true,
+                ),
+              ]),
+          ),
+        )
+        ..fields.addAll([
+          Field(
+            (f) => f
+              ..name = 'value'
+              ..type = refer('String')
+              ..modifier = FieldModifier.final$,
+          ),
+        ])
+        ..methods.addAll([
+          Method(
+            (m) => m
+              ..name = 'or'
+              ..lambda = true
+              ..returns = Reference('${entity.className}Where')
+              ..body = Code('const ${entity.className}Where(" or ")'),
+          ),
+          for (final field in entity.aPs)
+            if (field.sqlType != MTypeSql.integer &&
+                field.sqlType != MTypeSql.bit) ...[
+              Method(
+                (m) => m
+                  ..name = '${field.nameDefault}Equal'
+                  ..lambda = true
+                  ..returns = Reference('${entity.className}Where')
+                  ..requiredParameters.addAll([
+                    Parameter((p) => p
+                      ..name = 'value'
+                      ..type = Reference('dynamic'))
+                  ])
+                  ..body = Code(
+                      '${entity.className}Where("${field.nameDefault.toSnakeCase()} = \'\$value\'")'),
+              ),
+              Method(
+                (m) => m
+                  ..name = '${field.nameDefault}NotEqual'
+                  ..lambda = true
+                  ..returns = Reference('${entity.className}Where')
+                  ..requiredParameters.addAll([
+                    Parameter((p) => p
+                      ..name = 'value'
+                      ..type = Reference('dynamic'))
+                  ])
+                  ..body = Code(
+                      '${entity.className}Where("${field.nameDefault.toSnakeCase()} != \'\$value\'")'),
+              ),
+            ] else ...[
+              Method(
+                (m) => m
+                  ..name = '${field.nameDefault}Equal'
+                  ..lambda = true
+                  ..returns = Reference('${entity.className}Where')
+                  ..requiredParameters.addAll([
+                    Parameter((p) => p
+                      ..name = 'value'
+                      ..type = Reference('dynamic'))
+                  ])
+                  ..body = Code(
+                      '${entity.className}Where("${field.nameDefault.toSnakeCase()} = \$value")'),
+              ),
+              Method(
+                (m) => m
+                  ..name = '${field.nameDefault}NotEqual'
+                  ..lambda = true
+                  ..returns = Reference('${entity.className}Where')
+                  ..requiredParameters.addAll([
+                    Parameter((p) => p
+                      ..name = 'value'
+                      ..type = Reference('dynamic'))
+                  ])
+                  ..body = Code(
+                      '${entity.className}Where("${field.nameDefault.toSnakeCase()} != \$value")'),
+              ),
+            ],
+          // for (final field in entity.aPs)
+          //   Method(
+          //     (m) => m
+          //       ..name = 'sortBy${field.nameDefault.toPascalCase()}Desc'
+          //       ..lambda = true
+          //       ..returns = Reference('${entity.className}Filter')
+          //       ..type = MethodType.getter
+          //       ..body = Code(
+          //           'const ${entity.className}Filter(\'${field.nameDefault.toSnakeCase()} DESC\')'),
+          //   ),
+          // for (final field in entity.aPs.where((e) => e.isQues))
+          //   Method(
+          //     (m) => m
+          //       ..name = 'sortBy${field.nameDefault.toPascalCase()}NullsFirst'
+          //       ..lambda = true
+          //       ..returns = Reference('${entity.className}Filter')
+          //       ..type = MethodType.getter
+          //       ..body = Code(
+          //           'const ${entity.className}Filter(\'${field.nameDefault.toSnakeCase()} NULLS FIRST\')'),
+          //   ),
+          // for (final field in entity.aPs.where((e) => e.isQues))
+          //   Method(
+          //     (m) => m
+          //       ..name = 'sortBy${field.nameDefault.toPascalCase()}NullsLast'
+          //       ..lambda = true
+          //       ..returns = Reference('${entity.className}Filter')
+          //       ..type = MethodType.getter
+          //       ..body = Code(
+          //           'const ${entity.className}Filter(\'${field.nameDefault.toSnakeCase()} NULLS LAST\')'),
+          //   ),
+        ]),
+    );
+
     final emitter = DartEmitter(useNullSafetySyntax: true);
     return DartFormatter().format([
       '// ignore_for_file: library_private_types_in_public_api',
+      if (element.metadata.first.element.toString().contains('entityTest')) ...[
+        extensionBuilder2.build().accept(emitter),
+        classSetBuilderFilter.accept(emitter),
+        classSetBuilderWhere.accept(emitter),
+      ],
       extensionBuilder.build().accept(emitter),
       classSetBuilder.accept(emitter),
       classSetBuilderExternal.accept(emitter),
