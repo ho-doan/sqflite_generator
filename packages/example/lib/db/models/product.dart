@@ -16,12 +16,19 @@ class Product extends EntityQuery {
   @column
   final bool blocked;
 
-  Product({
+  const Product({
     this.id,
     required this.firstName,
     required this.lastName,
     required this.blocked,
   });
+
+  @override
+  String toString() => '''Product
+      id: $id
+      firstName: $firstName
+      lastName: $lastName
+      blocked: $blocked''';
 
   factory Product.fromDB(
           Map<dynamic, dynamic> json, List<Map<dynamic, dynamic>> lst,

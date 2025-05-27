@@ -34,6 +34,15 @@ class Bill extends EntityQuery {
     required this.product,
   });
 
+  @override
+  String toString() => '''Bill:
+  product: 
+    ${product?.toString()}
+  client: $client
+  parent: $parent
+  clientParent: $clientParent
+  time: $time''';
+
   factory Bill.fromDB(
     Map<dynamic, dynamic> json,
     List<Map<dynamic, dynamic>> lst, [
